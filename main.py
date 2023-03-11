@@ -1,20 +1,14 @@
 import asyncio
-import os
-import random
 import sqlite3
-import sys
-import time
 from datetime import datetime, timedelta
 
 
 from aiogram import Bot, types, Dispatcher
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, \
     InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils import executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from asyncio import exceptions
 import aioschedule as schedule
 
 from aiogram.utils.exceptions import BotBlocked
@@ -24,7 +18,6 @@ from Databases import db_start, data_profile, affirmation
 
 async def on_startup(_):
     await db_start()
-    # asyncio.create_task(scheduler_sleep())
 
 import FSM_classes
 import Markups
