@@ -1,3 +1,6 @@
+import FSM_classes
+import Markups
+from Databases import db_start, data_profile, pre_points_test_weariness, points_test_weariness
 import asyncio
 import sqlite3
 
@@ -11,52 +14,48 @@ from Token import Token
 bot = Bot(Token)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
-from Databases import db_start, data_profile, pre_points_test_weariness, points_test_weariness
-
-import Markups
-import FSM_classes
-
 
 weariness_questions = ["Чаще всего у меня хорошее самочувствие",
-                           "Я стал(а) раздражительным",
-                           "В последнее время я стал(а) хуже видеть",
-                           "Я стал(а) забывчивым",
-                           "После работы я чувствую себя разбитым(ой)",
-                           "Мне нравится работать в коллективе",
-                           "У меня часто бывает подавленное настроение",
-                           "Я чувствую постоянную тяжесть в голове",
-                           "У меня отекают ноги",
-                           "У меня бывают головокружения",
-                           "У меня бывает ощущение, что мне трудно вздохнуть",
-                           "Мне всегда хочется как можно быстрее закончить работу и уйти домой",
-                           "После сна я обычно встаю вялым(ой) и плохо отдохнувшим(ей)",
-                           "Мой рабочий день обычно пролетает незаметно",
-                           "Я стал(а) часто ссориться со своими близкими",
-                           "После пробуждения я засыпаю с трудом",
-                           "Я постоянно испытываю неприятные ощущения в глазах",
-                           "В последнее время меня стали раздражать те дела, которые нужно сделать сегодня",
-                           "Я стал(а) вялым и безразличным",
-                           "Мне трудно удержать в памяти те дела, которые нужно сделать сегодня",
-                           "В последнее время мне стало трудно работать",
-                           "У меня ровный и спокойный характер",
-                           "Меня мучают боли в висках и во лбу",
-                           "У меня часто бывают приступы сердцебиения",
-                           "Когда я работаю, у меня почти все время болят спина и шея",
-                           "У меня часто возникает ощущение тошноты",
-                           "У меня часто болит голова",
-                           "Моя работа мне перестала нравиться",
-                           "Я постоянно хочу спать днем",
-                           "Мои близкие стали замечать, что у меня портится характер",
-                           "Когда я читаю, мне приходится напрягать глаза",
-                           "Чаще всего у меня беспокойный сон",
-                           "Я с удовольствием прихожу на работу",
-                           "Я все время чувствую себя усталым(ой)",
-                           "В последнее время я чувствую общее недомогание",
-                           "Я чувствую себя абсолютно здоровым человеком"]
+                       "Я стал(а) раздражительным",
+                       "В последнее время я стал(а) хуже видеть",
+                       "Я стал(а) забывчивым",
+                       "После работы я чувствую себя разбитым(ой)",
+                       "Мне нравится работать в коллективе",
+                       "У меня часто бывает подавленное настроение",
+                       "Я чувствую постоянную тяжесть в голове",
+                       "У меня отекают ноги",
+                       "У меня бывают головокружения",
+                       "У меня бывает ощущение, что мне трудно вздохнуть",
+                       "Мне всегда хочется как можно быстрее закончить работу и уйти домой",
+                       "После сна я обычно встаю вялым(ой) и плохо отдохнувшим(ей)",
+                       "Мой рабочий день обычно пролетает незаметно",
+                       "Я стал(а) часто ссориться со своими близкими",
+                       "После пробуждения я засыпаю с трудом",
+                       "Я постоянно испытываю неприятные ощущения в глазах",
+                       "В последнее время меня стали раздражать те дела, которые нужно сделать сегодня",
+                       "Я стал(а) вялым и безразличным",
+                       "Мне трудно удержать в памяти те дела, которые нужно сделать сегодня",
+                       "В последнее время мне стало трудно работать",
+                       "У меня ровный и спокойный характер",
+                       "Меня мучают боли в висках и во лбу",
+                       "У меня часто бывают приступы сердцебиения",
+                       "Когда я работаю, у меня почти все время болят спина и шея",
+                       "У меня часто возникает ощущение тошноты",
+                       "У меня часто болит голова",
+                       "Моя работа мне перестала нравиться",
+                       "Я постоянно хочу спать днем",
+                       "Мои близкие стали замечать, что у меня портится характер",
+                       "Когда я читаю, мне приходится напрягать глаза",
+                       "Чаще всего у меня беспокойный сон",
+                       "Я с удовольствием прихожу на работу",
+                       "Я все время чувствую себя усталым(ой)",
+                       "В последнее время я чувствую общее недомогание",
+                       "Я чувствую себя абсолютно здоровым человеком"]
 
 
 answers = InlineKeyboardMarkup().add(InlineKeyboardButton('Да', callback_data='Answer_y'),
-                                     InlineKeyboardButton('Не уверен(а)', callback_data='Answer_m'),
+                                     InlineKeyboardButton(
+                                         'Не уверен(а)', callback_data='Answer_m'),
                                      InlineKeyboardButton('Нет', callback_data='Answer_n'))
 
 
@@ -69,11 +68,11 @@ async def pretest_weariness(message: types.message, state: FSMContext):
     await points_test_weariness(state, user_id=message.from_user.id)
     await state.finish()
     await bot.send_message(message.from_user.id, 'Хроническое утомление даже на ранних стадиях развития существенно снижает работоспособность человека, '
-                                                        'а в выраженных степенях приводит к затруднению выполнения даже хорошо знакомой работы '
-                                                        'и в крайних степенях – к полному срыву деятельности. '
-                                                        '\n Чтобы этого избежать, предлагаем вам пройти небольшой тест, чтобы оценить ваш уровень утомляемости и подобрать для вас нужные рекомендации и практики. '
-                                                        '\nВам будет представлены высказывания, отвечайте "Да", если это про вас, "Нет", если не про вас, и "Не уверен(а)", если затрудняетесь ответить.'
-                                                        '\n Приступим к тесту!', reply_markup=types.ReplyKeyboardRemove())
+                           'а в выраженных степенях приводит к затруднению выполнения даже хорошо знакомой работы '
+                           'и в крайних степенях – к полному срыву деятельности. '
+                           '\n Чтобы этого избежать, предлагаем вам пройти небольшой тест, чтобы оценить ваш уровень утомляемости и подобрать для вас нужные рекомендации и практики. '
+                           '\nВам будет представлены высказывания, отвечайте "Да", если это про вас, "Нет", если не про вас, и "Не уверен(а)", если затрудняетесь ответить.'
+                           '\n Приступим к тесту!', reply_markup=types.ReplyKeyboardRemove())
     await asyncio.sleep(5)
     await bot.send_message(message.from_user.id, text=weariness_questions[0], reply_markup=answers)
 
@@ -84,13 +83,17 @@ async def answer_weariness(callback_query: types.CallbackQuery, state: FSMContex
     cur_weariness = db_weariness.cursor()
     one = int(1)
     two = int(2)
-    cur_weariness.execute("UPDATE points SET count = (count + ?) WHERE user_id = ?", (one, callback_query.from_user.id))
+    cur_weariness.execute(
+        "UPDATE points SET count = (count + ?) WHERE user_id = ?", (one, callback_query.from_user.id))
     if (int(cur_weariness.execute('SELECT count FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) in [1, 6, 14, 22, 33, 36]) and (point == 'n'):
-        cur_weariness.execute("UPDATE points SET points = points + ? WHERE user_id = ?", (two, callback_query.from_user.id))
+        cur_weariness.execute(
+            "UPDATE points SET points = points + ? WHERE user_id = ?", (two, callback_query.from_user.id))
     elif (int(cur_weariness.execute('SELECT count FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) in [2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 15, 16, 17, 18, 19, 20, 21, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 34, 35]) and (point == 'y'):
-        cur_weariness.execute("UPDATE points SET points = points + ? WHERE user_id = ?", (two, callback_query.from_user.id))
+        cur_weariness.execute(
+            "UPDATE points SET points = points + ? WHERE user_id = ?", (two, callback_query.from_user.id))
     elif point == 'm':
-        cur_weariness.execute("UPDATE points SET points = points + ? WHERE user_id = ?", (one, callback_query.from_user.id))
+        cur_weariness.execute(
+            "UPDATE points SET points = points + ? WHERE user_id = ?", (one, callback_query.from_user.id))
     db_weariness.commit()
     if (int(cur_weariness.execute('SELECT count FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) != 36) and (point == 'y'):
         await bot.edit_message_text(chat_id=callback_query.from_user.id, text=weariness_questions[int(cur_weariness.execute('SELECT count FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0])], message_id=callback_query.message.message_id, reply_markup=answers)
@@ -106,12 +109,12 @@ async def answer_weariness(callback_query: types.CallbackQuery, state: FSMContex
         elif (int(cur_weariness.execute('SELECT points FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) > 17) and (int(cur_weariness.execute('SELECT points FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) <= 26):
             Feedback_kb = InlineKeyboardMarkup(row_width=1)
             Feedback_kb.add(InlineKeyboardButton('Посмотреть курс', callback_data='Feedback_btn0'),
-                             InlineKeyboardButton('Вернуться в меню', callback_data='Main_menu'))
+                            InlineKeyboardButton('Вернуться в меню', callback_data='Main_menu'))
             await bot.send_message(callback_query.from_user.id, 'Результаты показывают, что у вас присутствуют признаки начальной степени хронического утомления. Рекомендуем вам пройти небольшой курс поддерживающих практик', reply_markup=Feedback_kb)
         elif (int(cur_weariness.execute('SELECT points FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) > 26) and (int(cur_weariness.execute('SELECT points FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) <= 37):
             Feedback_kb = InlineKeyboardMarkup(row_width=1)
             Feedback_kb.add(InlineKeyboardButton('Посмотреть курс', callback_data='Feedback_btn0'),
-                             InlineKeyboardButton('Вернуться в меню', callback_data='Main_menu'))
+                            InlineKeyboardButton('Вернуться в меню', callback_data='Main_menu'))
             await bot.send_message(callback_query.from_user.id,
                                    'Результаты показывают, что у вас присутствуют признаки выраженной степени хронического утомления. Рекомендуем вам пройти небольшой курс восстанавливающих и поддерживающих практик', reply_markup=Feedback_kb)
         else:
@@ -131,7 +134,8 @@ async def process_callback_feedback(callback_query: types.CallbackQuery, state: 
         #     data['aftertest2'] = '-'
         #     data['aftertest3'] = '-'
         Feedback_kb = InlineKeyboardMarkup()
-        Feedback_kb.add(InlineKeyboardButton('Начать практику', callback_data='Feedback_btn1'))
+        Feedback_kb.add(InlineKeyboardButton(
+            'Начать практику', callback_data='Feedback_btn1'))
         await bot.send_message(callback_query.from_user.id,
                                'Предлагаем вам простую технику «Дыхание квадрат». '
                                'Оно позволит растянуть дыхательный цикл и с помощью этого увеличить содержание углекислого газа в крови и разгрузить вашу нервную систему.'
@@ -139,7 +143,8 @@ async def process_callback_feedback(callback_query: types.CallbackQuery, state: 
                                'Попробуйте расслабиться и сконцентрироваться на дыхании', parse_mode='html', reply_markup=Feedback_kb)
     if point == '1':
         Feedback_kb = InlineKeyboardMarkup()
-        Feedback_kb.add(InlineKeyboardButton('Выполнено!', callback_data='Feedback_btn2'))
+        Feedback_kb.add(InlineKeyboardButton(
+            'Выполнено!', callback_data='Feedback_btn2'))
         await bot.send_message(callback_query.from_user.id,
                                "Вдох, выдох и пауза примерно равны друг другу по длительности, комфортный ритм – примерно 4 секунд")
         ExVisualAudio2 = open('Exercises/Дыхание квадрат.mp3', 'rb')
@@ -177,6 +182,8 @@ async def process_callback_feedback(callback_query: types.CallbackQuery, state: 
                                "которые позволят держать в тонусе организм и сознание - внедрение прогулок, время без гаджета и правильный режим сна.", reply_markup=Feedback_kb)
 
 
-def register_handlers_Psy_Weariness(dp : Dispatcher):
-    dp.register_callback_query_handler(answer_weariness, text=['Answer_y', 'Answer_m', 'Answer_n'])
-    dp.register_callback_query_handler(process_callback_feedback, text=['Feedback_btn0','Feedback_btn1', 'Feedback_btn2', 'Feedback_btn3', 'Feedback_btn4'])
+def register_handlers_Psy_Weariness(dp: Dispatcher):
+    dp.register_callback_query_handler(
+        answer_weariness, text=['Answer_y', 'Answer_m', 'Answer_n'])
+    dp.register_callback_query_handler(process_callback_feedback, text=[
+                                       'Feedback_btn0', 'Feedback_btn1', 'Feedback_btn2', 'Feedback_btn3', 'Feedback_btn4'])

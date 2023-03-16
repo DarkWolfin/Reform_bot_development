@@ -8,7 +8,8 @@ Course_btn = KeyboardButton('🎓 Курсы')
 Specialist_btn = KeyboardButton('💬 Обсудить проблему')
 Contacts_btn = KeyboardButton('📥 Контакты')
 main_kb = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
-main_kb.add(Practise_btn, Tests_btn, Course_btn, Habits_btn, Specialist_btn, Contacts_btn)
+main_kb.add(Practise_btn, Tests_btn, Course_btn,
+            Habits_btn, Specialist_btn, Contacts_btn)
 
 # Practices
 Duh_btn = KeyboardButton('Дыхательные практики')
@@ -31,7 +32,8 @@ course6 = KeyboardButton('Борьба с депрессией')
 coursepv = KeyboardButton('Подробнее о полной версии')
 courseback = KeyboardButton('Вернуться в главное меню')
 courses_kb = ReplyKeyboardMarkup(row_width=1)
-courses_kb.add(course1, course2, course3, course4, course5, course6, coursepv, courseback)
+courses_kb.add(course1, course2, course3, course4,
+               course5, course6, coursepv, courseback)
 
 # Contacts
 cont = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
@@ -43,10 +45,12 @@ cont.add(btn1, btn2)
 typetest1 = KeyboardButton('Психологические тесты')
 typetest2 = KeyboardButton('Популярные тесты')
 typetestback = KeyboardButton('Вернуться в главное меню')
-type_of_tests = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(typetest1, typetest2, typetestback)
+type_of_tests = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(
+    typetest1, typetest2, typetestback)
 
 psy_tests = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(
     KeyboardButton('Хроническая усталость'),
+    KeyboardButton('Устойчивость к стрессу'),
     KeyboardButton('Личная самоэффективность'),
     KeyboardButton('Психологическое благополучие'),
     KeyboardButton('Доминирующее состояние'))
@@ -68,7 +72,8 @@ backCourseRe = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(
     KeyboardButton('Вернуться в меню', callback_data='Main_menu'))
 
 # Full version
-fullversion = ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton('Оформить подписку'))
+fullversion = ReplyKeyboardMarkup(resize_keyboard=True).add(
+    KeyboardButton('Оформить подписку'))
 
 # Habits
 type_of_habits = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(
