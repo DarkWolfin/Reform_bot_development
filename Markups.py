@@ -55,6 +55,7 @@ pop_tests = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(
     KeyboardButton('Управляю ли я своей жизнью?'),
     KeyboardButton('Мой тип личности'),
     KeyboardButton('Мой темперамент'),
+    KeyboardButton('Мотивация к успеху'),
     KeyboardButton('Мои скрытые таланты и способности'))
 
 # Back to menu

@@ -8,6 +8,7 @@ class MultiDialog(StatesGroup):
     test_selfefficacy = State()
     test_control = State()
     test_typeperson = State()
+    test_motivation = State()
     habits = State()
     sleep_habit = State()
     reading_habit = State()
