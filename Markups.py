@@ -49,12 +49,12 @@ psy_tests = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(
     KeyboardButton('Хроническая усталость'),
     KeyboardButton('Личная самоэффективность'),
     KeyboardButton('Психологическое благополучие'),
+    KeyboardButton('Мой темперамент'),
     KeyboardButton('Доминирующее состояние'))
 
 pop_tests = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(
     KeyboardButton('Управляю ли я своей жизнью?'),
     KeyboardButton('Мой тип личности'),
-    KeyboardButton('Мой темперамент'),
     KeyboardButton('Мои скрытые таланты и способности'))
 
 # Back to menu

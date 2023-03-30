@@ -26,7 +26,7 @@ import Courses
 import Tests
 import Habit
 import Specialists
-from PsyTests import Psy_Weariness, Psy_selfefficacy
+from PsyTests import Psy_Weariness, Psy_selfefficacy, Psy_temperament
 from PopTests import Pop_Control, Pop_Typeperson
 from Habits import Sleep, Water, Reading, Body
 from AllCourses import Anxiety
@@ -37,6 +37,7 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 Anxiety.register_handlers_course_Anxiety(dp)
 Psy_Weariness.register_handlers_Psy_Weariness(dp)
 Psy_selfefficacy.register_handlers_Psy_selfefficacy(dp)
+Psy_temperament.register_handlers_Psy_temperament(dp)
 Pop_Control.register_handlers_Pop_Control(dp)
 Pop_Typeperson.register_handlers_Pop_typeperson(dp)
 
@@ -218,7 +219,7 @@ async def reply_tests(message: types.Message, state: FSMContext):
 
 
 
-@dp.message_handler(state=(FSM_classes.MultiDialog.test_weariness or FSM_classes.MultiDialog.test_control or FSM_classes.MultiDialog.test_selfefficacy or FSM_classes.MultiDialog.test_typeperson))
+@dp.message_handler(state=(FSM_classes.MultiDialog.test_weariness or FSM_classes.MultiDialog.test_control or FSM_classes.MultiDialog.test_selfefficacy or FSM_classes.MultiDialog.test_typeperson or FSM_classes.MultiDialog.test_temperament))
 async def reply_alltests(message: types.Message, state: FSMContext):
     if message.text == 'Прервать тест и выйти в меню':
         await FSM_classes.MultiDialog.menu.set()

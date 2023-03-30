@@ -2,7 +2,7 @@ import sqlite3 as sq
 
 async def db_start():
     global db_data, cur_data, db_test_weariness, cur_test_weariness, db_test_selfefficacy, cur_test_selfefficacy, db_test_control, cur_test_control, db_test_typeperson, cur_test_typeperson, \
-        db_habit_sleep, cur_habit_sleep, db_course_anxiety, cur_course_anxiety
+        db_habit_sleep, cur_habit_sleep, db_course_anxiety, cur_course_anxiety, db_test_temperament, cur_test_temperament
 
     db_data = sq.connect('Databases/Data_users.db')
     cur_data = db_data.cursor()
@@ -37,6 +37,12 @@ async def db_start():
     cur_test_typeperson.execute(
         "CREATE TABLE IF NOT EXISTS points(user_id INT PRIMARY KEY, username TEXT, count INT, points INT)")
     db_test_typeperson.commit()
+
+    db_test_temperament = sq.connect('Databases/Result_Tests/PSY_Temperament.db')
+    cur_test_temperament = db_test_temperament.cursor()
+    cur_test_temperament.execute(
+        "CREATE TABLE IF NOT EXISTS points(user_id INT PRIMARY KEY, username TEXT, count INT, points_extra INT, points_neuro INT)")
+    db_test_temperament.commit()
 
 
     db_habit_sleep = sq.connect('Databases/Current_habits.db')
@@ -115,6 +121,19 @@ async def points_test_typeperson(state, user_id):
             cur_test_typeperson.execute("UPDATE points SET count = '{}', points = '{}' WHERE user_id == '{}'".format(
                 data['count'], data['points'], user_id))
             db_test_typeperson.commit()
+
+async def pre_points_test_temperament(user_id, username):
+     user = cur_test_temperament.execute("SELECT 1 FROM points WHERE user_id == '{key}'".format(key=user_id)).fetchone()
+     if not user:
+          cur_test_temperament.execute("INSERT INTO points VALUES(?, ?, ?, ?, ?)",
+                                        (user_id, username, '', '', ''))
+          db_test_temperament.commit()
+
+async def points_test_temperament(state, user_id):
+    async with state.proxy() as data:
+            cur_test_temperament.execute("UPDATE points SET count = '{}', points_extra = '{}', points_neuro = '{}' WHERE user_id == '{}'".format(
+                data['count'], data['points_extra'], data['points_neuro'], user_id))
+            db_test_temperament.commit()
 
 
 async def prehabit_sleep_db(user_id, username):
