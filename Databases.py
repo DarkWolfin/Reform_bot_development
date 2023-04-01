@@ -56,6 +56,12 @@ cur_test_typeperson.execute(
     "CREATE TABLE IF NOT EXISTS points(user_id INT PRIMARY KEY, username TEXT, count INT, points INT)")
 db_test_typeperson.commit()
 
+db_test_motivation = sq.connect('Databases/Result_Tests/TEST_Motivationn.db')
+cur_test_motivation = db_test_motivation.cursor()
+cur_test_motivation.execute(
+    "CREATE TABLE IF NOT EXISTS points(user_id INT PRIMARY KEY, username TEXT, count INT, points INT)")
+db_test_motivation.commit()
+
 db_habit_sleep = sq.connect('Databases/Current_habits.db')
 cur_habit_sleep = db_habit_sleep.cursor()
 cur_habit_sleep.execute(
@@ -172,6 +178,21 @@ async def points_test_typeperson(state, user_id):
         cur_test_typeperson.execute("UPDATE points SET count = '{}', points = '{}' WHERE user_id == '{}'".format(
             data['count'], data['points'], user_id))
         db_test_typeperson.commit()
+
+async def pre_points_test_motivation(user_id, username):
+    user = cur_test_motivation.execute(
+        "SELECT 1 FROM points WHERE user_id == '{key}'".format(key=user_id)).fetchone()
+    if not user:
+        cur_test_motivation.execute("INSERT INTO points VALUES(?, ?, ?, ?)",
+                                    (user_id, username, '', ''))
+        db_test_motivation.commit()
+
+
+async def points_test_motivation(state, user_id):
+    async with state.proxy() as data:
+        cur_test_motivation.execute("UPDATE points SET count = '{}', points = '{}' WHERE user_id == '{}'".format(
+            data['count'], data['points'], user_id))
+        db_test_motivation.commit()
 
 
 async def prehabit_sleep_db(user_id, username):
