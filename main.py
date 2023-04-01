@@ -1,7 +1,7 @@
 from PsyTests import Psy_Weariness, Psy_selfefficacy
 from AllCourses import Anxiety
 from Habits import Sleep, Water, Reading, Body
-from PopTests import Pop_Control, Pop_Typeperson
+from PopTests import Pop_Control, Pop_Typeperson, Pop_motivation
 from PsyTests import Psy_Weariness, Psy_selfefficacy, Psy_stress
 import Specialists
 import Habit
