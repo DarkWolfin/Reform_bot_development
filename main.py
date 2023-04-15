@@ -1,7 +1,7 @@
 from PsyTests import Psy_Weariness, Psy_selfefficacy
 from AllCourses import Anxiety
 from Habits import Sleep, Water, Reading, Body
-from PopTests import Pop_Control, Pop_Typeperson
+from PopTests import Pop_Control, Pop_Typeperson, Pop_motivation
 from PsyTests import Psy_Weariness, Psy_selfefficacy, Psy_stress
 import Specialists
 import Habit
@@ -42,6 +42,7 @@ Psy_selfefficacy.register_handlers_Psy_selfefficacy(dp)
 Psy_stress.register_handlers_Psy_stress(dp)
 Pop_Control.register_handlers_Pop_Control(dp)
 Pop_Typeperson.register_handlers_Pop_typeperson(dp)
+Pop_motivation.register_handlers_Pop_motivation(dp)
 
 
 @dp.message_handler(commands=['admin_mailing'], state='*', chat_id=417986886)
@@ -214,12 +215,13 @@ async def reply_tests(message: types.Message, state: FSMContext):
     await log_users(message)
 
 
-@dp.message_handler(state=(FSM_classes.MultiDialog.test_weariness or FSM_classes.MultiDialog.test_control or FSM_classes.MultiDialog.test_selfefficacy or FSM_classes.MultiDialog.test_typeperson or FSM_classes.MultiDialog.test_stress))
+@dp.message_handler(state=(FSM_classes.MultiDialog.test_weariness or FSM_classes.MultiDialog.test_control or FSM_classes.MultiDialog.test_selfefficacy or FSM_classes.MultiDialog.test_typeperson or FSM_classes.MultiDialog.test_stress or FSM_classes.MultiDialog.test_motivation))
 async def reply_alltests(message: types.Message, state: FSMContext):
     if message.text == 'Прервать тест и выйти в меню':
         await FSM_classes.MultiDialog.menu.set()
         await main_menu(message, state)
         await log_users(message)
+
 
 
 @dp.message_handler(state=FSM_classes.MultiDialog.courses)
