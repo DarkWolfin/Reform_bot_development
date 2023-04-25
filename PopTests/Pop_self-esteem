@@ -1,1 +1,39 @@
+async def answer_selfesteem(callback_query: types.CallbackQuery):
+    point = callback_query.data[-1]
+    db_selfesteem = sqlite3.connect('Databases/Result_Tests/POP_selfesteem.db')
+    cur_selfesteem = db_selfesteem.cursor()
+    one = int(1)
+    two = int(2)
+    cur_selfesteem.execute("UPDATE points SET count = (count + ?) WHERE user_id = ?", (one, callback_query.from_user.id))
+    if point == '2':
+        cur_selfesteem.execute("UPDATE points SET points = points + ? WHERE user_id = ?", (two, callback_query.from_user.id))
+    elif point == '1':
+        cur_selfesteem.execute("UPDATE points SET points = points + ? WHERE user_id = ?", (one, callback_query.from_user.id))
+    db_selfesteem.commit()
+    if int(cur_selfesteem.execute('SELECT count FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) != 10:
+        await bot.edit_message_text(chat_id=callback_query.from_user.id, text=selfesteem_questions[int(cur_selfesteem.execute('SELECT count FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0])],
+                                    message_id=callback_query.message.message_id, reply_markup=selfesteem_answer_keyboards[int(cur_selfesteem.execute('SELECT count FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0])])
+    else:
+        await bot.delete_message(callback_query.from_user.id, callback_query.message.message_id)
+        if int(cur_selfesteem.execute('SELECT points FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) < 10:
+            await bot.send_message(callback_query.from_user.id, 'Вы отличаетесь редкой независимостью от чужого мнения! '
+                                                                '\n\nВы строите свою жизнь, опираясь на собственные принципы, а не на интересы окружающих, а также способны распознать манипуляцию и пресечь попытку управлять вами. '
+                                                                '\nНо будьте осторожны, категоричность суждений может вызывать у ваших близких сложности при общении с вами, рассмотрев в вас излишне жесткого или недоверчивого человека. '
+                                                                '\nПомните, что открытя улыбка располагает людей к вам и при этом вовсе не обязывает идти у кого-то на поводу', reply_markup=Markups.backIn)
+        elif (int(cur_selfesteem.execute('SELECT points FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) > 9 ) and (int(cur_selfesteem.execute('SELECT points FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) < 16):
+            await bot.send_message(callback_query.from_user.id,
+                                   'Выстраивая взаимоотношения с людьми и собственную жизнь, вы достаточно хорошо разбираетесь в причинно-следственных связях. '
+                                   '\nПовлиять на вашу личность не так-то просто!'
+                                   '\nНо иногда вы все же можете попасть впросак. Чтобы лучше ориентироваться в происходящем, вы можете узнать психологические приемы, которые помогают управлять людьми, и чаще действовать в своих интересах.',
+                                   reply_markup=Markups.backIn)
+        else:
+            await bot.send_message(callback_query.from_user.id,
+                                   'Возможно, не все решения в жизни вы приняли, руководствуясь собственными интересами. '
+                                   '\nНо не бойтесь иногда настаивать на своем и действовать немного эгоистичнее. '
+                                   '\nВы сможете найти золотую середину, не отпугнув окружающих, но при этом начав жить по своим правилам! '
+                                   '\nХорошим решением будет повышение самооценки. Помня о своей ценности для мира, избавившись от комплексов и полюбив себя, вы можете изменить жизнь и взять ее в свои руки.',
+                                   reply_markup=Markups.backIn)
 
+
+def register_handlers_Pop_selfesteem(dp : Dispatcher):
+    dp.register_callback_query_handler(answer_selfesteem, text=['selfesteem_answer_0', 'selfesteem_answer_1', 'selfesteem_answer_2'])
