@@ -1,0 +1,6 @@
+aiogram
+db-sqlite3
+asyncio
+aioschedule
+pandas
+openpyxl

@@ -1,6 +1,6 @@
 import FSM_classes
 import Markups
-from Databases import db_start, data_profile, pre_points_test_weariness, points_test_weariness
+from Databases import db_start, data_profile, pre_points_test_weariness, points_test_weariness, pre_answers_test_weariness
 import asyncio
 import sqlite3
 
@@ -61,6 +61,7 @@ answers = InlineKeyboardMarkup().add(InlineKeyboardButton('Да', callback_data=
 
 async def pretest_weariness(message: types.message, state: FSMContext):
     await pre_points_test_weariness(user_id=message.from_user.id, username=message.from_user.username)
+    await pre_answers_test_weariness(user_id=message.from_user.id, username=message.from_user.username)
     async with state.proxy() as data:
         data['count'] = 0
     async with state.proxy() as data:
@@ -79,10 +80,15 @@ async def pretest_weariness(message: types.message, state: FSMContext):
 
 async def answer_weariness(callback_query: types.CallbackQuery, state: FSMContext):
     point = callback_query.data[-1]
-    db_weariness = sqlite3.connect('Databases/Result_Tests/PSY_Weariness.db')
-    cur_weariness = db_weariness.cursor()
     one = int(1)
     two = int(2)
+    db_weariness = sqlite3.connect('Databases/Result_Tests/PSY_Weariness.db')
+    cur_weariness = db_weariness.cursor()
+    cur_answer_count = cur_weariness.execute("SELECT countOfAnswers FROM answers WHERE user_id = ?", (callback_query.from_user.id,)).fetchone()
+    str_to_execute = f"UPDATE answers SET answer{str(int(cur_answer_count[0])+1)} = ?"
+    cur_weariness.execute(str_to_execute, (point,))
+    cur_weariness.execute("UPDATE answers SET countOfAnswers = countOfAnswers + ? WHERE user_id = ?", (one, callback_query.from_user.id))
+    db_weariness.commit()
     cur_weariness.execute(
         "UPDATE points SET count = (count + ?) WHERE user_id = ?", (one, callback_query.from_user.id))
     if (int(cur_weariness.execute('SELECT count FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) in [1, 6, 14, 22, 33, 36]) and (point == 'n'):
@@ -106,17 +112,23 @@ async def answer_weariness(callback_query: types.CallbackQuery, state: FSMContex
         if int(cur_weariness.execute('SELECT points FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) <= 17:
             await FSM_classes.MultiDialog.menu.set()
             await bot.send_message(callback_query.from_user.id, 'Результаты показывают, что у вас отсутствуют признаки хронического утомления. Надеемся, что текущая работа и дальше будет вам интересна и желанна', reply_markup=Markups.backIn)
+            cur_weariness.execute("UPDATE answers SET countOfAnswers = 0")
+            db_weariness.commit()
         elif (int(cur_weariness.execute('SELECT points FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) > 17) and (int(cur_weariness.execute('SELECT points FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) <= 26):
             Feedback_kb = InlineKeyboardMarkup(row_width=1)
             Feedback_kb.add(InlineKeyboardButton('Посмотреть курс', callback_data='Feedback_btn0'),
                             InlineKeyboardButton('Вернуться в меню', callback_data='Main_menu'))
             await bot.send_message(callback_query.from_user.id, 'Результаты показывают, что у вас присутствуют признаки начальной степени хронического утомления. Рекомендуем вам пройти небольшой курс поддерживающих практик', reply_markup=Feedback_kb)
+            cur_weariness.execute("UPDATE answers SET countOfAnswers = 0")
+            db_weariness.commit()
         elif (int(cur_weariness.execute('SELECT points FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) > 26) and (int(cur_weariness.execute('SELECT points FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) <= 37):
             Feedback_kb = InlineKeyboardMarkup(row_width=1)
             Feedback_kb.add(InlineKeyboardButton('Посмотреть курс', callback_data='Feedback_btn0'),
                             InlineKeyboardButton('Вернуться в меню', callback_data='Main_menu'))
             await bot.send_message(callback_query.from_user.id,
                                    'Результаты показывают, что у вас присутствуют признаки выраженной степени хронического утомления. Рекомендуем вам пройти небольшой курс восстанавливающих и поддерживающих практик', reply_markup=Feedback_kb)
+            cur_weariness.execute("UPDATE answers SET countOfAnswers = 0")
+            db_weariness.commit()
         else:
             await FSM_classes.MultiDialog.specialist.set()
             Feedback_kb = InlineKeyboardMarkup(row_width=1)
@@ -124,7 +136,8 @@ async def answer_weariness(callback_query: types.CallbackQuery, state: FSMContex
                             InlineKeyboardButton('Хочу обратиться к специалисту', callback_data='Feedback_btn7'))
             await bot.send_message(callback_query.from_user.id,
                                    'Результаты показывают, что у вас присутствуют признаки сильной степени хронического утомления. Рекомендуем вам пройти курс восстанавливающих и поддерживающих практик а также обратиться к специалисту в ближайшее время', reply_markup=Feedback_kb)
-
+            cur_weariness.execute("UPDATE answers SET countOfAnswers = 0")
+            db_weariness.commit()
 
 async def process_callback_feedback(callback_query: types.CallbackQuery, state: FSMContext):
     point = callback_query.data[-1]
