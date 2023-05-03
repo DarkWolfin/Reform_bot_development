@@ -24,9 +24,9 @@ async def choose_habit(message: types.message, state: FSMContext):
     #     await FSM_classes.MultiDialog.test_selfefficacy.set()
     #     await PsyTests.Psy_selfefficacy.pretest_selfefficacy(message, state)
     #
-    # if message.text == 'Дневная норма воды':
-    #     await FSM_classes.MultiDialog.test_control.set()
-    #     await PopTests.Pop_Control.pretest_control(message, state)
+    if message.text == 'Дневная норма воды':
+        await FSM_classes.MultiDialog.water_habit.set()
+        await Habits.Water.habit_water(message, state)
     # if message.text == 'Работа с телом':
     #     await FSM_classes.MultiDialog.test_typeperson.set()
     #     await PopTests.Pop_Typeperson.pretest_typeperson(message, state)
