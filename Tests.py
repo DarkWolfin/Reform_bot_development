@@ -47,6 +47,9 @@ async def type_test(message: types.message, state: FSMContext):
     if message.text == 'Личная самоэффективность':
         await FSM_classes.MultiDialog.test_selfefficacy.set()
         await PsyTests.Psy_selfefficacy.pretest_selfefficacy(message, state)
+    if message.text == 'Мой темперамент':
+        await FSM_classes.MultiDialog.test_temperament.set()
+        await PsyTests.Psy_temperament.pretest_temperament(message, state)
 
     if message.text == 'Управляю ли я своей жизнью?':
         await FSM_classes.MultiDialog.test_control.set()
@@ -57,6 +60,7 @@ async def type_test(message: types.message, state: FSMContext):
     if message.text == 'Мой тип личности':
         await FSM_classes.MultiDialog.test_typeperson.set()
         await PopTests.Pop_Typeperson.pretest_typeperson(message, state)
+    
 
     if message.text == ('Психологическое благополучие' or 'Доминирующее состояние' or 'Мой темперамент' or 'Мои скрытые таланты и способности'):
         await bot.send_message(message.from_user.id, 'Полный доступ доступен в платной версии.'
