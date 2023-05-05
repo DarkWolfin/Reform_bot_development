@@ -11,7 +11,7 @@ from Token import Token
 bot = Bot(Token)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
-from Databases import pre_points_test_control, points_test_control
+from Database import pre_points_test_control, points_test_control
 
 import Markups
 import FSM_classes

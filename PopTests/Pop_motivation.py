@@ -1,4 +1,4 @@
-from Databases import db_start, data_profile, pre_points_test_motivation, points_test_motivation
+from Database import db_start, data_profile, pre_points_test_motivation, points_test_motivation
 import asyncio
 import sqlite3
 import Markups
@@ -18,9 +18,8 @@ from aiogram.types import InlineKeyboardButton
 from aiogram.types import InlineKeyboardMarkup
 from aiogram.types import CallbackQuery
 from aiogram.types import Message
-import db
 
-questions = load(open("questions.json", "r", encoding="utf-8"))
+questions = load(open("PopTests/questions_motivation.json", "r", encoding="utf-8"))
 
 from Token import Token
 bot = Bot(Token)

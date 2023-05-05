@@ -1,4 +1,4 @@
-from Databases import db_start, data_profile, pre_points_test_stress, points_test_stress, pre_answers_test_stress
+from Database import db_start, data_profile, pre_points_test_stress, points_test_stress, pre_answers_test_stress
 import asyncio
 import sqlite3
 import Markups
@@ -86,7 +86,6 @@ async def answer_stress(callback_query: types.CallbackQuery, state: FSMContext):
     zero = int(0)
     check = cur_stress.execute("SELECT answer12 FROM answers WHERE user_id = ?",
                                   (callback_query.from_user.id,)).fetchone()
-    print(check)
     cur_stress.execute(
         "UPDATE points SET count = (count + ?) WHERE user_id = ?", (one, callback_query.from_user.id))
     if point == 'n':

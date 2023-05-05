@@ -25,7 +25,7 @@ import aioschedule as schedule
 from aiogram.utils.exceptions import BotBlocked
 
 from Token import Token
-from Databases import db_start, data_profile, affirmation
+from Database import db_start, data_profile, affirmation
 
 
 async def on_startup(_):
@@ -41,7 +41,7 @@ Psy_selfefficacy.register_handlers_Psy_selfefficacy(dp)
 Psy_stress.register_handlers_Psy_stress(dp)
 Pop_Control.register_handlers_Pop_Control(dp)
 Pop_Typeperson.register_handlers_Pop_typeperson(dp)
-Pop_motivation.register_handlers_Pop_motivation(dp)
+# Pop_motivation.register_handlers_Pop_motivation(dp)
 
 
 @dp.message_handler(commands=['admin_mailing'], state='*', chat_id=417986886)
@@ -540,6 +540,4 @@ async def log_users(message: types.Message):
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
     loop.create_task(scheduler_sleep())
-    executor.start_polling(dp,
-                           skip_updates=True,
-                           on_startup=on_startup)
+    executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
