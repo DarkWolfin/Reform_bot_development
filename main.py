@@ -255,18 +255,12 @@ async def reply_tests(message: types.Message, state: FSMContext):
     await log_users(message)
 
 
-<<<<<<< HEAD
-@dp.message_handler(state=(
-        FSM_classes.MultiDialog.test_weariness or FSM_classes.MultiDialog.test_control or FSM_classes.MultiDialog.test_selfefficacy or FSM_classes.MultiDialog.test_typeperson or FSM_classes.MultiDialog.test_stress))
-=======
 @dp.message_handler(state=(FSM_classes.MultiDialog.test_weariness or FSM_classes.MultiDialog.test_control or FSM_classes.MultiDialog.test_selfefficacy or FSM_classes.MultiDialog.test_typeperson or FSM_classes.MultiDialog.test_stress or FSM_classes.MultiDialog.test_motivation))
->>>>>>> c21f239ed1e7956d7181d4392609e05a2c883f8a
 async def reply_alltests(message: types.Message, state: FSMContext):
     if message.text == 'Прервать тест и выйти в меню':
         await FSM_classes.MultiDialog.menu.set()
         await main_menu(message, state)
         await log_users(message)
-
 
 
 @dp.message_handler(state=FSM_classes.MultiDialog.courses)
