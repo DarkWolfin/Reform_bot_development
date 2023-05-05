@@ -80,7 +80,7 @@ fullversion = ReplyKeyboardMarkup(resize_keyboard=True).add(
 type_of_habits = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(
     KeyboardButton('Работа со сном'),
     KeyboardButton('Регулярное чтение книг (скоро)'),
-    KeyboardButton('Дневная норма воды (скоро)'),
+    KeyboardButton('Дневная норма воды'),
     KeyboardButton('Работа с телом (скоро)'),
     KeyboardButton('Вернуться в главное меню'))
 
@@ -91,3 +91,13 @@ tune_habit = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(
 
 backHabitRe = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(
     KeyboardButton('Вернуться в главное меню', callback_data='Main_menu'))
+
+
+chooseScheduleWater = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(
+    KeyboardButton('Будние'),
+    KeyboardButton('Выходные'),
+    KeyboardButton('Вся неделя'))
+
+waterAnswers = InlineKeyboardMarkup().add(
+    InlineKeyboardButton('Получилось!',callback_data='answerWatery'),
+    InlineKeyboardButton('К сожалению, нет.',callback_data='answerWatern'))

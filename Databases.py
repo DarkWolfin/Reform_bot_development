@@ -16,7 +16,8 @@ async def db_start():
 
     db_test_weariness = sq.connect('Databases/Result_Tests/PSY_Weariness.db')
     cur_test_weariness = db_test_weariness.cursor()
-    cur_test_weariness.execute("CREATE TABLE IF NOT EXISTS answers(user_id INT PRIMARY KEY, username TEXT, answer1 TEXT, answer2 TEXT, answer3 TEXT, answer4 TEXT, answer5 TEXT, answer6 TEXT, "
+    #cur_test_weariness.execute("DROP TABLE IF EXISTS answers")
+    cur_test_weariness.execute("CREATE TABLE IF NOT EXISTS answers(user_id INT PRIMARY KEY, username TEXT, countOfAnswers INT, answer1 TEXT, answer2 TEXT, answer3 TEXT, answer4 TEXT, answer5 TEXT, answer6 TEXT, "
                                "answer7 TEXT, answer8 TEXT, answer9 TEXT, answer10 TEXT, answer11 TEXT, answer12 TEXT, answer13 TEXT, answer14 TEXT, answer15 TEXT, answer16 TEXT, "
                                "answer17 TEXT, answer18 TEXT, answer19 TEXT, answer20 TEXT, answer21 TEXT, answer22 TEXT, answer23 TEXT, answer24 TEXT, answer25 TEXT, answer26 TEXT, "
                                "answer27 TEXT, answer28 TEXT, answer29 TEXT, answer30 TEXT, answer31 TEXT, answer32 TEXT, answer33 TEXT, answer34 TEXT, answer35 TEXT, answer36 TEXT)")
@@ -28,7 +29,8 @@ async def db_start():
 ##################
 db_test_stress = sq.connect('Databases/Result_Tests/PSY_stress.db')
 cur_test_stress = db_test_stress.cursor()
-cur_test_stress.execute("CREATE TABLE IF NOT EXISTS answers(user_id INT PRIMARY KEY, username TEXT, answer1 TEXT, answer2 TEXT, answer3 TEXT, answer4 TEXT, answer5 TEXT, answer6 TEXT, "
+#cur_test_stress.execute("DROP TABLE IF EXISTS answers")
+cur_test_stress.execute("CREATE TABLE IF NOT EXISTS answers(user_id INT PRIMARY KEY, username TEXT, countOfAnswers INT, answer1 TEXT, answer2 TEXT, answer3 TEXT, answer4 TEXT, answer5 TEXT, answer6 TEXT, "
                         "answer7 TEXT, answer8 TEXT, answer9 TEXT, answer10 TEXT, answer11 TEXT, answer12 TEXT, answer13 TEXT, answer14 TEXT, answer15 TEXT, answer16 TEXT, "
                         "answer17 TEXT, answer18 TEXT, answer19 TEXT, answer20 TEXT, answer21 TEXT, answer22 TEXT, answer23 TEXT, answer24 TEXT, answer25 TEXT, answer26 TEXT, "
                         "answer27 TEXT, answer28 TEXT, answer29 TEXT, answer30 TEXT, answer31 TEXT, answer32 TEXT, answer33 TEXT)")
@@ -68,6 +70,13 @@ cur_habit_sleep.execute(
     "CREATE TABLE IF NOT EXISTS sleep(user_id INT PRIMARY KEY, username TEXT, active TEXT, bedtime TEXT, wakeup TEXT)")
 db_habit_sleep.commit()
 
+db_habit_water = sq.connect('Databases/Current_habits.db')
+cur_habit_water = db_habit_water.cursor()
+#cur_habit_water.execute("DROP TABLE IF EXISTS water")
+cur_habit_water.execute(
+    "CREATE TABLE IF NOT EXISTS water(user_id INT PRIMARY KEY, username TEXT, dayScheduleStart INT, interval INT, dayScheduleEnd INT, amountOfPortions INT, schedule TEXT)")
+db_habit_water.commit()
+
 db_course_anxiety = sq.connect('Databases/Courses.db')
 cur_course_anxiety = db_course_anxiety.cursor()
 cur_course_anxiety.execute(
@@ -103,6 +112,13 @@ async def pre_points_test_weariness(user_id, username):
                                    (user_id, username, '', ''))
         db_test_weariness.commit()
 
+async def pre_answers_test_weariness(user_id, username):
+    user = cur_test_weariness.execute(
+        "SELECT 1 FROM answers WHERE user_id == '{key}'".format(key=user_id)).fetchone()
+    if not user:
+        cur_test_weariness.execute("INSERT INTO answers VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                                   (user_id, username, 0, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '','',''))
+        db_test_weariness.commit()
 
 async def points_test_weariness(state, user_id):
     async with state.proxy() as data:
@@ -119,6 +135,15 @@ async def pre_points_test_stress(user_id, username):
     if not user:
         cur_test_stress.execute("INSERT INTO points VALUES(?, ?, ?, ?)",
                                 (user_id, username, '', ''))
+        db_test_stress.commit()
+
+
+async def pre_answers_test_stress(user_id, username):
+    user = cur_test_stress.execute(
+        "SELECT 1 FROM answers WHERE user_id == '{key}'".format(key=user_id)).fetchone()
+    if not user:
+        cur_test_stress.execute("INSERT INTO answers VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                                (user_id, username, 0, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '','',''))
         db_test_stress.commit()
 
 
@@ -202,6 +227,15 @@ async def prehabit_sleep_db(user_id, username):
         cur_habit_sleep.execute("INSERT INTO sleep VALUES(?, ?, ?, ?, ?)",
                                 (user_id, username, '', '', ''))
         db_habit_sleep.commit()
+
+
+async def prehabit_water_db(user_id, username):
+    user = cur_habit_water.execute(
+        "SELECT 1 FROM water WHERE user_id == '{key}'".format(key=user_id)).fetchone()
+    if not user:
+        cur_habit_water.execute("INSERT INTO water VALUES(?, ?, ?, ?, ?, ?,?)",
+                                (user_id, username, 0, 0, 0, 0,''))
+        db_habit_water.commit()
 
 
 async def course_anxiety_db(user_id, username, interested):

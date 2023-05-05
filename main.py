@@ -14,11 +14,10 @@ import asyncio
 import sqlite3
 from datetime import datetime, timedelta
 
-
 from aiogram import Bot, types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, \
-    InlineKeyboardMarkup, InlineKeyboardButton
+    InlineKeyboardMarkup, InlineKeyboardButton, InputFile
 from aiogram.utils import executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 import aioschedule as schedule
@@ -48,7 +47,45 @@ Pop_motivation.register_handlers_Pop_motivation(dp)
 @dp.message_handler(commands=['admin_mailing'], state='*', chat_id=417986886)
 async def check_active_users(message: types.Message):
     await FSM_classes.Admin.mailing_all.set()
-    await bot.send_message(message.from_user.id, text='Здравствуйте, босс! Пришлите то, что хотите разослать!', parse_mode='html')
+    await bot.send_message(message.from_user.id, text='Здравствуйте, босс! Пришлите то, что хотите разослать!',
+                           parse_mode='html')
+
+
+@dp.message_handler(commands=['getuserreport'], state='*')
+async def get_user_report(message: types.Message):
+    await bot.send_message(message.from_user.id, text='Введите пароль:')
+    await FSM_classes.HabitWater.getUserReportPassword.set()
+
+
+@dp.message_handler(state=FSM_classes.HabitWater.getUserReportPassword)
+async def get_user_report(message: types.Message, state: FSMContext):
+    if message.text == 'admin123':
+        await bot.send_message(message.from_user.id, text='Введите id нужных юзеров через пробел')
+        await FSM_classes.HabitWater.getUserReportId.set()
+    else:
+        await bot.send_message(message.from_user.id, text='Ошибка доступа!'
+                                                          '\n/getuserreport - ввести другой пароль '
+                                                          '\n/main_menu - перейти в главное меню')
+
+
+
+@dp.message_handler(state=FSM_classes.HabitWater.getUserReportId )
+async def get_user_report(message: types.Message, state: FSMContext):
+    await state.set_data({"users": message.text})
+    await bot.send_message(message.from_user.id, text='Введите дату начала и конца наблюдений через пробел')
+    await FSM_classes.HabitWater.getUserReportDate.set()
+
+
+@dp.message_handler(state=FSM_classes.HabitWater.getUserReportDate)
+async def get_user_report(message: types.Message, state: FSMContext):
+    users = await state.get_data("users")
+    startDate, endDate = message.text.split(' ')
+    startDate = startDate.replace(':','')
+    endDate = endDate.replace(':','')
+    users = str(users['users']).split(' ')
+    await Water.createExcelFile(startDate,endDate,users)
+    with open('userData.xlsx', 'rb') as f:
+        await bot.send_document(chat_id=message.from_user.id, document=InputFile(f))
 
 
 @dp.message_handler(content_types=['photo'], state=FSM_classes.Admin.mailing_all)
@@ -105,10 +142,12 @@ async def welcome(message: types.Message):
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('Welcome_btn'), state=FSM_classes.MultiDialog.menu)
 async def mailing(callback_query: types.CallbackQuery, state: FSMContext):
     if callback_query.data[-1] == '0':
-        agree_mailing_kb = InlineKeyboardMarkup().add(InlineKeyboardButton('Да, хочу попробовать', callback_data='Welcome_btny'),
-                                                      InlineKeyboardButton('Нет, ни в коем случае', callback_data='Welcome_btnn'))
-        await bot.send_message(callback_query.from_user.id, 'Хотите ли вы получать ежедневные мотивационные подборки и аффирмации для более эффективного взаимодействия с ботом?'
-                                                            '\nОтписаться можно в любой момент',
+        agree_mailing_kb = InlineKeyboardMarkup().add(
+            InlineKeyboardButton('Да, хочу попробовать', callback_data='Welcome_btny'),
+            InlineKeyboardButton('Нет, ни в коем случае', callback_data='Welcome_btnn'))
+        await bot.send_message(callback_query.from_user.id,
+                               'Хотите ли вы получать ежедневные мотивационные подборки и аффирмации для более эффективного взаимодействия с ботом?'
+                               '\nОтписаться можно в любой момент',
                                parse_mode='html', reply_markup=agree_mailing_kb)
     if callback_query.data[-1] == 'y':
         await affirmation(user_id=callback_query.from_user.id, first_name=callback_query.from_user.first_name,
@@ -175,13 +214,14 @@ async def contacts(message: types.Message):
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('fullversion'), state=FSM_classes.MultiDialog)
 async def fullversion_callback(callback_query: types.CallbackQuery, state: FSMContext):
     await bot.send_message(callback_query.from_user.id, 'Полный доступ доступен в платной версии.'
-                           '\nВ платной версии:'
-                           '❇️25 медитаций'
-                           '❇️10 дыхательных практик'
-                           '❇️Таймер Помодоро'
-                           '❇️Система ежедневных напоминаний и мотиваций'
-                           '❇️Рекомендации по сну, питанию и отдыху от ведущих специалистов'
-                           '\n\nОформить подписку за 499 рублей в месяц?', parse_mode='html')
+                                                        '\nВ платной версии:'
+                                                        '❇️25 медитаций'
+                                                        '❇️10 дыхательных практик'
+                                                        '❇️Таймер Помодоро'
+                                                        '❇️Система ежедневных напоминаний и мотиваций'
+                                                        '❇️Рекомендации по сну, питанию и отдыху от ведущих специалистов'
+                                                        '\n\nОформить подписку за 499 рублей в месяц?',
+                           parse_mode='html')
 
 
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('Main_menu'), state='*')
@@ -189,12 +229,12 @@ async def main_menu_callback(callback_query: types.CallbackQuery, state: FSMCont
     await FSM_classes.HabitSleep.none.set()
     await FSM_classes.MultiDialog.menu.set()
     await bot.send_message(callback_query.from_user.id, 'Вы в главном меню. Не знаете что делать дальше?'
-                           '\n\n🧘‍♀️ Практики помогут вам разгрузиться после тяжёлого дня или успокоиться'
-                           '\n📝 Пройдите тесты, чтобы определить актуальное состояние и выявить проблему'
-                           '\n💪 Трекер привычек поможет внедрить и поддерживать полезные навыки'
-                           '\n🎬 Проходите курсы, узнавайте лучше себя, что поможет вам справиться с жизненными трудностями'
-                           '\n💬 Также вы можете обсудить проблему и получить рекомендации от специалиста'
-                           '\nВыберите, что вас интересует',
+                                                        '\n\n🧘‍♀️ Практики помогут вам разгрузиться после тяжёлого дня или успокоиться'
+                                                        '\n📝 Пройдите тесты, чтобы определить актуальное состояние и выявить проблему'
+                                                        '\n💪 Трекер привычек поможет внедрить и поддерживать полезные навыки'
+                                                        '\n🎬 Проходите курсы, узнавайте лучше себя, что поможет вам справиться с жизненными трудностями'
+                                                        '\n💬 Также вы можете обсудить проблему и получить рекомендации от специалиста'
+                                                        '\nВыберите, что вас интересует',
                            parse_mode='html', reply_markup=Markups.main_kb)
 
 
@@ -221,7 +261,6 @@ async def reply_alltests(message: types.Message, state: FSMContext):
         await FSM_classes.MultiDialog.menu.set()
         await main_menu(message, state)
         await log_users(message)
-
 
 
 @dp.message_handler(state=FSM_classes.MultiDialog.courses)
@@ -251,6 +290,33 @@ async def reply_habits(message: types.Message, state: FSMContext):
         await main_menu(message, state)
     await Habit.choose_habit(message, state)
     await log_users(message)
+
+
+@dp.message_handler(state=FSM_classes.HabitWater.choose_action)
+async def reply_habit_water(message: types.Message, state: FSMContext):
+    if message.text == 'Вернуться в главное меню':
+        await main_menu(message, state)
+    await Water.choose_habit_action(message, state)
+    await log_users(message)
+
+
+@dp.message_handler(state=FSM_classes.HabitWater.choose_amount_of_portion)
+async def reply_habit_water(message: types.Message, state: FSMContext):
+    await Water.choose_habit_water_portions(message, state)
+    await log_users(message)
+
+
+@dp.message_handler(state=FSM_classes.HabitWater.choose_schedule)
+async def reply_habit_water(message: types.Message, state: FSMContext):
+    await Water.choose_habit_water_schedule(message, state)
+    await log_users(message)
+
+
+@dp.callback_query_handler(lambda c: c.data and c.data.startswith('answerWater'), state='*')
+async def reply_habit_water(callback_query: types.CallbackQuery, state: FSMContext):
+    await Water.answer_water_schedule(callback_query, state)
+    await FSM_classes.MultiDialog.menu.set()
+    await log_users(callback_query.message)
 
 
 @dp.message_handler(state=FSM_classes.HabitSleep.choose_action)
@@ -381,7 +447,7 @@ async def scheduler_sleep_message_wakeup():
     for user_wakeup in range(len(users_wakeup)):
         try:
             await bot.send_message(chat_id=users_wakeup[user_wakeup][0], text='Пора вставать! '
-                                   '\nНачинать никогда не поздно! А всё начинается с небольших изменений!')
+                                                                              '\nНачинать никогда не поздно! А всё начинается с небольших изменений!')
             await asyncio.sleep(0.1)
         except BotBlocked:
             cur_scheduler.execute(
@@ -399,9 +465,10 @@ async def scheduler_sleep_message_bedtime():
         'SELECT user_id FROM sleep WHERE bedtime = ?', (now.strftime('%H:%M'),)).fetchall()
     for user_bedtime in range(len(users_bedtime)):
         try:
-            await bot.send_message(chat_id=users_bedtime[user_bedtime][0], text='Вы просили напомнить, что вам пора ложиться спать!'
-                                   '\nЗавтра вас ждёт отличный день! '
-                                   '\nПомните, великое начинется с малого!')
+            await bot.send_message(chat_id=users_bedtime[user_bedtime][0],
+                                   text='Вы просили напомнить, что вам пора ложиться спать!'
+                                        '\nЗавтра вас ждёт отличный день! '
+                                        '\nПомните, великое начинется с малого!')
             await asyncio.sleep(0.1)
         except BotBlocked:
             cur_scheduler.execute(
@@ -411,12 +478,55 @@ async def scheduler_sleep_message_bedtime():
     db_scheduler_sleep.commit()
 
 
+async def scheduler_water_message():
+    db_scheduler_water = sqlite3.connect('Databases/Current_habits.db')
+    cur_scheduler_water = db_scheduler_water.cursor()
+    now = datetime.utcnow() + timedelta(hours=3, minutes=0)
+    time_in_min_now = int(now.strftime('%H:%M').split(':')[0]) * 60 + int(now.strftime('%H:%M').split(':')[1])
+    today = datetime.today()
+    weekday = today.weekday()
+
+    if weekday < 5:
+        users = cur_scheduler_water.execute(
+            'SELECT user_id FROM water WHERE interval != 0 AND schedule IN ("weekdays", "both")').fetchall()
+    if weekday >= 5:
+        users = cur_scheduler_water.execute(
+            'SELECT user_id FROM water WHERE interval != 0 AND schedule IN ("weekends", "both")').fetchall()
+
+    if time_in_min_now in range(600, 1381):
+        for user in users:
+            interval = cur_scheduler_water.execute(
+                'SELECT interval FROM water WHERE user_id = ?', (user[0],)).fetchone()
+            amount_of_portions = cur_scheduler_water.execute(
+                'SELECT amountOfPortions FROM water WHERE user_id = ?', (user[0],)).fetchone()
+
+            if time_in_min_now % interval[0] == 0:
+                try:
+                    await bot.send_message(chat_id=user[0], text='Пора пить воду!'
+                                                                 '\nОбъем приёма воды - ' + str(
+                        round(2000 / amount_of_portions[0])) + ' мл.')
+                    await asyncio.sleep(0.1)
+                except BotBlocked:
+                    cur_scheduler_water.execute(
+                        'UPDATE water SET user_id = 0 WHERE user_id = ?', (users[user[0]][0],))
+                    db_scheduler_water.commit()
+                cur_scheduler_water.execute('DELETE FROM water WHERE user_id = ?', (int(0),))
+                db_scheduler_water.commit()
+            if time_in_min_now == 1380:
+                await bot.send_message(chat_id=user[0], text='Получилось ли выполнить норму?',
+                                       reply_markup=Markups.waterAnswers)
+
+
 async def scheduler_sleep():
     schedule.every(1).minute.do(scheduler_sleep_message_wakeup)
     schedule.every(1).minute.do(scheduler_sleep_message_bedtime)
+    now = datetime.utcnow() + timedelta(hours=3, minutes=0)
+    time_in_min_now = int(now.strftime('%H:%M').split(':')[0]) * 60 + int(now.strftime('%H:%M').split(':')[1])
+    if time_in_min_now > 600 and time_in_min_now < 1380:
+        schedule.every(1).minute.do(scheduler_water_message)
     while True:
         await schedule.run_pending()
-        await asyncio.sleep(10)
+        await asyncio.sleep(1)
 
 
 async def log_users(message: types.Message):
