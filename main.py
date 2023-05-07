@@ -1,7 +1,7 @@
 from PsyTests import Psy_Weariness, Psy_selfefficacy
 from AllCourses import Anxiety
 from Habits import Sleep, Water, Reading, Body
-from PopTests import Pop_Control, Pop_Typeperson, Pop_motivation
+from PopTests import Pop_Control, Pop_Typeperson
 from PsyTests import Psy_Weariness, Psy_selfefficacy, Psy_stress
 import Specialists
 import Habit
@@ -13,6 +13,7 @@ import FSM_classes
 import asyncio
 import sqlite3
 from datetime import datetime, timedelta
+import admin_commands
 
 from aiogram import Bot, types, Dispatcher
 from aiogram.dispatcher import FSMContext
@@ -41,7 +42,6 @@ Psy_selfefficacy.register_handlers_Psy_selfefficacy(dp)
 Psy_stress.register_handlers_Psy_stress(dp)
 Pop_Control.register_handlers_Pop_Control(dp)
 Pop_Typeperson.register_handlers_Pop_typeperson(dp)
-Pop_motivation.register_handlers_Pop_motivation(dp)
 
 
 @dp.message_handler(commands=['admin_mailing'], state='*', chat_id=417986886)
@@ -54,38 +54,94 @@ async def check_active_users(message: types.Message):
 @dp.message_handler(commands=['getuserreport'], state='*')
 async def get_user_report(message: types.Message):
     await bot.send_message(message.from_user.id, text='Введите пароль:')
-    await FSM_classes.HabitWater.getUserReportPassword.set()
+    await FSM_classes.adminCommands.getUserReportPassword.set()
 
 
-@dp.message_handler(state=FSM_classes.HabitWater.getUserReportPassword)
+@dp.message_handler(state=FSM_classes.adminCommands.getUserReportPassword)
 async def get_user_report(message: types.Message, state: FSMContext):
     if message.text == 'admin123':
         await bot.send_message(message.from_user.id, text='Введите id нужных юзеров через пробел')
-        await FSM_classes.HabitWater.getUserReportId.set()
+        await FSM_classes.adminCommands.getUserReportId.set()
     else:
         await bot.send_message(message.from_user.id, text='Ошибка доступа!'
                                                           '\n/getuserreport - ввести другой пароль '
                                                           '\n/main_menu - перейти в главное меню')
 
 
-
-@dp.message_handler(state=FSM_classes.HabitWater.getUserReportId )
+@dp.message_handler(state=FSM_classes.adminCommands.getUserReportId )
 async def get_user_report(message: types.Message, state: FSMContext):
     await state.set_data({"users": message.text})
     await bot.send_message(message.from_user.id, text='Введите дату начала и конца наблюдений через пробел')
-    await FSM_classes.HabitWater.getUserReportDate.set()
+    await FSM_classes.adminCommands.getUserReportDate.set()
 
 
-@dp.message_handler(state=FSM_classes.HabitWater.getUserReportDate)
+@dp.message_handler(state=FSM_classes.adminCommands.getUserReportDate)
 async def get_user_report(message: types.Message, state: FSMContext):
     users = await state.get_data("users")
     startDate, endDate = message.text.split(' ')
     startDate = startDate.replace(':','')
     endDate = endDate.replace(':','')
     users = str(users['users']).split(' ')
-    await Water.createExcelFile(startDate,endDate,users)
+    await admin_commands.createExcelFileReportCommand(startDate,endDate,users)
     with open('userData.xlsx', 'rb') as f:
         await bot.send_document(chat_id=message.from_user.id, document=InputFile(f))
+
+
+@dp.message_handler(commands=['getuseractions'], state='*')
+async def get_user_report(message: types.Message):
+    await bot.send_message(message.from_user.id, text='Введите пароль:')
+    await FSM_classes.adminCommands.getUserActionPassword.set()
+
+
+@dp.message_handler(state=FSM_classes.adminCommands.getUserActionPassword)
+async def get_user_report(message: types.Message, state: FSMContext):
+    if message.text == 'admin123':
+        await bot.send_message(message.from_user.id, text='Введите id нужных юзеров через пробел')
+        await FSM_classes.adminCommands.getUserActionId.set()
+    else:
+        await bot.send_message(message.from_user.id, text='Ошибка доступа!'
+                                                          '\n/getuserreport - ввести другой пароль '
+                                                          '\n/main_menu - перейти в главное меню')
+
+
+@dp.message_handler(state=FSM_classes.adminCommands.getUserActionId)
+async def get_user_report(message: types.Message, state: FSMContext):
+    await state.set_data({"users": message.text})
+    await bot.send_message(message.from_user.id, text='Введите дату начала и конца наблюдений через пробел')
+    await FSM_classes.adminCommands.getUserActionDate.set()
+
+
+@dp.message_handler(state=FSM_classes.adminCommands.getUserActionDate)
+async def get_user_report(message: types.Message, state: FSMContext):
+    users = await state.get_data("users")
+    startDate, endDate = message.text.split(' ')
+    users = str(users['users']).split(' ')
+    await admin_commands.createExcelFileActionCommand(startDate,endDate,users)
+    with open('getUserAction.xlsx', 'rb') as f:
+        await bot.send_document(chat_id=message.from_user.id, document=InputFile(f))
+
+
+@dp.message_handler(commands=['getuserreportgraph'], state='*')
+async def get_user_report(message: types.Message):
+    await bot.send_message(message.from_user.id, text='Введите дату формата чч:мм:гггг')
+    await FSM_classes.adminCommands.getUserReportGraphDate.set()
+
+
+@dp.message_handler(state=FSM_classes.adminCommands.getUserReportGraphDate)
+async def get_user_report(message: types.Message, state: FSMContext):
+    try:
+        dateStart = datetime.strptime(message.text, '%d:%m:%Y')
+        await bot.send_message(message.from_user.id, text='График вашего приема воды',reply_markup=Markups.backHabitRe)
+        with open("scatter_plot.png", "rb") as f:
+            photo = InputFile(f)
+            await bot.send_photo(message.from_user.id, photo)
+        await admin_commands.createGraphReportCommand(dateStart,message.from_user.id)
+        await FSM_classes.MultiDialog.menu.set()
+    except ValueError:
+        await bot.send_message(message.from_user.id, text='Введена не корректная дата!\n'
+                                                          'Введите дату в формате чч:мм:гггг')
+        await FSM_classes.adminCommands.getUserReportGraphDate.set()
+
 
 
 @dp.message_handler(content_types=['photo'], state=FSM_classes.Admin.mailing_all)
@@ -255,18 +311,13 @@ async def reply_tests(message: types.Message, state: FSMContext):
     await log_users(message)
 
 
-<<<<<<< HEAD
 @dp.message_handler(state=(
         FSM_classes.MultiDialog.test_weariness or FSM_classes.MultiDialog.test_control or FSM_classes.MultiDialog.test_selfefficacy or FSM_classes.MultiDialog.test_typeperson or FSM_classes.MultiDialog.test_stress))
-=======
-@dp.message_handler(state=(FSM_classes.MultiDialog.test_weariness or FSM_classes.MultiDialog.test_control or FSM_classes.MultiDialog.test_selfefficacy or FSM_classes.MultiDialog.test_typeperson or FSM_classes.MultiDialog.test_stress or FSM_classes.MultiDialog.test_motivation))
->>>>>>> c21f239ed1e7956d7181d4392609e05a2c883f8a
 async def reply_alltests(message: types.Message, state: FSMContext):
     if message.text == 'Прервать тест и выйти в меню':
         await FSM_classes.MultiDialog.menu.set()
         await main_menu(message, state)
         await log_users(message)
-
 
 
 @dp.message_handler(state=FSM_classes.MultiDialog.courses)
@@ -519,6 +570,9 @@ async def scheduler_water_message():
                 cur_scheduler_water.execute('DELETE FROM water WHERE user_id = ?', (int(0),))
                 db_scheduler_water.commit()
             if time_in_min_now == 1380:
+                today = datetime.today()
+                tableName = 'date_' + str(today)[0:10].replace('-', '')
+                cur_scheduler_water.execute(f'ALTER TABLE waterDates ADD COLUMN {tableName} TEXT')
                 await bot.send_message(chat_id=user[0], text='Получилось ли выполнить норму?',
                                        reply_markup=Markups.waterAnswers)
 
@@ -528,7 +582,7 @@ async def scheduler_sleep():
     schedule.every(1).minute.do(scheduler_sleep_message_bedtime)
     now = datetime.utcnow() + timedelta(hours=3, minutes=0)
     time_in_min_now = int(now.strftime('%H:%M').split(':')[0]) * 60 + int(now.strftime('%H:%M').split(':')[1])
-    if time_in_min_now > 600 and time_in_min_now < 1380:
+    if time_in_min_now >= 600 and time_in_min_now <= 1380:
         schedule.every(1).minute.do(scheduler_water_message)
     while True:
         await schedule.run_pending()

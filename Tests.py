@@ -51,9 +51,6 @@ async def type_test(message: types.message, state: FSMContext):
     if message.text == 'Управляю ли я своей жизнью?':
         await FSM_classes.MultiDialog.test_control.set()
         await PopTests.Pop_Control.pretest_control(message, state)
-    if message.text == 'Мотивация к успеху':
-        await FSM_classes.MultiDialog.test_motivation.set()
-        await PopTests.Pop_Motivation.pretest_motivation(message, state)
     if message.text == 'Мой тип личности':
         await FSM_classes.MultiDialog.test_typeperson.set()
         await PopTests.Pop_Typeperson.pretest_typeperson(message, state)

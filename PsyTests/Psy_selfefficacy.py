@@ -6,6 +6,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, \
     InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from datetime import datetime, timedelta
 
 from Token import Token
 bot = Bot(Token)
@@ -51,6 +52,13 @@ async def pretest_selfefficacy(message: types.message, state: FSMContext):
                                                  '\n\nТест, который позволяет относительно измерить ваш уровень самоэффективности в настоящее время состоит из 10 утверждений'
                                                  ' на которые вам нужно дать ответ в четырехбальной системе и оценить так ли это.'
                                                  '\n\nПриступим к тесту!', reply_markup=types.ReplyKeyboardRemove())
+    timeNow = datetime.now()
+    timeNow = str(timeNow)[:-7]
+    db_user_interactions = sqlite3.connect('Databases/user_interactions.db')
+    cur_user_interactions = db_user_interactions.cursor()
+    cur_user_interactions.execute("INSERT INTO users VALUES(?, ?, ?)",
+                                  (message.from_user.id, 'Psy_selfefficacy', timeNow))
+    db_user_interactions.commit()
     await asyncio.sleep(5)
     await bot.send_message(message.from_user.id, text=selfefficacy_questions[0], reply_markup=selfefficacy_answer)
 

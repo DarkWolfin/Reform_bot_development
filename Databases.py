@@ -1,9 +1,10 @@
 import sqlite3 as sq
+from datetime import datetime, timedelta
 
 
 async def db_start():
     global db_data, cur_data, db_test_weariness, cur_test_weariness, db_test_selfefficacy, cur_test_selfefficacy, db_test_control, cur_test_control, db_test_typeperson, cur_test_typeperson, \
-        db_habit_sleep, cur_habit_sleep, db_course_anxiety, cur_course_anxiety
+        db_habit_sleep, cur_habit_sleep, db_course_anxiety, cur_course_anxiety, db_user_interactions, cur_user_interactions
 
     db_data = sq.connect('Databases/Data_users.db')
     cur_data = db_data.cursor()
@@ -25,6 +26,10 @@ async def db_start():
     cur_test_weariness.execute(
         "CREATE TABLE IF NOT EXISTS points(user_id INT PRIMARY KEY, username TEXT, count INT, points INT)")
     db_test_weariness.commit()
+    db_user_interactions = sq.connect('Databases/user_interactions.db')
+    cur_user_interactions = db_user_interactions.cursor()
+    cur_user_interactions.execute("CREATE TABLE IF NOT EXISTS users(user_id INT, action TEXT, time INT)")
+    db_user_interactions.commit()
 
 ##################
 db_test_stress = sq.connect('Databases/Result_Tests/PSY_stress.db')
@@ -58,12 +63,6 @@ cur_test_typeperson.execute(
     "CREATE TABLE IF NOT EXISTS points(user_id INT PRIMARY KEY, username TEXT, count INT, points INT)")
 db_test_typeperson.commit()
 
-db_test_motivation = sq.connect('Databases/Result_Tests/TEST_Motivationn.db')
-cur_test_motivation = db_test_motivation.cursor()
-cur_test_motivation.execute(
-    "CREATE TABLE IF NOT EXISTS points(user_id INT PRIMARY KEY, username TEXT, count INT, points INT)")
-db_test_motivation.commit()
-
 db_habit_sleep = sq.connect('Databases/Current_habits.db')
 cur_habit_sleep = db_habit_sleep.cursor()
 cur_habit_sleep.execute(
@@ -72,9 +71,11 @@ db_habit_sleep.commit()
 
 db_habit_water = sq.connect('Databases/Current_habits.db')
 cur_habit_water = db_habit_water.cursor()
-#cur_habit_water.execute("DROP TABLE IF EXISTS water")
 cur_habit_water.execute(
     "CREATE TABLE IF NOT EXISTS water(user_id INT PRIMARY KEY, username TEXT, dayScheduleStart INT, interval INT, dayScheduleEnd INT, amountOfPortions INT, schedule TEXT)")
+db_habit_water.commit()
+cur_habit_water.execute(
+    "CREATE TABLE IF NOT EXISTS waterDates(user_id INT PRIMARY KEY)")
 db_habit_water.commit()
 
 db_course_anxiety = sq.connect('Databases/Courses.db')
@@ -204,21 +205,6 @@ async def points_test_typeperson(state, user_id):
             data['count'], data['points'], user_id))
         db_test_typeperson.commit()
 
-async def pre_points_test_motivation(user_id, username):
-    user = cur_test_motivation.execute(
-        "SELECT 1 FROM points WHERE user_id == '{key}'".format(key=user_id)).fetchone()
-    if not user:
-        cur_test_motivation.execute("INSERT INTO points VALUES(?, ?, ?, ?)",
-                                    (user_id, username, '', ''))
-        db_test_motivation.commit()
-
-
-async def points_test_motivation(state, user_id):
-    async with state.proxy() as data:
-        cur_test_motivation.execute("UPDATE points SET count = '{}', points = '{}' WHERE user_id == '{}'".format(
-            data['count'], data['points'], user_id))
-        db_test_motivation.commit()
-
 
 async def prehabit_sleep_db(user_id, username):
     user = cur_habit_sleep.execute(
@@ -233,8 +219,12 @@ async def prehabit_water_db(user_id, username):
     user = cur_habit_water.execute(
         "SELECT 1 FROM water WHERE user_id == '{key}'".format(key=user_id)).fetchone()
     if not user:
-        cur_habit_water.execute("INSERT INTO water VALUES(?, ?, ?, ?, ?, ?,?)",
+        cur_habit_water.execute("INSERT OR IGNORE INTO water VALUES(?, ?, ?, ?, ?, ?,?)",
                                 (user_id, username, 0, 0, 0, 0,''))
+        print('123')
+        db_habit_water.commit()
+        cur_habit_water.execute("INSERT OR IGNORE INTO waterDates VALUES(?)",
+                                (user_id,))
         db_habit_water.commit()
 
 
@@ -245,3 +235,13 @@ async def course_anxiety_db(user_id, username, interested):
         cur_course_anxiety.execute("INSERT INTO anxiety VALUES(?, ?, ?)",
                                    (user_id, username, interested))
         db_course_anxiety.commit()
+
+
+async def save_user_action(*, user_id=None, action=None):
+    timeNow = datetime.now()
+    timeNow = str(timeNow)[:-7]
+    db_user_interactions = sq.connect('Databases/user_interactions.db')
+    cur_user_interactions = db_user_interactions.cursor()
+    cur_user_interactions.execute("INSERT INTO users VALUES(?, ?, ?)",
+                                  (user_id, action, timeNow))
+    db_user_interactions.commit()
