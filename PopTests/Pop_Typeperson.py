@@ -11,7 +11,7 @@ from Token import Token
 bot = Bot(Token)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
-from Database import pre_points_test_typeperson, points_test_typeperson
+from Databases import pre_points_test_typeperson, points_test_typeperson, save_user_action
 
 import Markups
 import FSM_classes
@@ -85,11 +85,13 @@ async def answer_typeperson(callback_query: types.CallbackQuery):
                                    '\nЗато вы довольно-таки основательны, вас сложно вывести из равновесия. Вы редко принимаете скоропалительные решения, руководствуетесь не эмоциями, а логикой. '
                                    '\nСовет: не замыкайтесь в себе и проявляйте больше нежности к домочадцам.',
                                    reply_markup=Markups.backIn)
+            await save_user_action(user_id=callback_query.from_user.id, action='Psy_Typeperson')
         elif (int(cur_typeperson.execute('SELECT points FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) > 25 ) and (int(cur_typeperson.execute('SELECT points FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) < 50):
             await bot.send_message(callback_query.from_user.id,
                                    'Ваш склад психики близок к золотой середине, что очень даже неплохо. '
                                    '\nПомните, умеренность может стать для вас залогом успеха!',
                                    reply_markup=Markups.backIn)
+            await save_user_action(user_id=callback_query.from_user.id, action='Psy_Typeperson')
         else:
             await bot.send_message(callback_query.from_user.id,
                                    'Вероятно, вы достаточно чувствительны к внешним раздражителям. Сильнее остальных страдаете от громких звуков и яркого света. '
@@ -97,6 +99,7 @@ async def answer_typeperson(callback_query: types.CallbackQuery):
                                    '\nЛюди с такой психической организацией бывают творческими личностями. '
                                    '\nСтарайтесь по возможности спокойнее реагировать на всё происходящее и не открывайте душу первому встречному.',
                                    reply_markup=Markups.backIn)
+            await save_user_action(user_id=callback_query.from_user.id, action='Psy_Typeperson')
 
 
 def register_handlers_Pop_typeperson(dp : Dispatcher):

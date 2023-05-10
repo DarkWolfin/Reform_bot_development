@@ -2,7 +2,7 @@ import asyncio
 import sqlite3
 import time
 import aioschedule
-import pandas as pd
+
 
 
 from aiogram import Bot, types, Dispatcher
@@ -14,7 +14,7 @@ from Token import Token
 bot = Bot(Token)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
-from Database import prehabit_water_db
+from Databases import prehabit_water_db, save_user_action
 import Markups
 import FSM_classes
 
@@ -29,6 +29,8 @@ async def choose_habit_action(message: types.message, state: FSMContext):
     if message.text == 'Настроить привычку':
         await bot.send_message(message.from_user.id, 'Напишите сколько раз в день вы хотели бы пить воду.'
                                                      '\nНорма воды в день - 2 литра, выберите на сколько порций эту норму разделить (от 2 до 8)')
+        db_waterHabit = sqlite3.connect('Databases/Current_habits.db')
+        cur_waterHabit = db_waterHabit.cursor()
         await FSM_classes.HabitWater.choose_amount_of_portion.set()
 
     if message.text == 'Удалить привычку':
@@ -37,9 +39,11 @@ async def choose_habit_action(message: types.message, state: FSMContext):
         habbit = cur_waterHabit.execute('SELECT interval FROM water WHERE user_id = ? AND interval != 0',(message.from_user.id,)).fetchone()
 
         if habbit is not None:
-            cur_waterHabit.execute('DELETE FROM water WHERE user_id = ?', (message.from_user.id,))
+            cur_waterHabit.execute('UPDATE water SET interval = 0 WHERE user_id = ?', (message.from_user.id,))
             await bot.send_message(message.from_user.id, 'Ваша привычка успешно удалена!')
             db_waterHabit.commit()
+            await save_user_action(user_id=message.from_user.id,action='waterHabitDeleted')
+
         else:
             await bot.send_message(message.from_user.id, 'У вас не настроена данная привычка!')
 
@@ -82,6 +86,8 @@ async def choose_habit_water_schedule(message: types.message, state: FSMContext)
         await FSM_classes.HabitWater.choose_schedule.set()
     await bot.send_message(message.from_user.id,
                            'Вы успешно начали работу над приёмом воды!', reply_markup=Markups.backHabitRe)
+    await save_user_action(user_id=message.from_user.id,action='waterHabitSet')
+
     await FSM_classes.MultiDialog.menu.set()
 
 async def answer_water_schedule(callback_query: types.CallbackQuery, state: FSMContext):
@@ -90,35 +96,8 @@ async def answer_water_schedule(callback_query: types.CallbackQuery, state: FSMC
     today = datetime.today()
     tableName = 'date_' + str(today)[0:10].replace('-','')
     db_mark = callback_query.data[-1]
-    cur_waterHabit.execute(f'ALTER TABLE water ADD COLUMN {tableName} TEXT')
-    cur_waterHabit.execute(f'UPDATE water SET {tableName} = ? WHERE user_id = ?', (db_mark,callback_query.from_user.id))
+    cur_waterHabit.execute(f'UPDATE waterDates SET {tableName} = ? WHERE user_id = ?', (db_mark,callback_query.from_user.id))
     db_waterHabit.commit()
 
-async def createExcelFile(startDate,endDate,users):
-    db_waterHabit = sqlite3.connect('Databases/Current_habits.db')
-    cur_waterHabit = db_waterHabit.cursor()
-    df = pd.DataFrame(columns=['user_id'])
-    date_start = datetime.strptime(startDate, "%Y%m%d")
-    date_end = datetime.strptime(endDate, "%Y%m%d")
-    days = []
-    current_date = date_start
 
-    while current_date <= date_end:
-        days.append(str(current_date.date()).replace('-', ''))
-        current_date += timedelta(days=1)
-    for i, user in enumerate(users):
-        df.loc[i, 'user_id'] = user
-        for j, day in enumerate(days):
-            cur_waterHabit.execute(
-                f"SELECT name FROM sqlite_master WHERE type='table' AND name='water' AND sql LIKE '%date_{day}%'")
-            if cur_waterHabit.fetchone() is not None:
-                answer = cur_waterHabit.execute(f"SELECT date_{day} FROM water WHERE user_id = ?", (user,)).fetchone()
-                answer = answer[0]
-            else:
-                answer = 'No data'
-            date_obj = datetime.strptime(day, '%Y%m%d')
-            date_formatted = date_obj.strftime('%d:%m:%Y')
-            df.loc[i, str(date_formatted)] = answer if answer else None
-    db_waterHabit.close()
-    df.to_excel('userData.xlsx', index=False)
 
