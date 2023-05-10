@@ -1,10 +1,11 @@
 /venv/
 /.idea/
-/AllCourses/__pycache__/
 Token.py
 LogsBot
-/__pycache__/
 /Databases/
+/AllCourses/__pycache__/
+/Habits/__pycache__/
 /PsyTests/__pycache__/
 /PopTests/__pycache__/
+/__pycache__/
 test.py
