@@ -14,7 +14,7 @@ from Token import Token
 bot = Bot(Token)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
-from Databases import prehabit_water_db, save_user_action
+from Database import prehabit_water_db, save_user_action
 import Markups
 import FSM_classes
 

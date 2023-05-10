@@ -26,7 +26,7 @@ import aioschedule as schedule
 from aiogram.utils.exceptions import BotBlocked
 
 from Token import Token
-from Databases import db_start, data_profile, affirmation
+from Database import db_start, data_profile, affirmation
 
 
 async def on_startup(_):

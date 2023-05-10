@@ -10,13 +10,10 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, \
     InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.utils import executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from Databases import save_user_action
-
 
 from Token import Token
 bot = Bot(Token)
-
-from Database import db_start, data_profile
+from Database import db_start, data_profile, save_user_action
 
 import Markups
 import FSM_classes
