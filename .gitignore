@@ -5,3 +5,6 @@ Token.py
 LogsBot
 /__pycache__/
 /Databases/
+/PsyTests/__pycache__/
+/PopTests/__pycache__/
+test.py
