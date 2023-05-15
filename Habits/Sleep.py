@@ -2,6 +2,8 @@ import asyncio
 import sqlite3
 import time
 import aioschedule
+import os
+import random
 
 from aiogram import Bot, types, Dispatcher
 from aiogram.dispatcher import FSMContext
@@ -18,6 +20,8 @@ import FSM_classes
 
 async def habit_sleep(message: types.message, state: FSMContext):
     await prehabit_sleep_db(user_id=message.from_user.id, username=message.from_user.username)
+    PreviewPhotoHabitSleep = open('Habits/Sleep/' + random.choice(os.listdir('Habits/Sleep/')), 'rb')
+    await bot.send_photo(message.from_user.id, PreviewPhotoHabitSleep)
     await bot.send_message(message.from_user.id, 'Хотите настроить привычку или удалить её?', reply_markup=Markups.tune_habit)
     await FSM_classes.HabitSleep.choose_action.set()
 

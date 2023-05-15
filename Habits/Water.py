@@ -1,7 +1,9 @@
 import asyncio
+import random
 import sqlite3
 import time
 import aioschedule
+import os
 
 
 
@@ -21,6 +23,8 @@ import FSM_classes
 
 async def habit_water(message: types.message, state: FSMContext):
     await prehabit_water_db(user_id=message.from_user.id, username=message.from_user.username)
+    PreviewPhotoHabitWater = open('Habits/Water/' + random.choice(os.listdir('Habits/Water/')), 'rb')
+    await bot.send_photo(message.from_user.id, PreviewPhotoHabitWater)
     await bot.send_message(message.from_user.id, 'Хотите настроить привычку или удалить её?', reply_markup=Markups.tune_habit)
     await FSM_classes.HabitWater.choose_action.set()
 
