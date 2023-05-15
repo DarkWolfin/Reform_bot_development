@@ -13,7 +13,7 @@ from Token import Token
 bot = Bot(Token)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
-from Database import prehabit_sleep_db
+from Database import prehabit_sleep_db, save_user_action
 import Markups
 import FSM_classes
 
@@ -34,12 +34,15 @@ async def choose_habit_action(message: types.message, state: FSMContext):
     if message.text == 'Удалить привычку':
         db_sleephabit = sqlite3.connect('Databases/Current_habits.db')
         cur_sleephabit = db_sleephabit.cursor()
-        if cur_sleephabit.execute('EXISTS(SELECT user_id FROM sleep WHERE user_id = ?)',(message.from_user.id,)):
-            cur_sleephabit.execute('DELETE FROM sleep WHERE user_id = ?)', (message.from_user.id,))
-            await bot.send_message (message.from_user.id, 'Ваша привычка успешно удалена!')
+        habit_active = cur_sleephabit.execute('SELECT active FROM sleep WHERE user_id = ? AND active != 0',
+                                       (message.from_user.id,)).fetchone()
+        if habit_active is not None:
+            cur_sleephabit.execute('UPDATE sleep SET active = 0 WHERE user_id = ?', (message.from_user.id,))
+            await bot.send_message(message.from_user.id, 'Ваша привычка успешно удалена!')
+            db_sleephabit.commit()
+            await save_user_action(user_id=message.from_user.id, action='Привычка "Сон" УДАЛЕНА')
         else:
             await bot.send_message(message.from_user.id, 'У вас не настроена данная привычка!')
-
 
 async def choose_habit_sleep_wakeup(message: types.message, state: FSMContext):
     db_sleephabit = sqlite3.connect('Databases/Current_habits.db')
@@ -83,6 +86,9 @@ async def choose_habit_sleep_bedtime(message: types.message, state: FSMContext):
                 db_sleephabit.commit()
                 await FSM_classes.MultiDialog.menu.set()
                 await bot.send_message(message.from_user.id, 'Вы выбрали время пробуждения: ' + message.text + '\nПоздравляем! Вы начали работу со своим сном!', reply_markup=Markups.backHabitRe)
+                cur_sleephabit.execute("UPDATE sleep SET active = 1 WHERE user_id = ?",
+                                       (message.from_user.id,))
+                db_sleephabit.commit()
             else:
                 await bot.send_message(message.from_user.id,
                                        'Ошибка! Напишите время отхода ко сну в формате ЧЧ:ММ (например: 22:45)')

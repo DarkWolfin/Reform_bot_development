@@ -40,9 +40,9 @@ async def choose_habit_action(message: types.message, state: FSMContext):
     if message.text == 'Удалить привычку':
         db_waterHabit = sqlite3.connect('Databases/Current_habits.db')
         cur_waterHabit = db_waterHabit.cursor()
-        habbit = cur_waterHabit.execute('SELECT interval FROM water WHERE user_id = ? AND interval != 0',(message.from_user.id,)).fetchone()
+        habit = cur_waterHabit.execute('SELECT interval FROM water WHERE user_id = ? AND interval != 0',(message.from_user.id,)).fetchone()
 
-        if habbit is not None:
+        if habit is not None:
             cur_waterHabit.execute('UPDATE water SET interval = 0 WHERE user_id = ?', (message.from_user.id,))
             await bot.send_message(message.from_user.id, 'Ваша привычка успешно удалена!')
             db_waterHabit.commit()
