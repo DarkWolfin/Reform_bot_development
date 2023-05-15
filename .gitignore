@@ -9,3 +9,5 @@ LogsBot
 /PopTests/__pycache__/
 /__pycache__/
 test.py
+getUserAction.xlsx
+userData.xlsx

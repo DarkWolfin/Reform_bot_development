@@ -139,7 +139,7 @@ async def answer_weariness(callback_query: types.CallbackQuery, state: FSMContex
             await FSM_classes.MultiDialog.specialist.set()
             Feedback_kb = InlineKeyboardMarkup(row_width=1)
             Feedback_kb.add(InlineKeyboardButton('Перейти к практикам', callback_data='Feedback_btn0'),
-                            InlineKeyboardButton('Хочу обратиться к специалисту', callback_data='Feedback_btn7'))
+                            InlineKeyboardButton('Хочу обратиться к специалисту', callback_data='Feedback_btn6'))
             await bot.send_message(callback_query.from_user.id,
                                    'Результаты показывают, что у вас присутствуют признаки сильной степени хронического утомления. Рекомендуем вам пройти курс восстанавливающих и поддерживающих практик а также обратиться к специалисту в ближайшее время', reply_markup=Feedback_kb)
             cur_weariness.execute("UPDATE answers SET countOfAnswers = 0")
@@ -176,21 +176,27 @@ async def process_callback_feedback(callback_query: types.CallbackQuery, state: 
         Feedback_kb.add(InlineKeyboardButton('Да', callback_data='Feedback_btn3'),
                         InlineKeyboardButton('Нет', callback_data='Feedback_btn4'))
         await bot.send_message(callback_query.from_user.id,
-                               "Советуем вам выполненять практики вечером, после работы. "
+                               "Советуем вам выполнять практики вечером, после работы. "
                                "\nЭто позволит вам эффективно разгрузить нервную систему и сбросить напряжение. "
                                "\nВам бы хотелось выбрать удобное время для напоминаний?", reply_markup=Feedback_kb)
     if point == '3':
         # async with state.proxy() as data:
         #     data['aftertest4'] = 'Да'
+        now = datetime.now()
+        botlogfile = open('LogsBot', 'a')
+        print(now.strftime('%d-%m-%Y %H:%M'), ' Пользователь - ' + message.from_user.first_name,
+              message.from_user.id, 'Хочет получать напоминания по выполнению практик')
+        botlogfile.close()
         Feedback_kb = InlineKeyboardMarkup(row_width=1)
         Feedback_kb.add(InlineKeyboardButton('Хочу посмотреть эти практики', callback_data='Feedback_btn5'),
                         InlineKeyboardButton('Перейти в меню', callback_data='Main_menud'))
         await bot.send_message(callback_query.from_user.id,
                                "Отлично! В скором времени такая возможность появиться! Мы вас оповестим!")
         await bot.send_message(callback_query.from_user.id,
-                               "Чтобы чувствовать себя бодрым и эффективным, существует несколько полезных и коротких практик, "
-                               "которые позволят держать в тонусе организм и сознание - внедрение прогулок, время без гаджета и правильный режим сна.",
+                               "Чтобы чувствовать себя бодрым и эффективным, существует множество хороших привычек, "
+                               "которые позволят держать в тонусе организм и сознание - внедрение правильного режима сна, физических упражнений, употребление нужного количесвта воды и другие",
                                reply_markup=Feedback_kb)
+
     if point == '4':
         # async with state.proxy() as data:
         #     data['aftertest4'] = 'Нет'
@@ -198,12 +204,20 @@ async def process_callback_feedback(callback_query: types.CallbackQuery, state: 
         Feedback_kb.add(InlineKeyboardButton('Хочу посмотреть эти практики', callback_data='Feedback_btn5'),
                         InlineKeyboardButton('Перейти в меню', callback_data='Main_menu'))
         await bot.send_message(callback_query.from_user.id,
-                               "Чтобы чувствовать себя бодрым и эффективным, существует несколько полезных и коротких практик, "
-                               "которые позволят держать в тонусе организм и сознание - внедрение прогулок, время без гаджета и правильный режим сна.", reply_markup=Feedback_kb)
+                               "Чтобы чувствовать себя бодрым и эффективным, существует множество хороших привычек, "
+                               "которые позволят держать в тонусе организм и сознание - внедрение правильного режима сна, физических упражнений, употребление нужного количесвта воды и другие", reply_markup=Feedback_kb)
+    if point == '5':
+        await FSM_classes.MultiDialog.habits.set()
+        await bot.send_message(message.from_user.id,
+                               'В этом разделе вы найдёте полезные практики и привычки, которые вы сможете внедрить в свою жизнь прямо сейчас.'
+                               'Для этого вам всего лишь нужно выбрать интересующую и время напоминаний, но не забывайте, что самое главное - ваши старания!',
+                               reply_markup=Markups.type_of_habits)
+    if point =='6':
+        await bot.send_message(message.from_user.id, 'Переход на тестирование и запись')
 
 
 def register_handlers_Psy_Weariness(dp: Dispatcher):
     dp.register_callback_query_handler(
         answer_weariness, text=['Answer_y', 'Answer_m', 'Answer_n'])
     dp.register_callback_query_handler(process_callback_feedback, text=[
-                                       'Feedback_btn0', 'Feedback_btn1', 'Feedback_btn2', 'Feedback_btn3', 'Feedback_btn4'])
+                                       'Feedback_btn0', 'Feedback_btn1', 'Feedback_btn2', 'Feedback_btn3', 'Feedback_btn4', 'Feedback_btn5', 'Feedback_btn6'])

@@ -26,7 +26,7 @@ import aioschedule as schedule
 from aiogram.utils.exceptions import BotBlocked
 
 from Token import Token
-from Database import db_start, data_profile, affirmation
+from Database import db_start, data_profile, affirmation, pre_points_test_weariness, points_test_weariness, pre_answers_test_weariness
 
 
 async def on_startup(_):
@@ -188,7 +188,7 @@ async def welcome(message: types.Message):
     Welcome_kb.add(InlineKeyboardButton(
         'Приятно познакомиться!', callback_data='Welcome_btn0'))
     mess = f'Здравствуйте 🖐, <b>{message.from_user.first_name}</b>! Рад, что вы заботитетсь о своем ментальном здоровье! ' \
-           f'\nБот Reform - это цифровой помощник, к которому ты сможешь обратиться в случае возникновения стресса, тревоги или апатии, а самое главное для того, чтобы не допустить этого!' \
+           f'\nБот Reform - это цифровой помощник, к которому вы сможете обратиться в случае возникновения стресса, тревоги или апатии, а самое главное для того, чтобы не допустить этого!' \
            f'\n\nОн поможет вам разобраться в проблеме и предоставит инструменты для её решения.' \
            f'\nВы сможете преодолеть любые преграды на вашем пути, а бот поможет вам советом и рекомендацией в трудную минуту!'
     await bot.send_message(message.from_user.id, mess, parse_mode='html', reply_markup=Welcome_kb)
@@ -200,7 +200,7 @@ async def mailing(callback_query: types.CallbackQuery, state: FSMContext):
     if callback_query.data[-1] == '0':
         agree_mailing_kb = InlineKeyboardMarkup().add(
             InlineKeyboardButton('Да, хочу попробовать', callback_data='Welcome_btny'),
-            InlineKeyboardButton('Нет, ни в коем случае', callback_data='Welcome_btnn'))
+            InlineKeyboardButton('Нет, пропустить', callback_data='Welcome_btnn'))
         await bot.send_message(callback_query.from_user.id,
                                'Хотите ли вы получать ежедневные мотивационные подборки и аффирмации для более эффективного взаимодействия с ботом?'
                                '\nОтписаться можно в любой момент',
@@ -208,17 +208,21 @@ async def mailing(callback_query: types.CallbackQuery, state: FSMContext):
     if callback_query.data[-1] == 'y':
         await affirmation(user_id=callback_query.from_user.id, first_name=callback_query.from_user.first_name,
                           username=callback_query.from_user.username)
-        enterIn = InlineKeyboardMarkup(resize_keyboard=True, row_width=1).add(
-            InlineKeyboardButton('Начнём!', callback_data='Main_menu'))
+        enterIn = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(
+            KeyboardButton('Начнём!'))
         await bot.send_message(callback_query.from_user.id,
-                               'Отлично! Теперь мы можем приступить к нашему с вами взаимодействию',
+                               'Отлично! Теперь мы можем приступить к нашему с вами взаимодействию!'
+                               '\nДля начала предлагаем вам пройти тест, состоящий из 36 вопросов для того, чтобы начать '
+                               'наше знакомство и получить индивидуальную подборку рекомендаций, упражнений и практик для улучшения состояния!',
                                parse_mode='html', reply_markup=enterIn)
     if callback_query.data[-1] == 'n':
-        enterIn = InlineKeyboardMarkup(resize_keyboard=True, row_width=1).add(
-            InlineKeyboardButton('Продолжить!', callback_data='Main_menu'))
+        enterIn = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(
+            KeyboardButton('Продолжить!'))
         await bot.send_message(callback_query.from_user.id,
                                'Очень жаль, что вы не хотите. Данные подборки созданы для того, чтобы повысить ваш эффект от взаимодействия с ботом!'
-                               '\nЕсли вы передумаете, вы можете нажать /start и изменить свой выбор',
+                               '\nЕсли вы передумаете, вы можете нажать /start и изменить свой выбор'
+                               '\n\nПредлагаем вам пройти тест, состоящий из 36 вопросов для того, чтобы начать '
+                               'наше знакомство и получить индивидуальную подборку рекомендаций, упражнений и практик для улучшения состояния!',
                                parse_mode='html', reply_markup=enterIn)
 
 
@@ -409,6 +413,22 @@ async def reply_all(message: types.Message, state: FSMContext):
     if message.text == 'Вернуться в главное меню':
         await main_menu(message, state)
         await log_users(message)
+
+    if (message.text == 'Начнём!') or (message.text == 'Продолжить!'):
+        await FSM_classes.MultiDialog.test_weariness.set()
+        await pre_points_test_weariness(user_id=message.from_user.id, username=message.from_user.username)
+        await pre_answers_test_weariness(user_id=message.from_user.id, username=message.from_user.username)
+        async with state.proxy() as data:
+            data['count'] = 0
+        async with state.proxy() as data:
+            data['points'] = 0
+        await points_test_weariness(state, user_id=message.from_user.id)
+        await state.finish()
+        await bot.send_message(message.from_user.id, text=Psy_Weariness.weariness_questions[0], reply_markup=Psy_Weariness.answers)
+        db_weariness = sqlite3.connect('Databases/Result_Tests/PSY_Weariness.db')
+        cur_weariness = db_weariness.cursor()
+        cur_weariness.execute("UPDATE answers SET countOfAnswers = 0 WHERE user_id = ?", (message.from_user.id,))
+        db_weariness.commit()
 
     if message.text == '🧘‍♀️ Практики':
         await FSM_classes.MultiDialog.practices.set()
