@@ -36,12 +36,14 @@ async def on_startup(_):
 bot = Bot(Token)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
+Specialists.register_handlers_specialist(dp)
 Anxiety.register_handlers_course_Anxiety(dp)
 Psy_Weariness.register_handlers_Psy_Weariness(dp)
 Psy_selfefficacy.register_handlers_Psy_selfefficacy(dp)
 Psy_stress.register_handlers_Psy_stress(dp)
 Pop_Control.register_handlers_Pop_Control(dp)
 Pop_Typeperson.register_handlers_Pop_typeperson(dp)
+
 
 
 @dp.message_handler(commands=['admin_mailing'], state='*', chat_id=417986886)
@@ -305,6 +307,13 @@ async def reply_practices(message: types.Message, state: FSMContext):
     await Practices.allreply_practices(message)
     await log_users(message)
 
+@dp.message_handler(state=FSM_classes.MultiDialog.specialist)
+async def reply_specialist(message: types.Message, state: FSMContext):
+    if message.text == 'Вернуться в главное меню':
+        await FSM_classes.MultiDialog.menu.set()
+        await main_menu(message, state)
+    await Specialists.test_holms(message, state)
+    await log_users(message)
 
 @dp.message_handler(state=FSM_classes.MultiDialog.tests)
 async def reply_tests(message: types.Message, state: FSMContext):

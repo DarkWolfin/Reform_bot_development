@@ -100,3 +100,8 @@ chooseScheduleWater = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add
 waterAnswers = InlineKeyboardMarkup().add(
     InlineKeyboardButton('Получилось!',callback_data='answerWatery'),
     InlineKeyboardButton('К сожалению, нет.',callback_data='answerWatern'))
+
+# Specialist
+appointment = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(
+    KeyboardButton('Записаться'),
+    KeyboardButton('Вернуться в главное меню'))
