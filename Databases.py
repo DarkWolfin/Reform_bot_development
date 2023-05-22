@@ -2,191 +2,283 @@ import sqlite3 as sq
 
 
 async def db_start():
-    global db_data, cur_data, db_test_weariness, cur_test_weariness, db_test_selfefficacy, cur_test_selfefficacy, db_test_control, cur_test_control, db_test_typeperson, cur_test_typeperson, \
-        db_habit_sleep, cur_habit_sleep, db_course_anxiety, cur_course_anxiety
+    global db_data, cur_data, db_test_weariness, cur_test_weariness, db_test_selfefficacy, cur_test_selfefficacy, db_test_control, cur_test_control, db_test_typeperson, cur_test_typeperson, db_habit_sleep, cur_habit_sleep, cur_habit_remind, cur_habit_answerRemind, db_habit_remind, db_habit_awswerRemind, db_course_anxiety, cur_course_anxiety
 
-    db_data = sq.connect('Databases/Data_users.db')
+    db_data = sq.connect("Databases/Data_users.db")
     cur_data = db_data.cursor()
     cur_data.execute(
-        "CREATE TABLE IF NOT EXISTS profile(user_id INT PRIMARY KEY, first_name TEXT, username TEXT, active TEXT)")
+        "CREATE TABLE IF NOT EXISTS profile(user_id INT PRIMARY KEY, first_name TEXT, username TEXT, active TEXT)"
+    )
     db_data.commit()
     cur_data.execute(
-        "CREATE TABLE IF NOT EXISTS affirmation(user_id INT PRIMARY KEY, first_name TEXT, username TEXT)")
+        "CREATE TABLE IF NOT EXISTS affirmation(user_id INT PRIMARY KEY, first_name TEXT, username TEXT)"
+    )
     db_data.commit()
 
-    db_test_weariness = sq.connect('Databases/Result_Tests/PSY_Weariness.db')
+    db_test_weariness = sq.connect("Databases/Result_Tests/PSY_Weariness.db")
     cur_test_weariness = db_test_weariness.cursor()
-    cur_test_weariness.execute("CREATE TABLE IF NOT EXISTS answers(user_id INT PRIMARY KEY, username TEXT, answer1 TEXT, answer2 TEXT, answer3 TEXT, answer4 TEXT, answer5 TEXT, answer6 TEXT, "
-                               "answer7 TEXT, answer8 TEXT, answer9 TEXT, answer10 TEXT, answer11 TEXT, answer12 TEXT, answer13 TEXT, answer14 TEXT, answer15 TEXT, answer16 TEXT, "
-                               "answer17 TEXT, answer18 TEXT, answer19 TEXT, answer20 TEXT, answer21 TEXT, answer22 TEXT, answer23 TEXT, answer24 TEXT, answer25 TEXT, answer26 TEXT, "
-                               "answer27 TEXT, answer28 TEXT, answer29 TEXT, answer30 TEXT, answer31 TEXT, answer32 TEXT, answer33 TEXT, answer34 TEXT, answer35 TEXT, answer36 TEXT)")
+    cur_test_weariness.execute(
+        "CREATE TABLE IF NOT EXISTS answers(user_id INT PRIMARY KEY, username TEXT, answer1 TEXT, answer2 TEXT, answer3 TEXT, answer4 TEXT, answer5 TEXT, answer6 TEXT, "
+        "answer7 TEXT, answer8 TEXT, answer9 TEXT, answer10 TEXT, answer11 TEXT, answer12 TEXT, answer13 TEXT, answer14 TEXT, answer15 TEXT, answer16 TEXT, "
+        "answer17 TEXT, answer18 TEXT, answer19 TEXT, answer20 TEXT, answer21 TEXT, answer22 TEXT, answer23 TEXT, answer24 TEXT, answer25 TEXT, answer26 TEXT, "
+        "answer27 TEXT, answer28 TEXT, answer29 TEXT, answer30 TEXT, answer31 TEXT, answer32 TEXT, answer33 TEXT, answer34 TEXT, answer35 TEXT, answer36 TEXT)"
+    )
     db_test_weariness.commit()
     cur_test_weariness.execute(
-        "CREATE TABLE IF NOT EXISTS points(user_id INT PRIMARY KEY, username TEXT, count INT, points INT)")
+        "CREATE TABLE IF NOT EXISTS points(user_id INT PRIMARY KEY, username TEXT, count INT, points INT)"
+    )
     db_test_weariness.commit()
 
+
 ##################
-db_test_stress = sq.connect('Databases/Result_Tests/PSY_stress.db')
+db_test_stress = sq.connect("Databases/Result_Tests/PSY_stress.db")
 cur_test_stress = db_test_stress.cursor()
-cur_test_stress.execute("CREATE TABLE IF NOT EXISTS answers(user_id INT PRIMARY KEY, username TEXT, answer1 TEXT, answer2 TEXT, answer3 TEXT, answer4 TEXT, answer5 TEXT, answer6 TEXT, "
-                        "answer7 TEXT, answer8 TEXT, answer9 TEXT, answer10 TEXT, answer11 TEXT, answer12 TEXT, answer13 TEXT, answer14 TEXT, answer15 TEXT, answer16 TEXT, "
-                        "answer17 TEXT, answer18 TEXT, answer19 TEXT, answer20 TEXT, answer21 TEXT, answer22 TEXT, answer23 TEXT, answer24 TEXT, answer25 TEXT, answer26 TEXT, "
-                        "answer27 TEXT, answer28 TEXT, answer29 TEXT, answer30 TEXT, answer31 TEXT, answer32 TEXT, answer33 TEXT)")
+cur_test_stress.execute(
+    "CREATE TABLE IF NOT EXISTS answers(user_id INT PRIMARY KEY, username TEXT, answer1 TEXT, answer2 TEXT, answer3 TEXT, answer4 TEXT, answer5 TEXT, answer6 TEXT, "
+    "answer7 TEXT, answer8 TEXT, answer9 TEXT, answer10 TEXT, answer11 TEXT, answer12 TEXT, answer13 TEXT, answer14 TEXT, answer15 TEXT, answer16 TEXT, "
+    "answer17 TEXT, answer18 TEXT, answer19 TEXT, answer20 TEXT, answer21 TEXT, answer22 TEXT, answer23 TEXT, answer24 TEXT, answer25 TEXT, answer26 TEXT, "
+    "answer27 TEXT, answer28 TEXT, answer29 TEXT, answer30 TEXT, answer31 TEXT, answer32 TEXT, answer33 TEXT)"
+)
 db_test_stress.commit()
 cur_test_stress.execute(
-    "CREATE TABLE IF NOT EXISTS points(user_id INT PRIMARY KEY, username TEXT, count INT, points INT)")
+    "CREATE TABLE IF NOT EXISTS points(user_id INT PRIMARY KEY, username TEXT, count INT, points INT)"
+)
 db_test_stress.commit()
 ##################
 
-db_test_selfefficacy = sq.connect('Databases/Result_Tests/PSY_Selfefficacy.db')
+db_test_selfefficacy = sq.connect("Databases/Result_Tests/PSY_Selfefficacy.db")
 cur_test_selfefficacy = db_test_selfefficacy.cursor()
 cur_test_selfefficacy.execute(
-    "CREATE TABLE IF NOT EXISTS points(user_id INT PRIMARY KEY, username TEXT, count INT, points INT)")
+    "CREATE TABLE IF NOT EXISTS points(user_id INT PRIMARY KEY, username TEXT, count INT, points INT)"
+)
 db_test_selfefficacy.commit()
 
-db_test_control = sq.connect('Databases/Result_Tests/POP_Control.db')
+db_test_control = sq.connect("Databases/Result_Tests/POP_Control.db")
 cur_test_control = db_test_control.cursor()
 cur_test_control.execute(
-    "CREATE TABLE IF NOT EXISTS points(user_id INT PRIMARY KEY, username TEXT, count INT, points INT)")
+    "CREATE TABLE IF NOT EXISTS points(user_id INT PRIMARY KEY, username TEXT, count INT, points INT)"
+)
 db_test_control.commit()
 
-db_test_typeperson = sq.connect('Databases/Result_Tests/POP_Typeperson.db')
+db_test_typeperson = sq.connect("Databases/Result_Tests/POP_Typeperson.db")
 cur_test_typeperson = db_test_typeperson.cursor()
 cur_test_typeperson.execute(
-    "CREATE TABLE IF NOT EXISTS points(user_id INT PRIMARY KEY, username TEXT, count INT, points INT)")
+    "CREATE TABLE IF NOT EXISTS points(user_id INT PRIMARY KEY, username TEXT, count INT, points INT)"
+)
 db_test_typeperson.commit()
 
-db_habit_sleep = sq.connect('Databases/Current_habits.db')
+db_habit_sleep = sq.connect("Databases/Current_habits.db")
 cur_habit_sleep = db_habit_sleep.cursor()
 cur_habit_sleep.execute(
-    "CREATE TABLE IF NOT EXISTS sleep(user_id INT PRIMARY KEY, username TEXT, active TEXT, bedtime TEXT, wakeup TEXT)")
+    "CREATE TABLE IF NOT EXISTS sleep(user_id INT PRIMARY KEY, username TEXT, active TEXT, bedtime TEXT, wakeup TEXT)"
+)
 db_habit_sleep.commit()
 
-db_course_anxiety = sq.connect('Databases/Courses.db')
+
+db_habit_remind = sq.connect("Databases/Current_habits.db")
+cur_habit_remind = db_habit_remind.cursor()
+cur_habit_remind.execute(
+    "CREATE TABLE IF NOT EXISTS remind(user_id INT PRIMARY KEY, username TEXT, day TEXT, time TEXT, type TEXT, timeRemind TEXT, remind_data TEXT)"
+)
+db_habit_remind.commit()
+
+db_habit_awswerRemind = sq.connect("Databases/Current_habits.db")
+cur_habit_answerRemind = db_habit_awswerRemind.cursor()
+cur_habit_answerRemind.execute(
+    "CREATE TABLE IF NOT EXISTS answer_remind(user_id INT PRIMARY KEY, username TEXT, day TEXT, time TEXT, result TEXT)"
+)
+db_habit_awswerRemind.commit()
+
+
+db_course_anxiety = sq.connect("Databases/Courses.db")
 cur_course_anxiety = db_course_anxiety.cursor()
 cur_course_anxiety.execute(
-    "CREATE TABLE IF NOT EXISTS anxiety(user_id INT PRIMARY KEY, username TEXT, interested TEXT)")
+    "CREATE TABLE IF NOT EXISTS anxiety(user_id INT PRIMARY KEY, username TEXT, interested TEXT)"
+)
 db_course_anxiety.commit()
 
 
 async def data_profile(user_id, first_name, username):
     user = cur_data.execute(
-        "SELECT 1 FROM profile WHERE user_id == '{key}'".format(key=user_id)).fetchone()
+        "SELECT 1 FROM profile WHERE user_id == '{key}'".format(key=user_id)
+    ).fetchone()
     if not user:
-        cur_data.execute("INSERT INTO profile VALUES(?, ?, ?, ?)",
-                         (user_id, first_name, username, 'Активен'))
+        cur_data.execute(
+            "INSERT INTO profile VALUES(?, ?, ?, ?)",
+            (user_id, first_name, username, "Активен"),
+        )
         db_data.commit()
 
 
 async def affirmation(user_id, first_name, username):
     user = cur_data.execute(
-        "SELECT 1 FROM affirmation WHERE user_id == '{key}'".format(key=user_id)).fetchone()
+        "SELECT 1 FROM affirmation WHERE user_id == '{key}'".format(key=user_id)
+    ).fetchone()
     if not user:
-        cur_data.execute("INSERT INTO affirmation VALUES(?, ?, ?)",
-                         (user_id, first_name, username))
+        cur_data.execute(
+            "INSERT INTO affirmation VALUES(?, ?, ?)", (user_id, first_name, username)
+        )
         db_data.commit()
+
 
 # PSY tests
 
 
 async def pre_points_test_weariness(user_id, username):
     user = cur_test_weariness.execute(
-        "SELECT 1 FROM points WHERE user_id == '{key}'".format(key=user_id)).fetchone()
+        "SELECT 1 FROM points WHERE user_id == '{key}'".format(key=user_id)
+    ).fetchone()
     if not user:
-        cur_test_weariness.execute("INSERT INTO points VALUES(?, ?, ?, ?)",
-                                   (user_id, username, '', ''))
+        cur_test_weariness.execute(
+            "INSERT INTO points VALUES(?, ?, ?, ?)", (user_id, username, "", "")
+        )
         db_test_weariness.commit()
 
 
 async def points_test_weariness(state, user_id):
     async with state.proxy() as data:
-        cur_test_weariness.execute("UPDATE points SET count = '{}', points = '{}' WHERE user_id == '{}'".format(
-            data['count'], data['points'], user_id))
+        cur_test_weariness.execute(
+            "UPDATE points SET count = '{}', points = '{}' WHERE user_id == '{}'".format(
+                data["count"], data["points"], user_id
+            )
+        )
         db_test_weariness.commit()
+
 
 #######################
 
 
 async def pre_points_test_stress(user_id, username):
     user = cur_test_stress.execute(
-        "SELECT 1 FROM points WHERE user_id == '{key}'".format(key=user_id)).fetchone()
+        "SELECT 1 FROM points WHERE user_id == '{key}'".format(key=user_id)
+    ).fetchone()
     if not user:
-        cur_test_stress.execute("INSERT INTO points VALUES(?, ?, ?, ?)",
-                                (user_id, username, '', ''))
+        cur_test_stress.execute(
+            "INSERT INTO points VALUES(?, ?, ?, ?)", (user_id, username, "", "")
+        )
         db_test_stress.commit()
 
 
 async def points_test_stress(state, user_id):
     async with state.proxy() as data:
-        cur_test_stress.execute("UPDATE points SET count = '{}', points = '{}' WHERE user_id == '{}'".format(
-            data['count'], data['points'], user_id))
+        cur_test_stress.execute(
+            "UPDATE points SET count = '{}', points = '{}' WHERE user_id == '{}'".format(
+                data["count"], data["points"], user_id
+            )
+        )
         db_test_stress.commit()
+
+
 #######################
 
 
 async def pre_points_test_selfefficacy(user_id, username):
     user = cur_test_selfefficacy.execute(
-        "SELECT 1 FROM points WHERE user_id == '{key}'".format(key=user_id)).fetchone()
+        "SELECT 1 FROM points WHERE user_id == '{key}'".format(key=user_id)
+    ).fetchone()
     if not user:
-        cur_test_selfefficacy.execute("INSERT INTO points VALUES(?, ?, ?, ?)",
-                                      (user_id, username, '', ''))
+        cur_test_selfefficacy.execute(
+            "INSERT INTO points VALUES(?, ?, ?, ?)", (user_id, username, "", "")
+        )
         db_test_selfefficacy.commit()
 
 
 async def points_test_selfefficacy(state, user_id):
     async with state.proxy() as data:
-        cur_test_selfefficacy.execute("UPDATE points SET count = '{}', points = '{}' WHERE user_id == '{}'".format(
-            data['count'], data['points'], user_id))
+        cur_test_selfefficacy.execute(
+            "UPDATE points SET count = '{}', points = '{}' WHERE user_id == '{}'".format(
+                data["count"], data["points"], user_id
+            )
+        )
         db_test_selfefficacy.commit()
+
 
 # POP tests
 
 
 async def pre_points_test_control(user_id, username):
     user = cur_test_control.execute(
-        "SELECT 1 FROM points WHERE user_id == '{key}'".format(key=user_id)).fetchone()
+        "SELECT 1 FROM points WHERE user_id == '{key}'".format(key=user_id)
+    ).fetchone()
     if not user:
-        cur_test_control.execute("INSERT INTO points VALUES(?, ?, ?, ?)",
-                                 (user_id, username, '', ''))
+        cur_test_control.execute(
+            "INSERT INTO points VALUES(?, ?, ?, ?)", (user_id, username, "", "")
+        )
         db_test_control.commit()
 
 
 async def points_test_control(state, user_id):
     async with state.proxy() as data:
-        cur_test_control.execute("UPDATE points SET count = '{}', points = '{}' WHERE user_id == '{}'".format(
-            data['count'], data['points'], user_id))
+        cur_test_control.execute(
+            "UPDATE points SET count = '{}', points = '{}' WHERE user_id == '{}'".format(
+                data["count"], data["points"], user_id
+            )
+        )
         db_test_control.commit()
 
 
 async def pre_points_test_typeperson(user_id, username):
     user = cur_test_typeperson.execute(
-        "SELECT 1 FROM points WHERE user_id == '{key}'".format(key=user_id)).fetchone()
+        "SELECT 1 FROM points WHERE user_id == '{key}'".format(key=user_id)
+    ).fetchone()
     if not user:
-        cur_test_typeperson.execute("INSERT INTO points VALUES(?, ?, ?, ?)",
-                                    (user_id, username, '', ''))
+        cur_test_typeperson.execute(
+            "INSERT INTO points VALUES(?, ?, ?, ?)", (user_id, username, "", "")
+        )
         db_test_typeperson.commit()
 
 
 async def points_test_typeperson(state, user_id):
     async with state.proxy() as data:
-        cur_test_typeperson.execute("UPDATE points SET count = '{}', points = '{}' WHERE user_id == '{}'".format(
-            data['count'], data['points'], user_id))
+        cur_test_typeperson.execute(
+            "UPDATE points SET count = '{}', points = '{}' WHERE user_id == '{}'".format(
+                data["count"], data["points"], user_id
+            )
+        )
         db_test_typeperson.commit()
 
 
 async def prehabit_sleep_db(user_id, username):
     user = cur_habit_sleep.execute(
-        "SELECT 1 FROM sleep WHERE user_id == '{key}'".format(key=user_id)).fetchone()
+        "SELECT 1 FROM sleep WHERE user_id == '{key}'".format(key=user_id)
+    ).fetchone()
     if not user:
-        cur_habit_sleep.execute("INSERT INTO sleep VALUES(?, ?, ?, ?, ?)",
-                                (user_id, username, '', '', ''))
+        cur_habit_sleep.execute(
+            "INSERT INTO sleep VALUES(?, ?, ?, ?, ?)", (user_id, username, "", "", "")
+        )
         db_habit_sleep.commit()
+
+
+async def habit_remind_db(user_id, username):
+    user = cur_habit_remind.execute(
+        "SELECT 1 FROM remind WHERE user_id == '{key}'".format(key=user_id)
+    ).fetchone()
+    if not user:
+        cur_habit_remind.execute(
+            "INSERT INTO remind VALUES(?, ?, ?, ?, ?, ?, ?)",
+            (user_id, username, "", "", "", "", ""),
+        )
+        db_habit_remind.commit()
+
+
+async def habit_answerRemind_db(user_id, username):
+    user = cur_habit_answerRemind.execute(
+        "SELECT 1 FROM answer_remind WHERE user_id == '{key}'".format(key=user_id),
+    ).fetchone()
+    if not user:
+        cur_habit_answerRemind.execute(
+            "INSERT INTO answer_remind VALUES(?, ?, ?, ?, ?)",
+            (user_id, username, "", "", ""),
+        )
+        db_habit_awswerRemind.commit()
 
 
 async def course_anxiety_db(user_id, username, interested):
     user = cur_course_anxiety.execute(
-        "SELECT 1 FROM anxiety WHERE user_id == '{key}'".format(key=user_id)).fetchone()
+        "SELECT 1 FROM anxiety WHERE user_id == '{key}'".format(key=user_id)
+    ).fetchone()
     if not user:
-        cur_course_anxiety.execute("INSERT INTO anxiety VALUES(?, ?, ?)",
-                                   (user_id, username, interested))
+        cur_course_anxiety.execute(
+            "INSERT INTO anxiety VALUES(?, ?, ?)", (user_id, username, interested)
+        )
         db_course_anxiety.commit()

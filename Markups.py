@@ -78,6 +78,7 @@ fullversion = ReplyKeyboardMarkup(resize_keyboard=True).add(
 # Habits
 type_of_habits = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(
     KeyboardButton('Работа со сном'),
+    KeyboardButton('Напоминалка'),
     KeyboardButton('Регулярное чтение книг (скоро)'),
     KeyboardButton('Дневная норма воды (скоро)'),
     KeyboardButton('Работа с телом (скоро)'),
@@ -90,3 +91,31 @@ tune_habit = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(
 
 backHabitRe = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(
     KeyboardButton('Вернуться в главное меню', callback_data='Main_menu'))
+
+time_remind = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(
+    KeyboardButton('Добавить напоминание'),
+    KeyboardButton('Удалить напоминание'),
+)
+
+day_remind = InlineKeyboardMarkup(resize_keyboard=True, row_width=1).add(
+    InlineKeyboardButton(text='Понедельник', callback_data='day_1_0'),
+    InlineKeyboardButton(text='Вторник', callback_data='day_2_0'),
+    InlineKeyboardButton(text='Среда', callback_data='day_3_0'),
+    InlineKeyboardButton(text='Четверг', callback_data='day_4_0'),
+    InlineKeyboardButton(text='Пятница', callback_data='day_5_0'),
+    InlineKeyboardButton(text='Суббота', callback_data='day_6_0'),
+    InlineKeyboardButton(text='Воскресение', callback_data='day_7_0'),
+    InlineKeyboardButton(text='Готово', callback_data='day_done')
+)
+
+data_choose = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(
+    KeyboardButton('Фото'),
+    KeyboardButton('Видео'),
+    KeyboardButton('Аудио'),
+    KeyboardButton('Текст')
+)
+
+answer_to_remind = InlineKeyboardMarkup(resize_keyboard=True, row_width=1).add(
+    InlineKeyboardButton(text='Я сделал!', callback_data='answer_+'),
+    InlineKeyboardButton(text='Пропустил', callback_data='answer_-')
+)

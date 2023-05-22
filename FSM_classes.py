@@ -12,6 +12,7 @@ class MultiDialog(StatesGroup):
     test_typeperson = State()
     habits = State()
     sleep_habit = State()
+    remind_habit = State()
     reading_habit = State()
     water_habit = State()
     body_habit = State()
@@ -25,6 +26,18 @@ class HabitSleep(StatesGroup):
     choose_action = State()
     choose_bedtime = State()
     choose_wakeup = State()
+
+
+class HabitRemind(StatesGroup):
+    choose_time = State()
+    choose_day = State()
+    choose_action = State()
+    choose_data = State()
+    data_photo = State()
+    data_video = State()
+    data_audio = State()
+    data_text = State()
+    none = State()
 
 
 class Admin(StatesGroup):
