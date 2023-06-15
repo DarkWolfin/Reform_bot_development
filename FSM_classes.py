@@ -2,6 +2,7 @@ from aiogram.dispatcher.filters.state import StatesGroup, State
 
 
 class MultiDialog(StatesGroup):
+    quick_help = State()
     menu = State()
     practices = State()
     tests = State()
@@ -14,11 +15,11 @@ class MultiDialog(StatesGroup):
     sleep_habit = State()
     water_habit = State()
     reading_habit = State()
-    water_habit = State()
     body_habit = State()
     courses = State()
     course_anxiety = State()
     specialist = State()
+
 
 
 class HabitSleep(StatesGroup):

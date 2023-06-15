@@ -14,6 +14,7 @@ import asyncio
 import sqlite3
 from datetime import datetime, timedelta
 import admin_commands
+import quick_help
 
 from aiogram import Bot, types, Dispatcher
 from aiogram.dispatcher import FSMContext
@@ -36,14 +37,9 @@ async def on_startup(_):
 bot = Bot(Token)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
-Specialists.register_handlers_specialist(dp)
-Anxiety.register_handlers_course_Anxiety(dp)
-Psy_Weariness.register_handlers_Psy_Weariness(dp)
-Psy_selfefficacy.register_handlers_Psy_selfefficacy(dp)
-Psy_stress.register_handlers_Psy_stress(dp)
-Pop_Control.register_handlers_Pop_Control(dp)
-Pop_Typeperson.register_handlers_Pop_typeperson(dp)
 
+Psy_selfefficacy.register_handlers_Psy_selfefficacy(dp)
+quick_help.register_handlers_Psy_Weariness(dp)
 
 
 @dp.message_handler(commands=['admin_mailing'], state='*', chat_id=417986886)
@@ -52,6 +48,12 @@ async def check_active_users(message: types.Message):
     await bot.send_message(message.from_user.id, text='Здравствуйте, босс! Пришлите то, что хотите разослать!',
                            parse_mode='html')
 
+@dp.message_handler(state=FSM_classes.MultiDialog.quick_help)
+async def reply_quick_help(message: types.Message, state: FSMContext):
+    if message.text == 'Перейти в главное меню':
+        await FSM_classes.MultiDialog.menu.set()
+        await main_menu(message, state)
+    await quick_help.quick_help_menu(message)
 
 @dp.message_handler(commands=['getuserreport'], state='*')
 async def get_user_report(message: types.Message):
@@ -200,30 +202,13 @@ async def welcome(message: types.Message):
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('Welcome_btn'), state=FSM_classes.MultiDialog.menu)
 async def mailing(callback_query: types.CallbackQuery, state: FSMContext):
     if callback_query.data[-1] == '0':
-        agree_mailing_kb = InlineKeyboardMarkup().add(
-            InlineKeyboardButton('Да, хочу попробовать', callback_data='Welcome_btny'),
-            InlineKeyboardButton('Нет, пропустить', callback_data='Welcome_btnn'))
-        await bot.send_message(callback_query.from_user.id,
-                               'Хотите ли вы получать ежедневные мотивационные подборки и аффирмации для более эффективного взаимодействия с ботом?'
-                               '\nОтписаться можно в любой момент',
-                               parse_mode='html', reply_markup=agree_mailing_kb)
-    if callback_query.data[-1] == 'y':
-        await affirmation(user_id=callback_query.from_user.id, first_name=callback_query.from_user.first_name,
-                          username=callback_query.from_user.username)
         enterIn = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(
-            KeyboardButton('Начнём!'))
+            KeyboardButton('Чувствую проблему'),
+            KeyboardButton('Пройти тест'))
         await bot.send_message(callback_query.from_user.id,
-                               'Отлично! Теперь мы можем приступить к нашему с вами взаимодействию!'
-                               '\nДля начала предлагаем вам пройти тест, состоящий из 36 вопросов для того, чтобы начать '
-                               'наше знакомство и получить индивидуальную подборку рекомендаций, упражнений и практик для улучшения состояния!',
-                               parse_mode='html', reply_markup=enterIn)
-    if callback_query.data[-1] == 'n':
-        enterIn = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(
-            KeyboardButton('Продолжить!'))
-        await bot.send_message(callback_query.from_user.id,
-                               'Очень жаль, что вы не хотите. Данные подборки созданы для того, чтобы повысить ваш эффект от взаимодействия с ботом!'
-                               '\nЕсли вы передумаете, вы можете нажать /start и изменить свой выбор'
-                               '\n\nПредлагаем вам пройти тест, состоящий из 36 вопросов для того, чтобы начать '
+                               'Как вы себя чувствуете?'
+                               '\n\nНажмите "Чувствую проблему", чтобы мгновенно получить рекомендации, которые помогут вам справиться с текущим состоянием '
+                               'или нажмите "Пройти тест" для того, чтобы пройти текущему состоянию или пройти тест, состоящий из 36 вопросов для того, чтобы начать '
                                'наше знакомство и получить индивидуальную подборку рекомендаций, упражнений и практик для улучшения состояния!',
                                parse_mode='html', reply_markup=enterIn)
 
@@ -423,7 +408,12 @@ async def reply_all(message: types.Message, state: FSMContext):
         await main_menu(message, state)
         await log_users(message)
 
-    if (message.text == 'Начнём!') or (message.text == 'Продолжить!'):
+    if message.text == 'Чувствую проблему':
+        await FSM_classes.MultiDialog.quick_help.set()
+        await bot.send_message(message.from_user.id, text='Выберите, что вы чувствуете, чтобы разобраться в проблеме поподробнее', reply_markup=quick_help.quick_help_menu)
+        await log_users(message)
+
+    if message.text == 'Пройти тест':
         await FSM_classes.MultiDialog.test_weariness.set()
         await pre_points_test_weariness(user_id=message.from_user.id, username=message.from_user.username)
         await pre_answers_test_weariness(user_id=message.from_user.id, username=message.from_user.username)
