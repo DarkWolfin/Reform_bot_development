@@ -50,7 +50,7 @@ async def check_active_users(message: types.Message):
 
 @dp.message_handler(state=FSM_classes.MultiDialog.quick_help)
 async def reply_quick_help(message: types.Message, state: FSMContext):
-    if message.text == 'Перейти в главное меню':
+    if message.text == 'Вернуться в главное меню':
         await FSM_classes.MultiDialog.menu.set()
         await main_menu(message, state)
     await quick_help.quick_help_menu(message)
