@@ -15,6 +15,7 @@ import sqlite3
 from datetime import datetime, timedelta
 import admin_commands
 import quick_help
+import Specialists
 
 from aiogram import Bot, types, Dispatcher
 from aiogram.dispatcher import FSMContext
@@ -38,8 +39,12 @@ bot = Bot(Token)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 
+Specialists.register_handlers_specialist(dp)
 Psy_selfefficacy.register_handlers_Psy_selfefficacy(dp)
-quick_help.register_handlers_Psy_Weariness(dp)
+quick_help.register_handlers_quick_help(dp)
+Psy_stress.register_handlers_Psy_stress(dp)
+Pop_Control.register_handlers_Pop_Control(dp)
+Pop_Typeperson.register_handlers_Pop_typeperson(dp)
 
 
 @dp.message_handler(commands=['admin_mailing'], state='*', chat_id=417986886)
@@ -48,12 +53,20 @@ async def check_active_users(message: types.Message):
     await bot.send_message(message.from_user.id, text='Здравствуйте, босс! Пришлите то, что хотите разослать!',
                            parse_mode='html')
 
+
+@dp.callback_query_handler(state=FSM_classes.MultiDialog.quick_help)
+async def inline_quick_help(callback_query: types.CallbackQuery):
+    await quick_help.all_way_callback_quick_help(callback_query)
+
+
 @dp.message_handler(state=FSM_classes.MultiDialog.quick_help)
 async def reply_quick_help(message: types.Message, state: FSMContext):
     if message.text == 'Вернуться в главное меню':
         await FSM_classes.MultiDialog.menu.set()
         await main_menu(message, state)
-    await quick_help.quick_help_menu(message)
+    await quick_help.all_way_quick_help(message)
+
+
 
 @dp.message_handler(commands=['getuserreport'], state='*')
 async def get_user_report(message: types.Message):
@@ -258,18 +271,18 @@ async def contacts(message: types.Message):
     await log_users(message)
 
 
-@dp.callback_query_handler(lambda c: c.data and c.data.startswith('fullversion'), state=FSM_classes.MultiDialog)
-async def fullversion_callback(callback_query: types.CallbackQuery, state: FSMContext):
-    await bot.send_message(callback_query.from_user.id, 'Полный доступ доступен в платной версии.'
-                                                        '\nВ платной версии:'
-                                                        '❇️25 медитаций'
-                                                        '❇️10 дыхательных практик'
-                                                        '❇️Таймер Помодоро'
-                                                        '❇️Система ежедневных напоминаний и мотиваций'
-                                                        '❇️Рекомендации по сну, питанию и отдыху от ведущих специалистов'
-                                                        '\n\nОформить подписку за 499 рублей в месяц?',
-                           parse_mode='html')
-
+# @dp.callback_query_handler(lambda c: c.data and c.data.startswith('fullversion'), state=FSM_classes.MultiDialog)
+# async def fullversion_callback(callback_query: types.CallbackQuery, state: FSMContext):
+#     await bot.send_message(callback_query.from_user.id, 'Полный доступ доступен в платной версии.'
+#                                                         '\nВ платной версии:'
+#                                                         '❇️25 медитаций'
+#                                                         '❇️10 дыхательных практик'
+#                                                         '❇️Таймер Помодоро'
+#                                                         '❇️Система ежедневных напоминаний и мотиваций'
+#                                                         '❇️Рекомендации по сну, питанию и отдыху от ведущих специалистов'
+#                                                         '\n\nОформить подписку за 499 рублей в месяц?',
+#                            parse_mode='html')
+#
 
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('Main_menu'), state='*')
 async def main_menu_callback(callback_query: types.CallbackQuery, state: FSMContext):
@@ -279,7 +292,7 @@ async def main_menu_callback(callback_query: types.CallbackQuery, state: FSMCont
                                                         '\n\n🧘‍♀️ Практики помогут вам разгрузиться после тяжёлого дня или успокоиться'
                                                         '\n📝 Пройдите тесты, чтобы определить актуальное состояние и выявить проблему'
                                                         '\n💪 Трекер привычек поможет внедрить и поддерживать полезные навыки'
-                                                        '\n🎬 Проходите курсы, узнавайте лучше себя, что поможет вам справиться с жизненными трудностями'
+                                                        '\n🌳 Чувствуете себя не очень? Разберитесь поподробнее в себе и выявите проблему'
                                                         '\n💬 Также вы можете обсудить проблему и получить рекомендации от специалиста'
                                                         '\nВыберите, что вас интересует',
                            parse_mode='html', reply_markup=Markups.main_kb)
@@ -294,6 +307,8 @@ async def reply_practices(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=FSM_classes.MultiDialog.specialist)
 async def reply_specialist(message: types.Message, state: FSMContext):
+    if message.text == 'Перейти':
+        await Specialists.choose_specialist(message, state)
     if message.text == 'Вернуться в главное меню':
         await FSM_classes.MultiDialog.menu.set()
         await main_menu(message, state)
@@ -412,6 +427,7 @@ async def reply_all(message: types.Message, state: FSMContext):
         await FSM_classes.MultiDialog.quick_help.set()
         await bot.send_message(message.from_user.id, text='Выберите, что вы чувствуете, чтобы разобраться в проблеме поподробнее', reply_markup=quick_help.quick_help_menu)
         await log_users(message)
+        await quick_help.all_way_quick_help(message)
 
     if message.text == 'Пройти тест':
         await FSM_classes.MultiDialog.test_weariness.set()
@@ -444,9 +460,13 @@ async def reply_all(message: types.Message, state: FSMContext):
         await Habit.prehabits(message, state)
         await log_users(message)
 
-    if message.text == '🎓 Курсы':
-        await FSM_classes.MultiDialog.courses.set()
-        await Courses.precourse(message, state)
+    if message.text == '🌳 Самоанализ':
+        await FSM_classes.MultiDialog.quick_help.set()
+        await bot.send_message(message.from_user.id,
+                               text='Выберите, что вы чувствуете, чтобы разобраться в проблеме поподробнее',
+                               reply_markup=quick_help.quick_help_menu)
+        await log_users(message)
+        await quick_help.all_way_quick_help(message)
         await log_users(message)
 
     if message.text == '💬 Обсудить проблему':

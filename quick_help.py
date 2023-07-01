@@ -1,7 +1,7 @@
 from aiogram import Bot, types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, \
-    InlineKeyboardMarkup, InlineKeyboardButton, InputFile
+    InlineKeyboardMarkup, InlineKeyboardButton, InputFile, ReplyKeyboardRemove
 from aiogram.utils import executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 import aioschedule as schedule
@@ -14,7 +14,7 @@ bot = Bot(Token)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 
-quick_help_menu = ReplyKeyboardMarkup(row_width=1).add(
+quick_help_menu = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(
     KeyboardButton('🤯 Истерика'),
     KeyboardButton('😢 Грусть'),
     KeyboardButton('😠 Раздражение'),
@@ -31,34 +31,56 @@ indifference0 = InlineKeyboardMarkup().add(InlineKeyboardButton('Продолж�
 despair0 = InlineKeyboardMarkup().add(InlineKeyboardButton('Продолжай', callback_data='despair0'))
 fear0 = InlineKeyboardMarkup().add(InlineKeyboardButton('Продолжай', callback_data='fear0'))
 
+
 async def all_way_quick_help(message:types.Message):
     if message.text == '🤯 Истерика':
         await bot.send_message(message.from_user.id,
-                               text='Я знаю, что ты стараешься и уделяешь много внимания клиентам. \nСегодня у тебя трудный день, однако не стоит заполнять себя этими мыслями',
+                               text='Я знаю, что ты стараешься и уделяешь много внимания клиентам',
+                               reply_markup=Markups.backHabitRe)
+        await bot.send_message(message.from_user.id,
+                               text='Сегодня у тебя трудный день, однако не стоит заполнять себя этими мыслями',
                                reply_markup=hysterics0)
-    if message.text == '😢 Грусть':
+    elif message.text == '😢 Грусть':
         await bot.send_message(message.from_user.id,
-                               text='Я знаю, что ты стараешься и уделяешь много внимания клиентам. \nСегодня у тебя трудный день, однако не стоит заполнять себя этими мыслями',
+                               text='Я знаю, что ты стараешься и уделяешь много внимания клиентам',
+                               reply_markup=Markups.backHabitRe)
+        await bot.send_message(message.from_user.id,
+                               text='Сегодня у тебя трудный день, однако не стоит заполнять себя этими мыслями',
                                reply_markup=sadness0)
-    if message.text == '😠 Раздражение':
+    elif message.text == '😠 Раздражение':
         await bot.send_message(message.from_user.id,
-                               text='У тебя сегодня были по-настоящему трудные беседы с клиентами. \nНе забывай, ты делаешь важную работу, и твои усилия очень ценятся',
+                               text='Я знаю, что ты стараешься и уделяешь много внимания клиентам',
+                               reply_markup=Markups.backHabitRe)
+        await bot.send_message(message.from_user.id,
+                               text='Сегодня у тебя трудный день, однако не стоит заполнять себя этими мыслями',
                                reply_markup=irritation0)
-    if message.text == '😔 Упадок сил':
+    elif message.text == '😔 Упадок сил':
         await bot.send_message(message.from_user.id,
-                               text='Работа в call-центре может быть очень истощающей. \nНе забывай, ты делаешь большое количество звонков, чтобы помогать людям, это очень важная работа',
+                               text='Я знаю, что ты стараешься и уделяешь много внимания клиентам',
+                               reply_markup=Markups.backHabitRe)
+        await bot.send_message(message.from_user.id,
+                               text='Сегодня у тебя трудный день, однако не стоит заполнять себя этими мыслями',
                                reply_markup=prostration0)
-    if message.text == '🙄 Безразличие':
+    elif message.text == '🙄 Безразличие':
         await bot.send_message(message.from_user.id,
-                               text='Тебе может казаться, что некоторые вопросы повторяются, а время потрачено зря. \nПомни, что каждый звонок очень важен для клиентов',
+                               text='Я знаю, что ты стараешься и уделяешь много внимания клиентам',
+                               reply_markup=Markups.backHabitRe)
+        await bot.send_message(message.from_user.id,
+                               text='Сегодня у тебя трудный день, однако не стоит заполнять себя этими мыслями',
                                reply_markup=indifference0)
-    if message.text == '😩 Отчаяние':
+    elif message.text == '😩 Отчаяние':
         await bot.send_message(message.from_user.id,
-                               text='Понимаю, что ты встречаешься с "трудными" и порой не очень дружелюбными клиентами. \nДавай вместе посмотрим на возможные пути решения',
+                               text='Я знаю, что ты стараешься и уделяешь много внимания клиентам',
+                               reply_markup=Markups.backHabitRe)
+        await bot.send_message(message.from_user.id,
+                               text='Сегодня у тебя трудный день, однако не стоит заполнять себя этими мыслями',
                                reply_markup=despair0)
-    if message.text == '😧 Страх':
+    elif message.text == '😧 Страх':
         await bot.send_message(message.from_user.id,
-                               text='Понимаю, что ты встречаешься с "трудными" и порой не очень дружелюбными клиентами. \nДавай вместе посмотрим на возможные пути решения',
+                               text='Я знаю, что ты стараешься и уделяешь много внимания клиентам',
+                               reply_markup=Markups.backHabitRe)
+        await bot.send_message(message.from_user.id,
+                               text='Сегодня у тебя трудный день, однако не стоит заполнять себя этими мыслями',
                                reply_markup=fear0)
 
 
@@ -112,7 +134,7 @@ fear6 = InlineKeyboardMarkup().add(InlineKeyboardButton('Спасибо! Что 
 
 
 async def all_way_callback_quick_help(callback_query: types.CallbackQuery):
-    if callback_query.data[:-1] == 'hysteric':
+    if callback_query.data[:-1] == 'hysterics':
         if callback_query.data[-1] == '0':
             await bot.send_message(callback_query.from_user.id,
                                    text='Самое важное сейчас - успокоиться. Глубоко вдохни и постепенно начинай выравнивать своё дыхание',
@@ -425,7 +447,7 @@ async def all_way_callback_quick_help(callback_query: types.CallbackQuery):
                                    reply_markup=Markups.backHabitRe)
 
 
-def register_handlers_Psy_Weariness(dp: Dispatcher):
+def register_handlers_quick_help(dp: Dispatcher):
     dp.register_callback_query_handler(
         all_way_callback_quick_help, text=['hysterics0', 'sadness0', 'irritation0', 'prostration0', 'indifference0', 'despair0', 'fear0',
                                            'hysterics1', 'sadness1', 'irritation1', 'prostration1', 'indifference1', 'despair1', 'fear1',

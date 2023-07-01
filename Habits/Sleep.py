@@ -85,7 +85,7 @@ async def choose_habit_sleep_bedtime(message: types.message, state: FSMContext):
                 cur_sleephabit.execute("UPDATE sleep SET bedtime = ? WHERE user_id = ?", (message.text, message.from_user.id))
                 db_sleephabit.commit()
                 await FSM_classes.MultiDialog.menu.set()
-                await bot.send_message(message.from_user.id, 'Вы выбрали время пробуждения: ' + message.text + '\nПоздравляем! Вы начали работу со своим сном!', reply_markup=Markups.backHabitRe)
+                await bot.send_message(message.from_user.id, 'Вы выбрали время отхода ко сну: ' + message.text + '\nПоздравляем! Вы начали работу со своим сном!', reply_markup=Markups.backHabitRe)
                 cur_sleephabit.execute("UPDATE sleep SET active = 1 WHERE user_id = ?",
                                        (message.from_user.id,))
                 db_sleephabit.commit()

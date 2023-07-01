@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import FSM_classes
 import Markups
 from Database import db_start, data_profile, pre_points_test_weariness, points_test_weariness, pre_answers_test_weariness,save_user_action
@@ -184,8 +186,8 @@ async def process_callback_feedback(callback_query: types.CallbackQuery, state: 
         #     data['aftertest4'] = 'Да'
         now = datetime.now()
         botlogfile = open('LogsBot', 'a')
-        print(now.strftime('%d-%m-%Y %H:%M'), ' Пользователь - ' + message.from_user.first_name,
-              message.from_user.id, 'Хочет получать напоминания по выполнению практик')
+        print(now.strftime('%d-%m-%Y %H:%M'), ' Пользователь - ' + callback_query.from_user.first_name,
+              callback_query.from_user.id, 'Хочет получать напоминания по выполнению практик')
         botlogfile.close()
         Feedback_kb = InlineKeyboardMarkup(row_width=1)
         Feedback_kb.add(InlineKeyboardButton('Хочу посмотреть эти практики', callback_data='Feedback_btn5'),
@@ -208,12 +210,14 @@ async def process_callback_feedback(callback_query: types.CallbackQuery, state: 
                                "которые позволят держать в тонусе организм и сознание - внедрение правильного режима сна, физических упражнений, употребление нужного количесвта воды и другие", reply_markup=Feedback_kb)
     if point == '5':
         await FSM_classes.MultiDialog.habits.set()
-        await bot.send_message(message.from_user.id,
+        await bot.send_message(callback_query.from_user.id,
                                'В этом разделе вы найдёте полезные практики и привычки, которые вы сможете внедрить в свою жизнь прямо сейчас.'
                                'Для этого вам всего лишь нужно выбрать интересующую и время напоминаний, но не забывайте, что самое главное - ваши старания!',
                                reply_markup=Markups.type_of_habits)
     if point =='6':
-        await bot.send_message(message.from_user.id, 'Переход на тестирование и запись')
+        spec = ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton('Перейти'))
+        await bot.send_message(callback_query.from_user.id, 'Вы хотите перейти на страницу записи к психотерапевту?', reply_markup=spec)
+        await FSM_classes.MultiDialog.specialist.set()
 
 
 def register_handlers_Psy_Weariness(dp: Dispatcher):

@@ -4,12 +4,12 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardBut
 Practise_btn = KeyboardButton('🧘‍♀️ Практики')
 Tests_btn = KeyboardButton('📝 Тесты')
 Habits_btn = KeyboardButton('💪 Мои привычки')
-Course_btn = KeyboardButton('🎓 Курсы')
+Help_btn = KeyboardButton('🌳 Самоанализ')
 Specialist_btn = KeyboardButton('💬 Обсудить проблему')
 Contacts_btn = KeyboardButton('📥 Контакты')
 main_kb = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
-main_kb.add(Practise_btn, Tests_btn, Course_btn,
-            Habits_btn, Specialist_btn, Contacts_btn)
+main_kb.add(Help_btn, Practise_btn, Specialist_btn,
+            Tests_btn, Habits_btn, Contacts_btn)
 
 # Practices
 Duh_btn = KeyboardButton('Дыхательные практики')
@@ -52,14 +52,14 @@ psy_tests = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(
     KeyboardButton('Хроническая усталость'),
     KeyboardButton('Устойчивость к стрессу'),
     KeyboardButton('Личная самоэффективность'),
-    KeyboardButton('Психологическое благополучие'),
-    KeyboardButton('Доминирующее состояние'))
+    KeyboardButton('Психологическое благополучие (скоро)'),
+    KeyboardButton('Доминирующее состояние (скоро)'))
 
 pop_tests = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(
     KeyboardButton('Управляю ли я своей жизнью?'),
     KeyboardButton('Мой тип личности'),
-    KeyboardButton('Мой темперамент'),
-    KeyboardButton('Мои скрытые таланты и способности'))
+    KeyboardButton('Мой темперамент (скоро)'),
+    KeyboardButton('Мои скрытые таланты и способности (скоро)'))
 
 # Back to menu
 backIn = InlineKeyboardMarkup(resize_keyboard=True, row_width=1).add(
@@ -105,3 +105,4 @@ waterAnswers = InlineKeyboardMarkup().add(
 appointment = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(
     KeyboardButton('Записаться'),
     KeyboardButton('Вернуться в главное меню'))
+

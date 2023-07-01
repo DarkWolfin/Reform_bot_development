@@ -5,8 +5,6 @@ import time
 import aioschedule
 import os
 
-
-
 from aiogram import Bot, types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
@@ -27,6 +25,7 @@ async def habit_water(message: types.message, state: FSMContext):
     await bot.send_photo(message.from_user.id, PreviewPhotoHabitWater)
     await bot.send_message(message.from_user.id, 'Хотите настроить привычку или удалить её?', reply_markup=Markups.tune_habit)
     await FSM_classes.HabitWater.choose_action.set()
+
 
 async def choose_habit_action(message: types.message, state: FSMContext):
 
