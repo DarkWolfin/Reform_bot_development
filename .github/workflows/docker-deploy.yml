@@ -1,0 +1,30 @@
+name: Test build and deploy project
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Test build
+      run: docker compose build 
+      
+    - uses: cross-the-world/ssh-pipeline@master
+    - name: Deploy
+      with:
+        host: ${{ vars.SSH_HOST }}
+        key: ${{ secrets.DEPLOY_SSH_KEY }}
+        port: ${{ vars.SSH_PORT }}
+        user: ${{ vars.SSH_USER }}
+        script: |
+          cd ${{ vars.PATH_TO_PROJECT_FOLDER }}
+          docker compose stop
+          git checkout master
+          git pull
+          docker compose up -d --build
