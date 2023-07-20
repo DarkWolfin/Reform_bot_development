@@ -95,10 +95,19 @@ async def get_user_report(message: types.Message, state: FSMContext):
 @dp.message_handler(state=FSM_classes.adminCommands.getUserReportDate)
 async def get_user_report(message: types.Message, state: FSMContext):
     users = await state.get_data("users")
-    startDate, endDate = message.text.split(' ')
+    try:
+        startDate, endDate = message.text.split(' ')
+    except:
+        await bot.send_message(message.from_user.id, text='Ошибка при вводе даты, попробуйте ещё')
+        await FSM_classes.adminCommands.getUserReportDate.set()
+        return
+
     startDate = startDate.replace(':','')
     endDate = endDate.replace(':','')
     users = str(users['users']).split(' ')
+    if len(users) == 0:
+        await bot.send_message(message.from_user.id, text='Список пользователей пуст, отчёта не будет!')
+
     await admin_commands.createExcelFileReportCommand(startDate,endDate,users)
     with open('userData.xlsx', 'rb') as f:
         await bot.send_document(chat_id=message.from_user.id, document=InputFile(f))
