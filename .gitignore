@@ -2,7 +2,7 @@
 /.idea/
 Token.py
 LogsBot
-/Databases/
+*.db
 /AllCourses/__pycache__/
 /Habits/__pycache__/
 /PsyTests/__pycache__/
