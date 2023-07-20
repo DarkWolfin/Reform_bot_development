@@ -18,12 +18,13 @@ jobs:
     needs: build
     steps:
     - name: Deploy      
-      uses: cross-the-world/ssh-pipeline@v1.2.0
+      uses: appleboy/ssh-action@v0.1.10
       with:
         host: ${{ vars.SSH_HOST }}
         key: ${{ secrets.DEPLOY_SSH_KEY }}
         port: ${{ vars.SSH_PORT }}
-        user: ${{ vars.SSH_USER }}
+        username: ${{ vars.SSH_USER }}
+        script_stop: true
         script: |
           cd ${{ vars.PATH_TO_PROJECT_FOLDER }}
           docker compose stop
