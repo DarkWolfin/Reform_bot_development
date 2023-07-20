@@ -15,8 +15,8 @@ jobs:
     - name: Test build
       run: docker compose build 
       
-    - uses: cross-the-world/ssh-pipeline@master
-    - name: Deploy
+    - name: Deploy      
+      uses: cross-the-world/ssh-pipeline@master
       with:
         host: ${{ vars.SSH_HOST }}
         key: ${{ secrets.DEPLOY_SSH_KEY }}
