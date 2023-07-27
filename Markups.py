@@ -10,7 +10,7 @@ Contacts_btn = KeyboardButton('📥 Контакты')
 MyCode_btn = KeyboardButton('Получить свой ID')
 main_kb = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
 main_kb.add(Help_btn, Practise_btn, Specialist_btn,
-            Tests_btn, Habits_btn, Contacts_btn)
+            Tests_btn, Habits_btn, Contacts_btn, MyCode_btn)
 
 # Practices
 Duh_btn = KeyboardButton('Дыхательные практики')

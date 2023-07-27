@@ -145,6 +145,8 @@ async def get_user_report(message: types.Message, state: FSMContext):
     await admin_commands.createExcelFileActionCommand(startDate,endDate,users)
     with open('getUserAction.xlsx', 'rb') as f:
         await bot.send_document(chat_id=message.from_user.id, document=InputFile(f))
+    await FSM_classes.MultiDialog.menu.set()
+    await main_menu(message, state)
 
 
 @dp.message_handler(commands=['getuserreportgraph'], state='*')
@@ -489,7 +491,8 @@ async def reply_all(message: types.Message, state: FSMContext):
 
     if message.text == 'Получить свой ID':
         await bot.send_message(message.from_user.id,
-                               text='Ваш id: `' + message.from_user.id + '`')
+                               text="Ваш id: `{}`".format(message.from_user.id),
+                               parse_mode='markdown')
         await log_users(message)
 
 
