@@ -487,6 +487,12 @@ async def reply_all(message: types.Message, state: FSMContext):
         await contacts(message)
         await log_users(message)
 
+    if message.text == 'Получить свой ID':
+        await bot.send_message(message.from_user.id,
+                               text='Ваш id: `' + message.from_user.id + '`')
+        await log_users(message)
+
+
     if message.text == 'Что ты умеешь?':
         back = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
         btn1 = types.KeyboardButton('Вернуться в главное меню')

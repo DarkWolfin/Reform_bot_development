@@ -7,6 +7,7 @@ Habits_btn = KeyboardButton('💪 Мои привычки')
 Help_btn = KeyboardButton('🌳 Самоанализ')
 Specialist_btn = KeyboardButton('💬 Обсудить проблему')
 Contacts_btn = KeyboardButton('📥 Контакты')
+MyCode_btn = KeyboardButton('Получить свой ID')
 main_kb = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
 main_kb.add(Help_btn, Practise_btn, Specialist_btn,
             Tests_btn, Habits_btn, Contacts_btn)
