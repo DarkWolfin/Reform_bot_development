@@ -243,6 +243,7 @@ async def set_token(message: types.Message):
     await log_users(message)
 
 
+
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('Welcome_btn'), state=FSM_classes.MultiDialog.menu)
 async def mailing(callback_query: types.CallbackQuery, state: FSMContext):
     if callback_query.data[-1] == '0':
