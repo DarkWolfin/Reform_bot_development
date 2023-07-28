@@ -3,6 +3,8 @@ from aiogram.dispatcher.filters.state import StatesGroup, State
 
 class MultiDialog(StatesGroup):
     quick_help = State()
+    getToken = State()
+    setToken = State()
     menu = State()
     practices = State()
     tests = State()

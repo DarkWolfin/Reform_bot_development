@@ -9,7 +9,7 @@ async def db_start():
     db_data = sq.connect('Databases/Data_users.db')
     cur_data = db_data.cursor()
     cur_data.execute(
-        "CREATE TABLE IF NOT EXISTS profile(user_id INT PRIMARY KEY, first_name TEXT, username TEXT, active TEXT)")
+        "CREATE TABLE IF NOT EXISTS profile(user_id INT PRIMARY KEY, first_name TEXT, username TEXT, active TEXT, token TEXT)")
     db_data.commit()
     cur_data.execute(
         "CREATE TABLE IF NOT EXISTS affirmation(user_id INT PRIMARY KEY, first_name TEXT, username TEXT)")
@@ -17,11 +17,12 @@ async def db_start():
 
     db_test_weariness = sq.connect('Databases/Result_Tests/PSY_Weariness.db')
     cur_test_weariness = db_test_weariness.cursor()
-    #cur_test_weariness.execute("DROP TABLE IF EXISTS answers")
-    cur_test_weariness.execute("CREATE TABLE IF NOT EXISTS answers(user_id INT PRIMARY KEY, username TEXT, countOfAnswers INT, answer1 TEXT, answer2 TEXT, answer3 TEXT, answer4 TEXT, answer5 TEXT, answer6 TEXT, "
-                               "answer7 TEXT, answer8 TEXT, answer9 TEXT, answer10 TEXT, answer11 TEXT, answer12 TEXT, answer13 TEXT, answer14 TEXT, answer15 TEXT, answer16 TEXT, "
-                               "answer17 TEXT, answer18 TEXT, answer19 TEXT, answer20 TEXT, answer21 TEXT, answer22 TEXT, answer23 TEXT, answer24 TEXT, answer25 TEXT, answer26 TEXT, "
-                               "answer27 TEXT, answer28 TEXT, answer29 TEXT, answer30 TEXT, answer31 TEXT, answer32 TEXT, answer33 TEXT, answer34 TEXT, answer35 TEXT, answer36 TEXT)")
+    # cur_test_weariness.execute("DROP TABLE IF EXISTS answers")
+    cur_test_weariness.execute(
+        "CREATE TABLE IF NOT EXISTS answers(user_id INT PRIMARY KEY, username TEXT, countOfAnswers INT, answer1 TEXT, answer2 TEXT, answer3 TEXT, answer4 TEXT, answer5 TEXT, answer6 TEXT, "
+        "answer7 TEXT, answer8 TEXT, answer9 TEXT, answer10 TEXT, answer11 TEXT, answer12 TEXT, answer13 TEXT, answer14 TEXT, answer15 TEXT, answer16 TEXT, "
+        "answer17 TEXT, answer18 TEXT, answer19 TEXT, answer20 TEXT, answer21 TEXT, answer22 TEXT, answer23 TEXT, answer24 TEXT, answer25 TEXT, answer26 TEXT, "
+        "answer27 TEXT, answer28 TEXT, answer29 TEXT, answer30 TEXT, answer31 TEXT, answer32 TEXT, answer33 TEXT, answer34 TEXT, answer35 TEXT, answer36 TEXT)")
     db_test_weariness.commit()
     cur_test_weariness.execute(
         "CREATE TABLE IF NOT EXISTS points(user_id INT PRIMARY KEY, username TEXT, count INT, points INT)")
@@ -34,11 +35,12 @@ async def db_start():
     ##################
     db_test_stress = sq.connect('Databases/Result_Tests/PSY_stress.db')
     cur_test_stress = db_test_stress.cursor()
-    #cur_test_stress.execute("DROP TABLE IF EXISTS answers")
-    cur_test_stress.execute("CREATE TABLE IF NOT EXISTS answers(user_id INT PRIMARY KEY, username TEXT, countOfAnswers INT, answer1 TEXT, answer2 TEXT, answer3 TEXT, answer4 TEXT, answer5 TEXT, answer6 TEXT, "
-                            "answer7 TEXT, answer8 TEXT, answer9 TEXT, answer10 TEXT, answer11 TEXT, answer12 TEXT, answer13 TEXT, answer14 TEXT, answer15 TEXT, answer16 TEXT, "
-                            "answer17 TEXT, answer18 TEXT, answer19 TEXT, answer20 TEXT, answer21 TEXT, answer22 TEXT, answer23 TEXT, answer24 TEXT, answer25 TEXT, answer26 TEXT, "
-                            "answer27 TEXT, answer28 TEXT, answer29 TEXT, answer30 TEXT, answer31 TEXT, answer32 TEXT, answer33 TEXT)")
+    # cur_test_stress.execute("DROP TABLE IF EXISTS answers")
+    cur_test_stress.execute(
+        "CREATE TABLE IF NOT EXISTS answers(user_id INT PRIMARY KEY, username TEXT, countOfAnswers INT, answer1 TEXT, answer2 TEXT, answer3 TEXT, answer4 TEXT, answer5 TEXT, answer6 TEXT, "
+        "answer7 TEXT, answer8 TEXT, answer9 TEXT, answer10 TEXT, answer11 TEXT, answer12 TEXT, answer13 TEXT, answer14 TEXT, answer15 TEXT, answer16 TEXT, "
+        "answer17 TEXT, answer18 TEXT, answer19 TEXT, answer20 TEXT, answer21 TEXT, answer22 TEXT, answer23 TEXT, answer24 TEXT, answer25 TEXT, answer26 TEXT, "
+        "answer27 TEXT, answer28 TEXT, answer29 TEXT, answer30 TEXT, answer31 TEXT, answer32 TEXT, answer33 TEXT)")
     db_test_stress.commit()
     cur_test_stress.execute(
         "CREATE TABLE IF NOT EXISTS points(user_id INT PRIMARY KEY, username TEXT, count INT, points INT)")
@@ -86,24 +88,35 @@ async def db_start():
 
     db_test_holms = sq.connect('Databases/Result_Tests/Holmes-Rahe.db')
     cur_test_holms = db_test_holms.cursor()
-    cur_test_holms.execute("CREATE TABLE IF NOT EXISTS answers(user_id INT PRIMARY KEY, username TEXT, countOfAnswers INT, answer1 TEXT, answer2 TEXT, answer3 TEXT, answer4 TEXT, answer5 TEXT, answer6 TEXT, "
-                               "answer7 TEXT, answer8 TEXT, answer9 TEXT, answer10 TEXT, answer11 TEXT, answer12 TEXT, answer13 TEXT, answer14 TEXT, answer15 TEXT, answer16 TEXT, "
-                               "answer17 TEXT, answer18 TEXT, answer19 TEXT, answer20 TEXT, answer21 TEXT, answer22 TEXT, answer23 TEXT, answer24 TEXT, answer25 TEXT, answer26 TEXT, "
-                               "answer27 TEXT, answer28 TEXT, answer29 TEXT, answer30 TEXT, answer31 TEXT, answer32 TEXT, answer33 TEXT, answer34 TEXT, answer35 TEXT, answer36 TEXT, "
-                               "answer37 TEXT, answer38 TEXT, answer39 TEXT, answer40 TEXT, answer41 TEXT, answer42 TEXT, answer43 TEXT)")
+    cur_test_holms.execute(
+        "CREATE TABLE IF NOT EXISTS answers(user_id INT PRIMARY KEY, username TEXT, countOfAnswers INT, answer1 TEXT, answer2 TEXT, answer3 TEXT, answer4 TEXT, answer5 TEXT, answer6 TEXT, "
+        "answer7 TEXT, answer8 TEXT, answer9 TEXT, answer10 TEXT, answer11 TEXT, answer12 TEXT, answer13 TEXT, answer14 TEXT, answer15 TEXT, answer16 TEXT, "
+        "answer17 TEXT, answer18 TEXT, answer19 TEXT, answer20 TEXT, answer21 TEXT, answer22 TEXT, answer23 TEXT, answer24 TEXT, answer25 TEXT, answer26 TEXT, "
+        "answer27 TEXT, answer28 TEXT, answer29 TEXT, answer30 TEXT, answer31 TEXT, answer32 TEXT, answer33 TEXT, answer34 TEXT, answer35 TEXT, answer36 TEXT, "
+        "answer37 TEXT, answer38 TEXT, answer39 TEXT, answer40 TEXT, answer41 TEXT, answer42 TEXT, answer43 TEXT)")
     db_test_holms.commit()
     cur_test_holms.execute(
         "CREATE TABLE IF NOT EXISTS points(user_id INT PRIMARY KEY, username TEXT, count INT, points INT)")
     db_test_holms.commit()
 
+
 async def data_profile(user_id, first_name, username):
     user = cur_data.execute(
         "SELECT 1 FROM profile WHERE user_id == '{key}'".format(key=user_id)).fetchone()
     if not user:
-        cur_data.execute("INSERT INTO profile VALUES(?, ?, ?, ?)",
+        cur_data.execute("INSERT INTO profile VALUES(?, ?, ?, ?, '')",
                          (user_id, first_name, username, 'Активен'))
         db_data.commit()
 
+
+async def set_user_token(user_id, token):
+    user = cur_data.execute(
+        "SELECT 1 FROM profile WHERE user_id == '{key}'".format(key=user_id)).fetchone()
+
+    if user:
+        cur_data.execute("UPDATE profile SET token = '{token}' WHERE user_id == '{id}'".format(
+            token=token, id=user_id))
+        db_data.commit()
 
 async def affirmation(user_id, first_name, username):
     user = cur_data.execute(
@@ -112,6 +125,7 @@ async def affirmation(user_id, first_name, username):
         cur_data.execute("INSERT INTO affirmation VALUES(?, ?, ?)",
                          (user_id, first_name, username))
         db_data.commit()
+
 
 # PSY tests
 
@@ -124,13 +138,17 @@ async def pre_points_test_weariness(user_id, username):
                                    (user_id, username, '', ''))
         db_test_weariness.commit()
 
+
 async def pre_answers_test_weariness(user_id, username):
     user = cur_test_weariness.execute(
         "SELECT 1 FROM answers WHERE user_id == '{key}'".format(key=user_id)).fetchone()
     if not user:
-        cur_test_weariness.execute("INSERT INTO answers VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                                   (user_id, username, 0, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '','',''))
+        cur_test_weariness.execute(
+            "INSERT INTO answers VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (user_id, username, 0, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+             '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''))
         db_test_weariness.commit()
+
 
 async def points_test_weariness(state, user_id):
     async with state.proxy() as data:
@@ -138,28 +156,34 @@ async def points_test_weariness(state, user_id):
             data['count'], data['points'], user_id))
         db_test_weariness.commit()
 
+
 #######################
 async def pre_points_test_holms(user_id, username):
     user = cur_test_holms.execute(
         "SELECT 1 FROM points WHERE user_id == '{key}'".format(key=user_id)).fetchone()
     if not user:
         cur_test_holms.execute("INSERT INTO points VALUES(?, ?, ?, ?)",
-                                   (user_id, username, '', ''))
+                               (user_id, username, '', ''))
         db_test_holms.commit()
+
 
 async def pre_answers_test_holms(user_id, username):
     user = cur_test_holms.execute(
         "SELECT 1 FROM answers WHERE user_id == '{key}'".format(key=user_id)).fetchone()
     if not user:
-        cur_test_holms.execute("INSERT INTO answers VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                                   (user_id, username, 0, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '','','','','','','','','',''))
+        cur_test_holms.execute(
+            "INSERT INTO answers VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (user_id, username, 0, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+             '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''))
         db_test_holms.commit()
+
 
 async def points_test_holms(state, user_id):
     async with state.proxy() as data:
         cur_test_holms.execute("UPDATE points SET count = '{}', points = '{}' WHERE user_id == '{}'".format(
             data['count'], data['points'], user_id))
         db_test_holms.commit()
+
 
 ####################
 
@@ -176,8 +200,10 @@ async def pre_answers_test_stress(user_id, username):
     user = cur_test_stress.execute(
         "SELECT 1 FROM answers WHERE user_id == '{key}'".format(key=user_id)).fetchone()
     if not user:
-        cur_test_stress.execute("INSERT INTO answers VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                                (user_id, username, 0, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '','',''))
+        cur_test_stress.execute(
+            "INSERT INTO answers VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (user_id, username, 0, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
+             '', '', '', '', '', '', '', '', '', '', '', ''))
         db_test_stress.commit()
 
 
@@ -186,6 +212,8 @@ async def points_test_stress(state, user_id):
         cur_test_stress.execute("UPDATE points SET count = '{}', points = '{}' WHERE user_id == '{}'".format(
             data['count'], data['points'], user_id))
         db_test_stress.commit()
+
+
 #######################
 
 
@@ -203,6 +231,7 @@ async def points_test_selfefficacy(state, user_id):
         cur_test_selfefficacy.execute("UPDATE points SET count = '{}', points = '{}' WHERE user_id == '{}'".format(
             data['count'], data['points'], user_id))
         db_test_selfefficacy.commit()
+
 
 # POP tests
 
@@ -253,7 +282,7 @@ async def prehabit_water_db(user_id, username):
         "SELECT 1 FROM water WHERE user_id == '{key}'".format(key=user_id)).fetchone()
     if not user:
         cur_habit_water.execute("INSERT OR IGNORE INTO water VALUES(?, ?, ?, ?, ?, ?,?)",
-                                (user_id, username, 0, 0, 0, 0,''))
+                                (user_id, username, 0, 0, 0, 0, ''))
         print('123')
         db_habit_water.commit()
         cur_habit_water.execute("INSERT OR IGNORE INTO waterDates VALUES(?)",
