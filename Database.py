@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 
 
 async def db_start():
-    global db_data, cur_data, db_test_weariness, cur_test_weariness, db_test_selfefficacy, cur_test_selfefficacy, db_test_control, cur_test_control, db_test_typeperson, cur_test_typeperson, \
-        db_habit_sleep, cur_habit_sleep, db_course_anxiety, cur_course_anxiety, db_user_interactions, cur_user_interactions, db_test_holms, cur_test_holms
+    global db_data, cur_data, db_test_weariness, cur_test_weariness, db_test_selfefficacy, cur_test_selfefficacy, cur_test_stress, db_test_control, cur_test_control, db_test_typeperson, cur_test_typeperson, \
+        db_habit_sleep, cur_habit_sleep, db_course_anxiety, cur_course_anxiety, db_user_interactions, db_test_stress, cur_user_interactions, db_test_holms, cur_test_holms
 
     db_data = sq.connect('Databases/Data_users.db')
     cur_data = db_data.cursor()
