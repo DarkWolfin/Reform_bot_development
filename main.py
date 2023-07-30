@@ -41,12 +41,13 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 
 
 Specialists.register_handlers_specialist(dp)
-Psy_selfefficacy.register_handlers_Psy_selfefficacy(dp)
 quick_help.register_handlers_quick_help(dp)
-Psy_stress.register_handlers_Psy_stress(dp)
 Pop_Control.register_handlers_Pop_Control(dp)
 Pop_Typeperson.register_handlers_Pop_typeperson(dp)
 
+Psy_selfefficacy.register_handlers_Psy_selfefficacy(dp)
+Psy_stress.register_handlers_Psy_stress(dp)
+Psy_Weariness.register_handlers_Psy_Weariness(dp)
 
 @dp.message_handler(commands=['admin_mailing'], state='*', chat_id=417986886)
 async def check_active_users(message: types.Message):
