@@ -29,7 +29,7 @@ from aiogram.utils.exceptions import BotBlocked
 
 from Token import Token
 from Database import db_start, data_profile, affirmation, pre_points_test_weariness, points_test_weariness, \
-    pre_answers_test_weariness, set_user_token
+    pre_answers_test_weariness, set_user_token, get_all_user_ids
 
 
 async def on_startup(_):
@@ -79,7 +79,8 @@ async def get_user_report(message: types.Message):
 @dp.message_handler(state=FSM_classes.adminCommands.getUserReportPassword)
 async def get_user_report(message: types.Message, state: FSMContext):
     if message.text == 'admin123':
-        await bot.send_message(message.from_user.id, text='Введите id нужных юзеров через пробел')
+        await bot.send_message(message.from_user.id,
+                               text='Введите id нужных юзеров через пробел или напишите слово "все"')
         await FSM_classes.adminCommands.getUserReportId.set()
     else:
         await bot.send_message(message.from_user.id, text='Ошибка доступа!'
@@ -87,10 +88,11 @@ async def get_user_report(message: types.Message, state: FSMContext):
                                                           '\n/main_menu - перейти в главное меню')
 
 
-@dp.message_handler(state=FSM_classes.adminCommands.getUserReportId )
+@dp.message_handler(state=FSM_classes.adminCommands.getUserReportId)
 async def get_user_report(message: types.Message, state: FSMContext):
     await state.set_data({"users": message.text})
-    await bot.send_message(message.from_user.id, text='Введите дату начала и конца наблюдений через пробел')
+    await bot.send_message(message.from_user.id,
+                           text='Введите дату начала и конца наблюдений через пробел в формате гггг:мм:дд')
     await FSM_classes.adminCommands.getUserReportDate.set()
 
 
@@ -104,11 +106,12 @@ async def get_user_report(message: types.Message, state: FSMContext):
         await FSM_classes.adminCommands.getUserReportDate.set()
         return
 
-    startDate = startDate.replace(':','')
-    endDate = endDate.replace(':','')
+    startDate = startDate.replace(':', '')
+    endDate = endDate.replace(':', '')
     users = str(users['users']).split(' ')
-    if len(users) == 0:
-        await bot.send_message(message.from_user.id, text='Список пользователей пуст, отчёта не будет!')
+    if len(users) == 1 and users[0] == 'все':
+        users = await get_all_user_ids()
+        users = [str(user) for user in users]
 
     await admin_commands.createExcelFileReportCommand(startDate,endDate,users)
     with open('userData.xlsx', 'rb') as f:
@@ -124,7 +127,8 @@ async def get_user_report(message: types.Message):
 @dp.message_handler(state=FSM_classes.adminCommands.getUserActionPassword)
 async def get_user_report(message: types.Message, state: FSMContext):
     if message.text == 'admin123':
-        await bot.send_message(message.from_user.id, text='Введите id нужных юзеров через пробел')
+        await bot.send_message(message.from_user.id,
+                               text='Введите id нужных юзеров через пробел или напишите слово "все"')
         await FSM_classes.adminCommands.getUserActionId.set()
     else:
         await bot.send_message(message.from_user.id, text='Ошибка доступа!'
@@ -144,6 +148,11 @@ async def get_user_report(message: types.Message, state: FSMContext):
     users = await state.get_data("users")
     startDate, endDate = message.text.split(' ')
     users = str(users['users']).split(' ')
+
+    if len(users) == 1 and users[0] == 'все':
+        users = await get_all_user_ids()
+        users = [str(user) for user in users]
+
     await admin_commands.createExcelFileActionCommand(startDate,endDate,users)
     with open('getUserAction.xlsx', 'rb') as f:
         await bot.send_document(chat_id=message.from_user.id, document=InputFile(f))
@@ -153,7 +162,7 @@ async def get_user_report(message: types.Message, state: FSMContext):
 
 @dp.message_handler(commands=['getuserreportgraph'], state='*')
 async def get_user_report(message: types.Message):
-    await bot.send_message(message.from_user.id, text='Введите дату формата чч:мм:гггг')
+    await bot.send_message(message.from_user.id, text='Введите дату формата дд:мм:гггг')
     await FSM_classes.adminCommands.getUserReportGraphDate.set()
 
 

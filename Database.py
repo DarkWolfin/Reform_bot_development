@@ -118,6 +118,11 @@ async def set_user_token(user_id, token):
             token=token, id=user_id))
         db_data.commit()
 
+
+async def get_all_user_ids():
+    return cur_data.execute("SELECT user_id FROM profile").fetchone()
+
+
 async def affirmation(user_id, first_name, username):
     user = cur_data.execute(
         "SELECT 1 FROM affirmation WHERE user_id == '{key}'".format(key=user_id)).fetchone()
