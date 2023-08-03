@@ -111,7 +111,7 @@ async def get_user_report(message: types.Message, state: FSMContext):
     users = str(users['users']).split(' ')
     if len(users) == 1 and users[0] == 'все':
         users = await get_all_user_ids()
-        users = [str(user) for user in users]
+        users = [str(user[0]) for user in users]
 
     await admin_commands.createExcelFileReportCommand(startDate,endDate,users)
     with open('userData.xlsx', 'rb') as f:
@@ -151,7 +151,7 @@ async def get_user_report(message: types.Message, state: FSMContext):
 
     if len(users) == 1 and users[0] == 'все':
         users = await get_all_user_ids()
-        users = [str(user) for user in users]
+        users = [str(user[0]) for user in users]
 
     await admin_commands.createExcelFileActionCommand(startDate,endDate,users)
     with open('getUserAction.xlsx', 'rb') as f:

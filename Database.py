@@ -120,7 +120,7 @@ async def set_user_token(user_id, token):
 
 
 async def get_all_user_ids():
-    return cur_data.execute("SELECT user_id FROM profile").fetchone()
+    return cur_data.execute("SELECT user_id FROM profile").fetchall()
 
 
 async def affirmation(user_id, first_name, username):
