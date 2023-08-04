@@ -82,7 +82,7 @@ async def createExcelFileActionsForAllUsersWithTokens(startDate: str, endDate: s
             if dateTimeStartDate <= resultDateTime <= dateTimeEndDate:
                 new_df = pd.DataFrame([(result[0], result[1])], columns=['action', 'time'])
                 df = pd.concat([df, new_df], ignore_index=True)
-        sheet = workbook.create_sheet(title=user[0]+' - '+user[1])
+        sheet = workbook.create_sheet(title=user[0]+' - '+user[1].replace('?', ''))
         for row in dataframe_to_rows(df, index=False, header=True):
             sheet.append(row)
     workbook.remove(workbook['Sheet'])
