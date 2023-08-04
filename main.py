@@ -128,7 +128,7 @@ async def get_user_report(message: types.Message):
 async def get_user_report(message: types.Message, state: FSMContext):
     if message.text == 'admin123':
         await bot.send_message(message.from_user.id,
-                               text='Введите id нужных юзеров через пробел или напишите слово "все"')
+                               text='Введите токены нужных юзеров через пробел или напишите слово "все"')
         await FSM_classes.adminCommands.getUserActionId.set()
     else:
         await bot.send_message(message.from_user.id, text='Ошибка доступа!'
@@ -145,15 +145,15 @@ async def get_user_report(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=FSM_classes.adminCommands.getUserActionDate)
 async def get_user_report(message: types.Message, state: FSMContext):
-    users = await state.get_data("users")
+    tokens = await state.get_data("users")
     startDate, endDate = message.text.split(' ')
-    users = str(users['users']).split(' ')
+    tokens = str(tokens['users']).split(' ')
 
-    if len(users) == 1 and users[0] == 'все':
-        users = await get_all_user_ids()
-        users = [str(user[0]) for user in users]
+    if len(tokens) == 1 and tokens[0] == 'все':
+        await admin_commands.createExcelFileActionsForAllUsersWithTokens(startDate, endDate)
+    else:
+        await admin_commands.createExcelFileActionCommand(startDate, endDate, tokens)
 
-    await admin_commands.createExcelFileActionCommand(startDate,endDate,users)
     with open('getUserAction.xlsx', 'rb') as f:
         await bot.send_document(chat_id=message.from_user.id, document=InputFile(f))
     await FSM_classes.MultiDialog.menu.set()

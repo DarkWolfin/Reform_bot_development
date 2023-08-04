@@ -57,6 +57,38 @@ async def createExcelFileActionCommand(startDate,endDate,users):
     workbook.save('getUserAction.xlsx')
 
 
+async def createExcelFileActionsForAllUsersWithTokens(startDate: str, endDate: str):
+    db_user_interactions = sqlite3.connect('Databases/user_interactions.db')
+    cur_user_interactions = db_user_interactions.cursor()
+
+    db_profiles = sqlite3.connect('Databases/Data_users.db')
+    cur_profiles = db_profiles.cursor()
+
+    workbook = Workbook()
+    print(startDate, endDate)
+
+    users = [[str(user[0]), str(user[1])] for user in cur_profiles.execute("SELECT user_id, token FROM profile").fetchall()]
+
+    for user in users:
+        df = pd.DataFrame(columns=['action', 'time'])
+        results = cur_user_interactions.execute("SELECT action, time FROM users WHERE user_id = ?", (user[0],))\
+            .fetchall()
+
+        print(results)
+        for result in results:
+            dateTimeStartDate = datetime.strptime(startDate, '%d:%m:%Y')
+            dateTimeEndDate = datetime.strptime(endDate, '%d:%m:%Y')
+            resultDateTime = datetime.strptime(result[1][0:10], '%Y-%m-%d')
+            if dateTimeStartDate <= resultDateTime <= dateTimeEndDate:
+                new_df = pd.DataFrame([(result[0], result[1])], columns=['action', 'time'])
+                df = pd.concat([df, new_df], ignore_index=True)
+        sheet = workbook.create_sheet(title=user[0]+' - '+user[1])
+        for row in dataframe_to_rows(df, index=False, header=True):
+            sheet.append(row)
+    workbook.remove(workbook['Sheet'])
+    workbook.save('getUserAction.xlsx')
+
+
 async def createGraphReportCommand(dateStart,user_id):
     dateEnd = datetime.now().date()
     dateStart = dateStart.date()
