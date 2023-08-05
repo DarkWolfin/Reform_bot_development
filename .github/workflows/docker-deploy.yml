@@ -2,7 +2,7 @@ name: Test build and deploy project
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "work" ]
 
 jobs:
 
