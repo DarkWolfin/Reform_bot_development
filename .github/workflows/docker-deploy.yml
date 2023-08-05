@@ -31,7 +31,6 @@ jobs:
         script_stop: true
         script: |
           cd ${{ vars.PATH_TO_PROJECT_FOLDER }}
-          docker compose stop
           git checkout work
-          git pull origin work
+          git pull
           docker compose up -d --build
