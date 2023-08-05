@@ -28,6 +28,6 @@ jobs:
         script: |
           cd ${{ vars.PATH_TO_PROJECT_FOLDER }}
           docker compose stop
-          git checkout master
-          git pull
+          git checkout work
+          git pull origin work
           docker compose up -d --build
