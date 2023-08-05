@@ -15,6 +15,7 @@ jobs:
       with: 
         image_name: work-reform-bot
         dockerfile: Dockerfile
+        push_image_and_stages: false
       
   deploy:
     runs-on: ubuntu-latest
