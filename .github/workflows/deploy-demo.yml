@@ -1,8 +1,8 @@
-name: Test build and deploy project
+name: Test build and deploy DEMO
 
 on:
   push:
-    branches: [ "work" ]
+    branches: [ "demo" ]
 
 jobs:
 
@@ -26,7 +26,7 @@ jobs:
         username: ${{ vars.SSH_USER }}
         script_stop: true
         script: |
-          cd ${{ vars.PATH_TO_PROJECT_FOLDER }}
-          git checkout work
+          cd ${{ vars.PATH_TO_DEMO_PROJECT_FOLDER }}
+          git checkout demo
           git pull
           docker compose up -d --build
