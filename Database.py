@@ -109,6 +109,16 @@ async def data_profile(user_id, first_name, username):
         db_data.commit()
 
 
+
+async def data_feedback(user_id):
+    user = cur_data.execute(
+        "SELECT 1 FROM feedback WHERE user_id == '{key}'".format(key=user_id)).fetchone()
+    if not user:
+        cur_data.execute("INSERT INTO feedback VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
+                         (user_id, '', '', '', '', '', '', ''))
+        db_data.commit()
+
+
 async def set_user_token(user_id, token):
     user = cur_data.execute(
         "SELECT 1 FROM profile WHERE user_id == '{key}'".format(key=user_id)).fetchone()
