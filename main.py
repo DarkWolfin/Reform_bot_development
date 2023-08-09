@@ -20,7 +20,7 @@ import Specialists
 from aiogram import Bot, types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, \
-    InlineKeyboardMarkup, InlineKeyboardButton, InputFile, user
+    InlineKeyboardMarkup, InlineKeyboardButton, InputFile
 from aiogram.utils import executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 import aioschedule as schedule
@@ -29,7 +29,7 @@ from aiogram.utils.exceptions import BotBlocked
 
 from Token import Token
 from Database import db_start, data_profile, affirmation, pre_points_test_weariness, points_test_weariness, \
-    pre_answers_test_weariness, set_user_token, get_all_user_ids, data_feedback
+    pre_answers_test_weariness, set_user_token, get_all_user_ids
 
 
 async def on_startup(_):
@@ -48,7 +48,6 @@ Pop_Typeperson.register_handlers_Pop_typeperson(dp)
 Psy_selfefficacy.register_handlers_Psy_selfefficacy(dp)
 Psy_stress.register_handlers_Psy_stress(dp)
 Psy_Weariness.register_handlers_Psy_Weariness(dp)
-
 
 @dp.message_handler(commands=['admin_mailing'], state='*', chat_id=417986886)
 async def check_active_users(message: types.Message):
@@ -198,6 +197,7 @@ async def reply_quick_help(message: types.Message, state: FSMContext):
         await FSM_classes.MultiDialog.menu.set()
         await main_menu(message, state)
     await quick_help.all_way_quick_help(message)
+
 
 
 @dp.message_handler(commands=['getuserreport'], state='*')
