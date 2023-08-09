@@ -14,6 +14,9 @@ async def db_start():
     cur_data.execute(
         "CREATE TABLE IF NOT EXISTS affirmation(user_id INT PRIMARY KEY, first_name TEXT, username TEXT)")
     db_data.commit()
+    cur_data.execute(
+        "CREATE TABLE IF NOT EXISTS feedback(user_id INT PRIMARY KEY, answer_1_yn TEXT, answer_2_choose TEXT, answer_3_choose TEXT, answer_4 TEXT, answer_5 TEXT, answer_6 TEXT, answer_extra TEXT)")
+    db_data.commit()
 
     db_test_weariness = sq.connect('Databases/Result_Tests/PSY_Weariness.db')
     cur_test_weariness = db_test_weariness.cursor()
