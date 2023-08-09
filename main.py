@@ -57,14 +57,14 @@ async def check_active_users(message: types.Message):
                            parse_mode='html')
 
 
-@dp.callback_query_handler(commands=['receiving_feedback'], state='*')
+@dp.message_handler(commands=['receiving_feedback'], state='*')
 async def start_feedback(message: types.Message):
     await bot.send_message(message.from_user.id, text='Введите пароль:')
     await FSM_classes.adminCommands.receiving_feedback_password.set()
 
 
 @dp.message_handler(state=FSM_classes.adminCommands.receiving_feedback_password)
-async def get_user_report(message: types.Message, state: FSMContext):
+async def process_feedback(message: types.Message):
     if message.text == 'ad12min3':
         await bot.send_message(message.from_user.id,
                                text='Рассылка опроса началась')
@@ -73,7 +73,7 @@ async def get_user_report(message: types.Message, state: FSMContext):
                             '\nВаш ответ поможет нам улучшить качество предоставляемых услуг. ' \
                             '\n\nПожалуйста, оцените следующие утверждения, выбрав наиболее подходящий вариант: ' \
                             '\n\n1. Взаимодействовали ли вы с чат-ботом? '
-        answer_1_keyboard = ReplyKeyboardMarkup().add(KeyboardButton('Да'), KeyboardButton('Нет'))
+        answer_1_keyboard = ReplyKeyboardMarkup(row_width=1, resize_keyboard=True).add(KeyboardButton('Да'), KeyboardButton('Нет'))
         db_data = sqlite3.connect('Databases/Data_users.db')
         cur_data = db_data.cursor()
         users = cur_data.execute(
@@ -82,8 +82,9 @@ async def get_user_report(message: types.Message, state: FSMContext):
             try:
                 await bot.send_message(chat_id=(users[user_mailing][0]),
                                        text=start_of_feedback, parse_mode='html', reply_markup=answer_1_keyboard)
-                await dp.current_state(user=users[user_mailing][0]).set_state(FSM_classes.Feedback.answer_1_yn)
                 await data_feedback(user_id=users[user_mailing][0])
+                state = dp.current_state(chat=users[user_mailing][0], user=users[user_mailing][0])
+                await state.set_state(FSM_classes.Feedback.answer_1_yn)
                 await asyncio.sleep(0.1)
             except BotBlocked:
                 cur_data.execute('UPDATE profile SET user_id = 0 WHERE user_id = ?',
@@ -91,39 +92,41 @@ async def get_user_report(message: types.Message, state: FSMContext):
                 db_data.commit()
         cur_data.execute('DELETE FROM profile WHERE user_id = ?', (int(0),))
         db_data.commit()
+        await bot.send_message(message.from_user.id,
+                               text='Опросы успешно разосланы!')
     else:
         await bot.send_message(message.from_user.id, text='Ошибка доступа!'
                                                           '\n/receiving_feedback - ввести другой пароль '
                                                           '\n/main_menu - перейти в главное меню')
 
 
-@dp.callback_query_handler(content_type=['text'], state=FSM_classes.Feedback.answer_1_yn)
+@dp.message_handler(content_types=['text'], state=FSM_classes.Feedback.answer_1_yn)
 async def feedback_answer_1(message: types.Message):
     db_f = sqlite3.connect('Databases/Data_users.db')
     cur_f = db_f.cursor()
     cur_f.execute("UPDATE feedback SET answer_1_yn = ? WHERE user_id = ?", (message.text, message.from_user.id))
     db_f.commit()
-    answer_2_keyboard = ReplyKeyboardMarkup().add(KeyboardButton('Очень полезен'), KeyboardButton('Полезен, но есть недостатки'),
+    answer_2_keyboard = ReplyKeyboardMarkup(row_width=1, resize_keyboard=True).add(KeyboardButton('Очень полезен'), KeyboardButton('Полезен, но есть недостатки'),
                                                   KeyboardButton('Есть польза, но много недостатков'), KeyboardButton('Бесполезен'), KeyboardButton('Ещё не взаимодействовал'))
     await bot.send_message(message.from_user.id,
                            text='2. Насколько был полезен для вас чат-бот?', parse_mode='html', reply_markup=answer_2_keyboard)
     await FSM_classes.Feedback.answer_2_choose.set()
 
 
-@dp.callback_query_handler(content_type=['text'], state=FSM_classes.Feedback.answer_2_choose)
+@dp.message_handler(content_types=['text'], state=FSM_classes.Feedback.answer_2_choose)
 async def feedback_answer_2(message: types.Message):
     db_f = sqlite3.connect('Databases/Data_users.db')
     cur_f = db_f.cursor()
     cur_f.execute("UPDATE feedback SET answer_2_choose = ? WHERE user_id = ?", (message.text, message.from_user.id))
     db_f.commit()
-    answer_3_keyboard = ReplyKeyboardMarkup().add(KeyboardButton('Общаться комфортно'), KeyboardButton('Общаться скорее комфортно, но есть недостатки'),
+    answer_3_keyboard = ReplyKeyboardMarkup(row_width=1, resize_keyboard=True).add(KeyboardButton('Общаться комфортно'), KeyboardButton('Общаться скорее комфортно, но есть недостатки'),
                                                   KeyboardButton('Большинство общения неприятно'), KeyboardButton('Неприятно общаться, так как затрагиваются личные темы'))
     await bot.send_message(message.from_user.id,
                            text='3. Как бы вы оценили уровень общения с чат-ботом на темы, связанные с вашим психологическим состоянием?', parse_mode='html', reply_markup=answer_3_keyboard)
     await FSM_classes.Feedback.answer_3_choose.set()
 
 
-@dp.callback_query_handler(content_type=['text'], state=FSM_classes.Feedback.answer_3_choose)
+@dp.message_handler(content_types=['text'], state=FSM_classes.Feedback.answer_3_choose)
 async def feedback_answer_2(message: types.Message):
     db_f = sqlite3.connect('Databases/Data_users.db')
     cur_f = db_f.cursor()
@@ -131,11 +134,11 @@ async def feedback_answer_2(message: types.Message):
     db_f.commit()
     await bot.send_message(message.from_user.id,
                            text='4. Были ли у вас какие-либо негативные или позитивные эмоции, связанные с использованием чат-бота для психологической поддержки (прохождение тестов, использование практик, система рекомендаций)? '
-                                '\nЕсли да, то будем признательны, если вы поделитесь вашим опытом', parse_mode='html')
+                                '\nЕсли да, то будем признательны, если вы поделитесь вашим опытом', parse_mode='html', reply_markup=types.ReplyKeyboardRemove())
     await FSM_classes.Feedback.answer_4.set()
 
 
-@dp.callback_query_handler(content_type=['text'], state=FSM_classes.Feedback.answer_4)
+@dp.message_handler(content_types=['text'], state=FSM_classes.Feedback.answer_4)
 async def feedback_answer_2(message: types.Message):
     db_f = sqlite3.connect('Databases/Data_users.db')
     cur_f = db_f.cursor()
@@ -147,7 +150,7 @@ async def feedback_answer_2(message: types.Message):
     await FSM_classes.Feedback.answer_5.set()
 
 
-@dp.callback_query_handler(content_type=['text'], state=FSM_classes.Feedback.answer_5)
+@dp.message_handler(content_types=['text'], state=FSM_classes.Feedback.answer_5)
 async def feedback_answer_2(message: types.Message):
     db_f = sqlite3.connect('Databases/Data_users.db')
     cur_f = db_f.cursor()
@@ -159,7 +162,7 @@ async def feedback_answer_2(message: types.Message):
     await FSM_classes.Feedback.answer_6.set()
 
 
-@dp.callback_query_handler(content_type=['text'], state=FSM_classes.Feedback.answer_6)
+@dp.message_handler(content_types=['text'], state=FSM_classes.Feedback.answer_6)
 async def feedback_answer_2(message: types.Message):
     db_f = sqlite3.connect('Databases/Data_users.db')
     cur_f = db_f.cursor()
@@ -171,8 +174,8 @@ async def feedback_answer_2(message: types.Message):
     await FSM_classes.Feedback.answer_extra.set()
 
 
-@dp.callback_query_handler(content_type=['text'], state=FSM_classes.Feedback.answer_extra)
-async def feedback_answer_2(message: types.Message):
+@dp.message_handler(content_types=['text'], state=FSM_classes.Feedback.answer_extra)
+async def feedback_answer_2(message: types.Message, state: FSMContext):
     db_f = sqlite3.connect('Databases/Data_users.db')
     cur_f = db_f.cursor()
     cur_f.execute("UPDATE feedback SET answer_extra = ? WHERE user_id = ?", (message.text, message.from_user.id))
@@ -181,7 +184,7 @@ async def feedback_answer_2(message: types.Message):
                            text='Спасибо вам за участие в опросе! '
                                 '\nВаши ответы помогут нам сделать чат-бот психологической поддержки более эффективным и удобным для вашего использования!', parse_mode='html')
     await FSM_classes.MultiDialog.menu.set()
-    await main_menu(message)
+    await main_menu(message, state)
 
 
 @dp.callback_query_handler(state=FSM_classes.MultiDialog.quick_help)

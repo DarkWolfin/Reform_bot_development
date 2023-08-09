@@ -116,8 +116,8 @@ async def data_feedback(user_id):
     user = cur_data.execute(
         "SELECT 1 FROM feedback WHERE user_id == '{key}'".format(key=user_id)).fetchone()
     if not user:
-        cur_data.execute("INSERT INTO profile VALUES(?, '', '', '', '', '', '', '')",
-                         (user_id))
+        cur_data.execute("INSERT INTO feedback VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
+                         (user_id, '', '', '', '', '', '', ''))
         db_data.commit()
 
 
