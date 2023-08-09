@@ -41,6 +41,15 @@ class HabitWater(StatesGroup):
 class Admin(StatesGroup):
     mailing_all = State()
 
+class Feedback(StatesGroup):
+    answer_1_yn = State()
+    answer_2_choose = State()
+    answer_3_choose = State()
+    answer_4 = State()
+    answer_5 = State()
+    answer_6 = State()
+    answer_extra = State()
+
 
 class adminCommands(StatesGroup):
     getUserReportPassword = State()
@@ -51,3 +60,5 @@ class adminCommands(StatesGroup):
     getUserActionId = State()
     getUserActionDate = State()
     getUserReportGraphDate = State()
+    receiving_feedback_password = State()
+    receiving_feedback_process = State()
