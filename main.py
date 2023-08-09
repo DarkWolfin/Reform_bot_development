@@ -28,7 +28,7 @@ import aioschedule as schedule
 from aiogram.utils.exceptions import BotBlocked
 
 from Token import Token
-from Database import db_start, data_profile, affirmation, pre_points_test_weariness, points_test_weariness, \
+from Database import db_start, data_profile, affirmation, data_feedback, pre_points_test_weariness, points_test_weariness, \
     pre_answers_test_weariness, set_user_token, get_all_user_ids
 
 
