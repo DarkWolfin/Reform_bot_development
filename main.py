@@ -49,6 +49,25 @@ Psy_selfefficacy.register_handlers_Psy_selfefficacy(dp)
 Psy_stress.register_handlers_Psy_stress(dp)
 Psy_Weariness.register_handlers_Psy_Weariness(dp)
 
+
+@dp.message_handler(commands=['start'], state='*')
+async def welcome(message: types.Message):
+    await data_profile(user_id=message.from_user.id, first_name=message.from_user.first_name,
+                       username=message.from_user.username)
+    await FSM_classes.MultiDialog.getToken.set()
+    mess = f'Здравствуйте 🖐, <b>{message.from_user.first_name}</b>! Рад, что вы заботитетсь о своем ментальном здоровье! ' \
+           f'\nБот Reform - это цифровой помощник, к которому вы сможете обратиться в случае возникновения стресса, тревоги или апатии, а самое главное для того, чтобы не допустить этого!' \
+           f'\n\nОн поможет вам разобраться в проблеме и предоставит инструменты для её решения.' \
+           f'\nВы сможете преодолеть любые преграды на вашем пути, а бот поможет вам советом и рекомендацией в трудную минуту!'
+    await bot.send_message(message.from_user.id, mess, parse_mode='html')
+    await bot.send_message(message.from_user.id,
+                           "Наш бот не в открытом доступе, по этому нужно ввести личный токен доступа",
+                           parse_mode='html')
+    await FSM_classes.MultiDialog.setToken.set()
+
+    await log_users(message)
+
+
 @dp.message_handler(commands=['admin_mailing'], state='*', chat_id=417986886)
 async def check_active_users(message: types.Message):
     await FSM_classes.Admin.mailing_all.set()
