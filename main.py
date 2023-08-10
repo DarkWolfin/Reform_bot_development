@@ -218,7 +218,6 @@ async def reply_quick_help(message: types.Message, state: FSMContext):
     await quick_help.all_way_quick_help(message)
 
 
-
 @dp.message_handler(commands=['getuserreport'], state='*')
 async def get_user_report(message: types.Message):
     await bot.send_message(message.from_user.id, text='Введите пароль:')
@@ -331,7 +330,6 @@ async def get_user_report(message: types.Message, state: FSMContext):
         await FSM_classes.adminCommands.getUserReportGraphDate.set()
 
 
-
 @dp.message_handler(content_types=['photo'], state=FSM_classes.Admin.mailing_all)
 async def mailing_photo(message: types.Message):
     await message.photo[-1].download(destination_file='mailing.jpg')
@@ -365,24 +363,6 @@ async def mailing_text(message: types.Message):
             cur_user_blocked.execute(
                 'UPDATE profile SET active = "Нет" WHERE user_id = ?', (users[user][0],))
             db_user_blocked.commit()
-
-
-@dp.message_handler(commands=['start'], state='*')
-async def welcome(message: types.Message):
-    await data_profile(user_id=message.from_user.id, first_name=message.from_user.first_name,
-                       username=message.from_user.username)
-    await FSM_classes.MultiDialog.getToken.set()
-    mess = f'Здравствуйте 🖐, <b>{message.from_user.first_name}</b>! Рад, что вы заботитетсь о своем ментальном здоровье! ' \
-           f'\nБот Reform - это цифровой помощник, к которому вы сможете обратиться в случае возникновения стресса, тревоги или апатии, а самое главное для того, чтобы не допустить этого!' \
-           f'\n\nОн поможет вам разобраться в проблеме и предоставит инструменты для её решения.' \
-           f'\nВы сможете преодолеть любые преграды на вашем пути, а бот поможет вам советом и рекомендацией в трудную минуту!'
-    await bot.send_message(message.from_user.id, mess, parse_mode='html')
-    await bot.send_message(message.from_user.id,
-                           "Наш бот не в открытом доступе, по этому нужно ввести личный токен доступа",
-                           parse_mode='html')
-    await FSM_classes.MultiDialog.setToken.set()
-
-    await log_users(message)
 
 
 @dp.message_handler(state=FSM_classes.MultiDialog.setToken)
