@@ -96,13 +96,12 @@ async def set_token(message: types.Message):
     Welcome_kb = InlineKeyboardMarkup()
     Welcome_kb.add(InlineKeyboardButton(
         'Приятно познакомиться!', callback_data='Welcome_btn0'))
-
-    await FSM_classes.MultiDialog.menu.set()
     if message.text in Token_Raiff:
         try:
             await set_user_token(user_id=message.from_user.id, token=message.text)
             await bot.send_message(message.from_user.id, "Спасибо! Токен установлен корректно!", parse_mode='html',
                                    reply_markup=Welcome_kb)
+            await FSM_classes.MultiDialog.menu.set()
         except Exception:
             await bot.send_message(message.from_user.id, "Произошла ошибка, попробуйте ещё раз", parse_mode='html')
     else:
