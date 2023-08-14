@@ -50,6 +50,14 @@ Psy_stress.register_handlers_Psy_stress(dp)
 Psy_Weariness.register_handlers_Psy_Weariness(dp)
 
 
+Token_Raiff = ['RCS1', 'RCS2', 'RCS3', 'RCS4', 'RCS5', 'RCS6', 'RCS7', 'RCS8', 'RCS9', 'RCS10', 'RCS11', 'RCS12', 'RCS13',
+               'RCS14', 'RCS15', 'RCS16', 'RCS17', 'RCS18', 'RCS19', 'RCS20', 'RCS21', 'RCS22', 'RCS23', 'RCS24', 'RCS25', 'RCS26',
+               'SME1', 'SME2', 'SME3', 'SME4', 'SME5', 'SME6', 'SME7', 'SME8', 'SME9', 'SME10', 'SME11', 'SME12', 'SME13', 'SME14', 'SME15',
+               'PREM1', 'PREM2', 'PREM3', 'PREM4', 'PREM5', 'PREM6', 'PREM7', 'PREM8', 'PREM9',
+               'TEST1', 'TEST2', 'TEST3', 'TEST4', 'TEST5', 'TEST00',
+               'admin']
+
+
 @dp.message_handler(commands=['start'], state='*')
 async def welcome(message: types.Message):
     await data_profile(user_id=message.from_user.id, first_name=message.from_user.first_name,
@@ -61,11 +69,63 @@ async def welcome(message: types.Message):
            f'\nВы сможете преодолеть любые преграды на вашем пути, а бот поможет вам советом и рекомендацией в трудную минуту!'
     await bot.send_message(message.from_user.id, mess, parse_mode='html')
     await bot.send_message(message.from_user.id,
-                           "Наш бот не в открытом доступе, по этому нужно ввести личный токен доступа",
+                           "Пожалуйста введите ваш личный токен доступа, присвоенный вам \nНаш бот не в открытом доступе",
                            parse_mode='html')
     await FSM_classes.MultiDialog.setToken.set()
 
     await log_users(message)
+
+
+@dp.message_handler(commands=['main_menu'], state='*')
+async def main_menu(message: types.Message, state: FSMContext):
+    await FSM_classes.HabitSleep.none.set()
+    await FSM_classes.MultiDialog.menu.set()
+    await bot.send_message(message.from_user.id, 'Вы в главном меню! Не знаете, что делать дальше?'
+                                                 '\n\n🧘‍♀️ Практики помогут вам разгрузиться после тяжёлого дня или успокоиться'
+                                                 '\n📝 Пройдите тесты, чтобы определить актуальное состояние и выявить проблему'
+                                                 '\n💪 Трекер привычек поможет внедрить и поддерживать полезные навыки'
+                                                 '\n🎬 Проходите курсы, узнавайте лучше себя, что поможет вам справиться с жизненными трудностями'
+                                                 '\n💬 Также вы можете обсудить проблему и получить рекомендации от специалиста'
+                                                 '\nВыберите, что вас интересует',
+                           parse_mode='html', reply_markup=Markups.main_kb)
+    await log_users(message)
+
+
+@dp.message_handler(state=FSM_classes.MultiDialog.setToken)
+async def set_token(message: types.Message):
+    Welcome_kb = InlineKeyboardMarkup()
+    Welcome_kb.add(InlineKeyboardButton(
+        'Приятно познакомиться!', callback_data='Welcome_btn0'))
+
+    await FSM_classes.MultiDialog.menu.set()
+    if message.text in Token_Raiff:
+        try:
+            await set_user_token(user_id=message.from_user.id, token=message.text)
+            await bot.send_message(message.from_user.id, "Спасибо! Токен установлен корректно!", parse_mode='html',
+                                   reply_markup=Welcome_kb)
+        except Exception:
+            await bot.send_message(message.from_user.id, "Произошла ошибка, попробуйте ещё раз", parse_mode='html')
+    else:
+        await bot.send_message(message.from_user.id, "Вы ввели некорректный токен, пожалуйста введите токен, который вы получили на работе, "
+                                                     "он состоит из заглавных букв английского алфавита и числа, записанных слитно (например, SME16, RCS28 и др.)", parse_mode='html')
+    await log_users(message)
+
+
+@dp.message_handler(commands=['fix_tokens'], state='*', chat_id=417986886)
+async def fix_tokens_users(message: types.Message):
+    # users_fix_tokens = [860113766, 1499938354, 566646368, 389638229, 5203851196, 518769233, 518769233, 755610058, 417986886]
+    users_fix_tokens = [417986886, 85550547]
+    for i in range(len(users_fix_tokens)):
+        print(i)
+        print(users_fix_tokens[i])
+        await bot.send_message(chat_id=users_fix_tokens[i], text='Добрый день! \nВ прошлое наше знакомство вы ввели некорректный токен доступа к боту, '
+                                                                 'пожалуйста напишите правильный токен доступа, который вы получили на работе, '
+                                                                 'он состоит из заглавных букв английского алфавита и числа, записанных слитно (например, SME16, RCS28 и др.)'
+                                                                 '\n\nВпереди мы готовим много интересного для вас! Подключайтесь! '
+                                                                 '\nБудем благодарны вам за помощь в тестировании!', parse_mode='html')
+        state = dp.current_state(chat=users_fix_tokens[i], user=users_fix_tokens[i])
+        await state.set_state(FSM_classes.MultiDialog.setToken)
+        await bot.send_message(message.from_user.id, text='Отправлено '+str(users_fix_tokens[i]))
 
 
 @dp.message_handler(commands=['admin_mailing'], state='*', chat_id=417986886)
@@ -365,24 +425,6 @@ async def mailing_text(message: types.Message):
             db_user_blocked.commit()
 
 
-@dp.message_handler(state=FSM_classes.MultiDialog.setToken)
-async def set_token(message: types.Message):
-    Welcome_kb = InlineKeyboardMarkup()
-    Welcome_kb.add(InlineKeyboardButton(
-        'Приятно познакомиться!', callback_data='Welcome_btn0'))
-
-    await FSM_classes.MultiDialog.menu.set()
-    try:
-        await set_user_token(user_id=message.from_user.id, token=message.text)
-        await bot.send_message(message.from_user.id, "Токен установлен корректно!", parse_mode='html',
-                               reply_markup=Welcome_kb)
-    except Exception:
-        await bot.send_message(message.from_user.id, "Произошла ошибка, попробуйте ещё раз", parse_mode='html')
-
-    await log_users(message)
-
-
-
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('Welcome_btn'), state=FSM_classes.MultiDialog.menu)
 async def mailing(callback_query: types.CallbackQuery, state: FSMContext):
     if callback_query.data[-1] == '0':
@@ -395,21 +437,6 @@ async def mailing(callback_query: types.CallbackQuery, state: FSMContext):
                                'или нажмите "Пройти тест" для того, чтобы пройти текущему состоянию или пройти тест, состоящий из 36 вопросов для того, чтобы начать '
                                'наше знакомство и получить индивидуальную подборку рекомендаций, упражнений и практик для улучшения состояния!',
                                parse_mode='html', reply_markup=enterIn)
-
-
-@dp.message_handler(commands=['main_menu'], state='*')
-async def main_menu(message: types.Message, state: FSMContext):
-    await FSM_classes.HabitSleep.none.set()
-    await FSM_classes.MultiDialog.menu.set()
-    await bot.send_message(message.from_user.id, 'Вы в главном меню! Не знаете, что делать дальше?'
-                                                 '\n\n🧘‍♀️ Практики помогут вам разгрузиться после тяжёлого дня или успокоиться'
-                                                 '\n📝 Пройдите тесты, чтобы определить актуальное состояние и выявить проблему'
-                                                 '\n💪 Трекер привычек поможет внедрить и поддерживать полезные навыки'
-                                                 '\n🎬 Проходите курсы, узнавайте лучше себя, что поможет вам справиться с жизненными трудностями'
-                                                 '\n💬 Также вы можете обсудить проблему и получить рекомендации от специалиста'
-                                                 '\nВыберите, что вас интересует',
-                           parse_mode='html', reply_markup=Markups.main_kb)
-    await log_users(message)
 
 
 @dp.message_handler(commands=['practices'], state='*')
