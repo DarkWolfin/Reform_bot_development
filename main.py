@@ -112,11 +112,8 @@ async def set_token(message: types.Message):
 
 @dp.message_handler(commands=['fix_tokens'], state='*', chat_id=417986886)
 async def fix_tokens_users(message: types.Message):
-    # users_fix_tokens = [860113766, 1499938354, 566646368, 389638229, 5203851196, 518769233, 518769233, 755610058, 417986886]
-    users_fix_tokens = [417986886, 85550547]
+    users_fix_tokens = [860113766, 1499938354, 566646368, 389638229, 5203851196, 518769233, 518769233, 755610058, 417986886, 85550547]
     for i in range(len(users_fix_tokens)):
-        print(i)
-        print(users_fix_tokens[i])
         await bot.send_message(chat_id=users_fix_tokens[i], text='Добрый день! \nВ прошлое наше знакомство вы ввели некорректный токен доступа к боту, '
                                                                  'пожалуйста напишите правильный токен доступа, который вы получили на работе, '
                                                                  'он состоит из заглавных букв английского алфавита и числа, записанных слитно (например, SME16, RCS28 и др.)'
