@@ -124,6 +124,11 @@ async def fix_tokens_users(message: types.Message):
         await bot.send_message(message.from_user.id, text='Отправлено '+str(users_fix_tokens[i]))
 
 
+@dp.message_handler(commands=['get_db'], state='*', chat_id=417986886)
+async def get_db(message: types.Message):
+    await bot.send_document(message.from_user.id, open('Databases/Data_users.db', 'rb'))
+
+
 @dp.message_handler(commands=['admin_mailing'], state='*', chat_id=417986886)
 async def check_active_users(message: types.Message):
     await FSM_classes.Admin.mailing_all.set()
