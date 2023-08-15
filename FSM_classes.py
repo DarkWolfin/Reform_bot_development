@@ -24,12 +24,12 @@ class MultiDialog(StatesGroup):
     specialist = State()
 
 
-
 class HabitSleep(StatesGroup):
     none = State()
     choose_action = State()
     choose_bedtime = State()
     choose_wakeup = State()
+
 
 class HabitWater(StatesGroup):
     none = State()
@@ -40,6 +40,7 @@ class HabitWater(StatesGroup):
 
 class Admin(StatesGroup):
     mailing_all = State()
+
 
 class Feedback(StatesGroup):
     answer_1_yn = State()
@@ -61,4 +62,3 @@ class adminCommands(StatesGroup):
     getUserActionDate = State()
     getUserReportGraphDate = State()
     receiving_feedback_password = State()
-    receiving_feedback_process = State()
