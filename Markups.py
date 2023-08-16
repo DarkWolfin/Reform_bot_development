@@ -3,7 +3,7 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardBut
 # Main_menu
 Practise_btn = KeyboardButton('🧘‍♀️ Практики')
 Tests_btn = KeyboardButton('📝 Тесты')
-Habits_btn = KeyboardButton('💪 Мои привычки')
+Habits_btn = KeyboardButton('💪 Привычки')
 Help_btn = KeyboardButton('🌳 Самоанализ')
 Specialist_btn = KeyboardButton('💬 Обсудить проблему')
 Contacts_btn = KeyboardButton('📥 Контакты')

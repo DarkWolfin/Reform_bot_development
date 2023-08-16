@@ -70,6 +70,7 @@ async def pretest_weariness(message: types.message, state: FSMContext):
         data['points'] = 0
     await points_test_weariness(state, user_id=message.from_user.id)
     await state.finish()
+    await save_user_action(user_id=message.from_user.id, action='Начал тест Psy_Weariness')
     await bot.send_message(message.from_user.id, 'Хроническое утомление даже на ранних стадиях развития существенно снижает работоспособность человека, '
                            'а в выраженных степенях приводит к затруднению выполнения даже хорошо знакомой работы '
                            'и в крайних степенях – к полному срыву деятельности. '
@@ -82,6 +83,7 @@ async def pretest_weariness(message: types.message, state: FSMContext):
     cur_weariness = db_weariness.cursor()
     cur_weariness.execute("UPDATE answers SET countOfAnswers = 0 WHERE user_id = ?", (message.from_user.id,))
     db_weariness.commit()
+
 
 async def answer_weariness(callback_query: types.CallbackQuery, state: FSMContext):
     point = callback_query.data[-1]
@@ -147,6 +149,7 @@ async def answer_weariness(callback_query: types.CallbackQuery, state: FSMContex
             cur_weariness.execute("UPDATE answers SET countOfAnswers = 0")
             db_weariness.commit()
             await save_user_action(user_id=callback_query.from_user.id, action='Psy_Weariness')
+
 
 async def process_callback_feedback(callback_query: types.CallbackQuery, state: FSMContext):
     point = callback_query.data[-1]
@@ -214,7 +217,7 @@ async def process_callback_feedback(callback_query: types.CallbackQuery, state: 
                                'В этом разделе вы найдёте полезные практики и привычки, которые вы сможете внедрить в свою жизнь прямо сейчас.'
                                'Для этого вам всего лишь нужно выбрать интересующую и время напоминаний, но не забывайте, что самое главное - ваши старания!',
                                reply_markup=Markups.type_of_habits)
-    if point =='6':
+    if point == '6':
         spec = ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton('Перейти'))
         await bot.send_message(callback_query.from_user.id, 'Вы хотите перейти на страницу записи к психотерапевту?', reply_markup=spec)
         await FSM_classes.MultiDialog.specialist.set()

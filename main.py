@@ -28,8 +28,9 @@ import aioschedule as schedule
 from aiogram.utils.exceptions import BotBlocked
 
 from Token import Token
-from Database import db_start, data_profile, affirmation, data_feedback, pre_points_test_weariness, points_test_weariness, \
-    pre_answers_test_weariness, set_user_token, get_all_user_ids
+from Database import db_start, data_profile, affirmation, data_feedback, pre_points_test_weariness, \
+    points_test_weariness, \
+    pre_answers_test_weariness, set_user_token, get_all_user_ids, save_user_action
 
 
 async def on_startup(_):
@@ -74,6 +75,7 @@ async def welcome(message: types.Message):
     await FSM_classes.MultiDialog.setToken.set()
 
     await log_users(message)
+    await save_user_action(user_id=message.from_user.id, action='/start')
 
 
 @dp.message_handler(commands=['main_menu'], state='*')
@@ -89,6 +91,7 @@ async def main_menu(message: types.Message, state: FSMContext):
                                                  '\nВыберите, что вас интересует',
                            parse_mode='html', reply_markup=Markups.main_kb)
     await log_users(message)
+    await save_user_action(user_id=message.from_user.id, action='/main_menu')
 
 
 @dp.message_handler(state=FSM_classes.MultiDialog.setToken)
@@ -444,6 +447,7 @@ async def mailing(callback_query: types.CallbackQuery, state: FSMContext):
 async def practices(message: types.Message):
     await FSM_classes.MultiDialog.practices.set()
     await Practices.type_practices(message)
+    await save_user_action(user_id=message.from_user.id, action='/practices')
 
 
 @dp.message_handler(commands=['test'], state='*')
@@ -451,6 +455,7 @@ async def test(message: types.message, state: FSMContext):
     await FSM_classes.MultiDialog.tests.set()
     await Tests.pretest(message, state)
     await log_users(message)
+    await save_user_action(user_id=message.from_user.id, action='/test')
 
 
 @dp.message_handler(commands=['courses'], state='*')
@@ -458,6 +463,7 @@ async def courses(message: types.Message, state: FSMContext):
     await FSM_classes.MultiDialog.courses.set()
     await Courses.precourse(message, state)
     await log_users(message)
+    await save_user_action(user_id=message.from_user.id, action='/courses')
 
 
 @dp.message_handler(commands=['contacts'], state='*')
@@ -468,20 +474,8 @@ async def contacts(message: types.Message):
                                                  'Если у вас есть вопросы или вы обнаружили ошибку, вы можете обратиться к @APecherkin.',
                            parse_mode='html', reply_markup=Markups.cont)
     await log_users(message)
+    await save_user_action(user_id=message.from_user.id, action='/contacts')
 
-
-# @dp.callback_query_handler(lambda c: c.data and c.data.startswith('fullversion'), state=FSM_classes.MultiDialog)
-# async def fullversion_callback(callback_query: types.CallbackQuery, state: FSMContext):
-#     await bot.send_message(callback_query.from_user.id, 'Полный доступ доступен в платной версии.'
-#                                                         '\nВ платной версии:'
-#                                                         '❇️25 медитаций'
-#                                                         '❇️10 дыхательных практик'
-#                                                         '❇️Таймер Помодоро'
-#                                                         '❇️Система ежедневных напоминаний и мотиваций'
-#                                                         '❇️Рекомендации по сну, питанию и отдыху от ведущих специалистов'
-#                                                         '\n\nОформить подписку за 499 рублей в месяц?',
-#                            parse_mode='html')
-#
 
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('Main_menu'), state='*')
 async def main_menu_callback(callback_query: types.CallbackQuery, state: FSMContext):
@@ -504,6 +498,7 @@ async def reply_practices(message: types.Message, state: FSMContext):
     await Practices.allreply_practices(message)
     await log_users(message)
 
+
 @dp.message_handler(state=FSM_classes.MultiDialog.specialist)
 async def reply_specialist(message: types.Message, state: FSMContext):
     if message.text == 'Перейти':
@@ -513,6 +508,7 @@ async def reply_specialist(message: types.Message, state: FSMContext):
         await main_menu(message, state)
     await Specialists.test_holms(message, state)
     await log_users(message)
+
 
 @dp.message_handler(state=FSM_classes.MultiDialog.tests)
 async def reply_tests(message: types.Message, state: FSMContext):
@@ -618,6 +614,7 @@ async def reply_specialist(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state='*')
 async def reply_all(message: types.Message, state: FSMContext):
+    await save_user_action(user_id=message.from_user.id, action=message.text)
     if message.text == 'Вернуться в главное меню':
         await main_menu(message, state)
         await log_users(message)
@@ -654,7 +651,7 @@ async def reply_all(message: types.Message, state: FSMContext):
         await Tests.pretest(message, state)
         await log_users(message)
 
-    if message.text == '💪 Мои привычки':
+    if message.text == '💪 Привычки':
         await FSM_classes.MultiDialog.habits.set()
         await Habit.prehabits(message, state)
         await log_users(message)
