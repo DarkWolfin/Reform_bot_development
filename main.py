@@ -683,7 +683,6 @@ async def reply_all(message: types.Message, state: FSMContext):
                                parse_mode='markdown')
         await log_users(message)
 
-
     if message.text == 'Что ты умеешь?':
         back = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
         btn1 = types.KeyboardButton('Вернуться в главное меню')
@@ -743,18 +742,20 @@ async def affirmation_mailing_photo(message: types.Message):
 async def scheduler_sleep_message_wakeup():
     db_scheduler_sleep = sqlite3.connect('Databases/Current_habits.db')
     cur_scheduler = db_scheduler_sleep.cursor()
+    cur_scheduler_check = db_scheduler_sleep.cursor()
     now = datetime.utcnow() + timedelta(hours=3, minutes=0)
     users_wakeup = cur_scheduler.execute(
         'SELECT user_id FROM sleep WHERE wakeup = ?', (now.strftime('%H:%M'),)).fetchall()
     for user_wakeup in range(len(users_wakeup)):
-        try:
-            await bot.send_message(chat_id=users_wakeup[user_wakeup][0], text='Пора вставать! '
-                                                                              '\nНачинать никогда не поздно! А всё начинается с небольших изменений!')
-            await asyncio.sleep(0.1)
-        except BotBlocked:
-            cur_scheduler.execute(
-                'UPDATE sleep SET user_id = 0 WHERE user_id = ?', (users_wakeup[user_wakeup][0],))
-            db_scheduler_sleep.commit()
+        if cur_scheduler_check.execute('SELECT active FROM sleep WHERE user_id = ?', (users_wakeup[user_wakeup][0],)) == 1:
+            try:
+                await bot.send_message(chat_id=users_wakeup[user_wakeup][0], text='Пора вставать! '
+                                                                                  '\nНачинать никогда не поздно! А всё начинается с небольших изменений!')
+                await asyncio.sleep(0.1)
+            except BotBlocked:
+                cur_scheduler.execute(
+                    'UPDATE sleep SET user_id = 0 WHERE user_id = ?', (users_wakeup[user_wakeup][0],))
+                db_scheduler_sleep.commit()
     cur_scheduler.execute('DELETE FROM sleep WHERE user_id = ?', (int(0),))
     db_scheduler_sleep.commit()
 
@@ -762,20 +763,22 @@ async def scheduler_sleep_message_wakeup():
 async def scheduler_sleep_message_bedtime():
     db_scheduler_sleep = sqlite3.connect('Databases/Current_habits.db')
     cur_scheduler = db_scheduler_sleep.cursor()
+    cur_scheduler_check = db_scheduler_sleep.cursor()
     now = datetime.utcnow() + timedelta(hours=3, minutes=0)
     users_bedtime = cur_scheduler.execute(
         'SELECT user_id FROM sleep WHERE bedtime = ?', (now.strftime('%H:%M'),)).fetchall()
     for user_bedtime in range(len(users_bedtime)):
-        try:
-            await bot.send_message(chat_id=users_bedtime[user_bedtime][0],
-                                   text='Вы просили напомнить, что вам пора ложиться спать!'
-                                        '\nЗавтра вас ждёт отличный день! '
-                                        '\nПомните, великое начинется с малого!')
-            await asyncio.sleep(0.1)
-        except BotBlocked:
-            cur_scheduler.execute(
-                'UPDATE sleep SET user_id = 0 WHERE user_id = ?', (users_bedtime[user_bedtime][0],))
-            db_scheduler_sleep.commit()
+        if cur_scheduler_check.execute('SELECT active FROM sleep WHERE user_id = ?', (users_bedtime[user_bedtime][0],)) == 1:
+            try:
+                await bot.send_message(chat_id=users_bedtime[user_bedtime][0],
+                                       text='Вы просили напомнить, что вам пора ложиться спать!'
+                                            '\nЗавтра вас ждёт отличный день! '
+                                            '\nПомните, великое начинется с малого!')
+                await asyncio.sleep(0.1)
+            except BotBlocked:
+                cur_scheduler.execute(
+                    'UPDATE sleep SET user_id = 0 WHERE user_id = ?', (users_bedtime[user_bedtime][0],))
+                db_scheduler_sleep.commit()
     cur_scheduler.execute('DELETE FROM sleep WHERE user_id = ?', (int(0),))
     db_scheduler_sleep.commit()
 

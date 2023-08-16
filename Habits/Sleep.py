@@ -25,6 +25,7 @@ async def habit_sleep(message: types.message, state: FSMContext):
     await bot.send_message(message.from_user.id, 'Хотите настроить привычку или удалить её?', reply_markup=Markups.tune_habit)
     await FSM_classes.HabitSleep.choose_action.set()
 
+
 async def choose_habit_action(message: types.message, state: FSMContext):
 
     if message.text == 'Настроить привычку':
@@ -43,6 +44,7 @@ async def choose_habit_action(message: types.message, state: FSMContext):
             await save_user_action(user_id=message.from_user.id, action='Привычка "Сон" УДАЛЕНА')
         else:
             await bot.send_message(message.from_user.id, 'У вас не настроена данная привычка!')
+
 
 async def choose_habit_sleep_wakeup(message: types.message, state: FSMContext):
     db_sleephabit = sqlite3.connect('Databases/Current_habits.db')
