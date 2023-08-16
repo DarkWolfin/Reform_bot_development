@@ -98,8 +98,11 @@ async def test_holms(message: types.message, state: FSMContext):
         db_holms.commit()
     if message.text == 'Записаться':
         await bot.send_message(message.from_user.id,
-                               'Перейдите по ссылке для записи - https://dikidi.net/1046062?p=0.pi')
+                               'К сожалению, пока что раздел взаимодействия со специалистами находится в разработке('
+                               '\nМы обязательно вас оповестим в первую очередь, когда появится возможность записи к психотерапевту через нашего бота!'
+                               '\n\nА пока что рекомендуем вам обратиться к психотерапевту воспользовавшись другими сервисами в ближайшее время, если есть необходимость')
         await save_user_action(user_id=message.from_user.id, action='Перешел по ссылке на запись к психотерапевту')
+
 
 async def answer_holms(callback_query: types.CallbackQuery, state: FSMContext):
     point = callback_query.data[-1]
@@ -167,6 +170,7 @@ async def answer_holms(callback_query: types.CallbackQuery, state: FSMContext):
             db_holms.commit()
             await save_user_action(user_id=callback_query.from_user.id, action='Завершил тест Холмса-Рея (>300)')
             await FSM_classes.MultiDialog.specialist.set()
+
 
 def register_handlers_specialist(dp: Dispatcher):
     dp.register_callback_query_handler(
