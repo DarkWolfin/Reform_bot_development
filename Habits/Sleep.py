@@ -24,6 +24,7 @@ async def habit_sleep(message: types.message, state: FSMContext):
     await bot.send_photo(message.from_user.id, PreviewPhotoHabitSleep)
     await bot.send_message(message.from_user.id, 'Хотите настроить привычку или удалить её?', reply_markup=Markups.tune_habit)
     await FSM_classes.HabitSleep.choose_action.set()
+    await save_user_action(user_id=message.from_user.id, action='Выбрал привычку "Сон"')
 
 
 async def choose_habit_action(message: types.message, state: FSMContext):
@@ -42,6 +43,7 @@ async def choose_habit_action(message: types.message, state: FSMContext):
             await bot.send_message(message.from_user.id, 'Ваша привычка успешно удалена!')
             db_sleephabit.commit()
             await save_user_action(user_id=message.from_user.id, action='Привычка "Сон" УДАЛЕНА')
+            await save_user_action(user_id=message.from_user.id, action='Удалил привычку "Сон"')
         else:
             await bot.send_message(message.from_user.id, 'У вас не настроена данная привычка!')
 
@@ -91,6 +93,7 @@ async def choose_habit_sleep_bedtime(message: types.message, state: FSMContext):
                 cur_sleephabit.execute("UPDATE sleep SET active = 1 WHERE user_id = ?",
                                        (message.from_user.id,))
                 db_sleephabit.commit()
+                await save_user_action(user_id=message.from_user.id, action='Настроил привычку "Сон"')
             else:
                 await bot.send_message(message.from_user.id,
                                        'Ошибка! Напишите время отхода ко сну в формате ЧЧ:ММ (например: 22:45)')
