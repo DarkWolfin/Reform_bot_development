@@ -21,6 +21,7 @@ class MultiDialog(StatesGroup):
     courses = State()
     course_anxiety = State()
     specialist = State()
+    tech_support = State()
 
 
 class HabitSleep(StatesGroup):
