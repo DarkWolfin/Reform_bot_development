@@ -25,7 +25,6 @@ async def habit_water(message: types.message, state: FSMContext):
     await bot.send_photo(message.from_user.id, PreviewPhotoHabitWater)
     await bot.send_message(message.from_user.id, 'Хотите настроить привычку или удалить её?', reply_markup=Markups.tune_habit)
     await FSM_classes.HabitWater.choose_action.set()
-    await save_user_action(user_id=message.from_user.id, action='Выбрал привычку "Питьё воды"')
 
 
 async def choose_habit_action(message: types.message, state: FSMContext):
@@ -46,7 +45,7 @@ async def choose_habit_action(message: types.message, state: FSMContext):
             cur_waterHabit.execute('UPDATE water SET interval = 0 WHERE user_id = ?', (message.from_user.id,))
             await bot.send_message(message.from_user.id, 'Ваша привычка успешно удалена!')
             db_waterHabit.commit()
-            await save_user_action(user_id=message.from_user.id, action='Удалил привычку "Питьё воды"')
+            await save_user_action(user_id=message.from_user.id,action='waterHabitDeleted')
 
         else:
             await bot.send_message(message.from_user.id, 'У вас не настроена данная привычка!')
@@ -71,6 +70,7 @@ async def choose_habit_water_portions(message: types.message, state: FSMContext)
         await FSM_classes.HabitWater.choose_amount_of_portion.set()
 
 
+
 async def choose_habit_water_schedule(message: types.message, state: FSMContext):
     db_waterHabit = sqlite3.connect('Databases/Current_habits.db')
     cur_waterHabit = db_waterHabit.cursor()
@@ -89,9 +89,9 @@ async def choose_habit_water_schedule(message: types.message, state: FSMContext)
         await FSM_classes.HabitWater.choose_schedule.set()
     await bot.send_message(message.from_user.id,
                            'Вы успешно начали работу над приёмом воды!', reply_markup=Markups.backHabitRe)
-    await FSM_classes.MultiDialog.menu.set()
-    await save_user_action(user_id=message.from_user.id, action='Настроил привычку "Питьё воды"')
+    await save_user_action(user_id=message.from_user.id,action='waterHabitSet')
 
+    await FSM_classes.MultiDialog.menu.set()
 
 async def answer_water_schedule(callback_query: types.CallbackQuery, state: FSMContext):
     db_waterHabit = sqlite3.connect('Databases/Current_habits.db')

@@ -70,7 +70,6 @@ async def pretest_weariness(message: types.message, state: FSMContext):
         data['points'] = 0
     await points_test_weariness(state, user_id=message.from_user.id)
     await state.finish()
-    await save_user_action(user_id=message.from_user.id, action='Начал тест Psy_Weariness')
     await bot.send_message(message.from_user.id, 'Хроническое утомление даже на ранних стадиях развития существенно снижает работоспособность человека, '
                            'а в выраженных степенях приводит к затруднению выполнения даже хорошо знакомой работы '
                            'и в крайних степенях – к полному срыву деятельности. '
@@ -83,7 +82,6 @@ async def pretest_weariness(message: types.message, state: FSMContext):
     cur_weariness = db_weariness.cursor()
     cur_weariness.execute("UPDATE answers SET countOfAnswers = 0 WHERE user_id = ?", (message.from_user.id,))
     db_weariness.commit()
-
 
 async def answer_weariness(callback_query: types.CallbackQuery, state: FSMContext):
     point = callback_query.data[-1]
@@ -121,7 +119,7 @@ async def answer_weariness(callback_query: types.CallbackQuery, state: FSMContex
             await bot.send_message(callback_query.from_user.id, 'Результаты показывают, что у вас отсутствуют признаки хронического утомления. Надеемся, что текущая работа и дальше будет вам интересна и желанна', reply_markup=Markups.backIn)
             cur_weariness.execute("UPDATE answers SET countOfAnswers = 0")
             db_weariness.commit()
-            await save_user_action(user_id=callback_query.from_user.id, action='Прошёл тест Psy_Weariness (Отсутствует)')
+            await save_user_action(user_id=callback_query.from_user.id, action='Psy_Weariness')
         elif (int(cur_weariness.execute('SELECT points FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) > 17) and (int(cur_weariness.execute('SELECT points FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) <= 26):
             Feedback_kb = InlineKeyboardMarkup(row_width=1)
             Feedback_kb.add(InlineKeyboardButton('Посмотреть курс', callback_data='Feedback_btn0'),
@@ -129,7 +127,7 @@ async def answer_weariness(callback_query: types.CallbackQuery, state: FSMContex
             await bot.send_message(callback_query.from_user.id, 'Результаты показывают, что у вас присутствуют признаки начальной степени хронического утомления. Рекомендуем вам пройти небольшой курс поддерживающих практик', reply_markup=Feedback_kb)
             cur_weariness.execute("UPDATE answers SET countOfAnswers = 0")
             db_weariness.commit()
-            await save_user_action(user_id=callback_query.from_user.id, action='Прошёл тест Psy_Weariness (Начальная степень)')
+            await save_user_action(user_id=callback_query.from_user.id, action='Psy_Weariness')
         elif (int(cur_weariness.execute('SELECT points FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) > 26) and (int(cur_weariness.execute('SELECT points FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) <= 37):
             Feedback_kb = InlineKeyboardMarkup(row_width=1)
             Feedback_kb.add(InlineKeyboardButton('Посмотреть курс', callback_data='Feedback_btn0'),
@@ -138,7 +136,7 @@ async def answer_weariness(callback_query: types.CallbackQuery, state: FSMContex
                                    'Результаты показывают, что у вас присутствуют признаки выраженной степени хронического утомления. Рекомендуем вам пройти небольшой курс восстанавливающих и поддерживающих практик', reply_markup=Feedback_kb)
             cur_weariness.execute("UPDATE answers SET countOfAnswers = 0")
             db_weariness.commit()
-            await save_user_action(user_id=callback_query.from_user.id, action='Прошёл тест Psy_Weariness (Средняя степень)')
+            await save_user_action(user_id=callback_query.from_user.id, action='Psy_Weariness')
         else:
             await FSM_classes.MultiDialog.specialist.set()
             Feedback_kb = InlineKeyboardMarkup(row_width=1)
@@ -148,8 +146,7 @@ async def answer_weariness(callback_query: types.CallbackQuery, state: FSMContex
                                    'Результаты показывают, что у вас присутствуют признаки сильной степени хронического утомления. Рекомендуем вам пройти курс восстанавливающих и поддерживающих практик а также обратиться к специалисту в ближайшее время', reply_markup=Feedback_kb)
             cur_weariness.execute("UPDATE answers SET countOfAnswers = 0")
             db_weariness.commit()
-            await save_user_action(user_id=callback_query.from_user.id, action='Прошёл тест Psy_Weariness (Высокая степень)')
-
+            await save_user_action(user_id=callback_query.from_user.id, action='Psy_Weariness')
 
 async def process_callback_feedback(callback_query: types.CallbackQuery, state: FSMContext):
     point = callback_query.data[-1]
@@ -217,7 +214,7 @@ async def process_callback_feedback(callback_query: types.CallbackQuery, state: 
                                'В этом разделе вы найдёте полезные практики и привычки, которые вы сможете внедрить в свою жизнь прямо сейчас.'
                                'Для этого вам всего лишь нужно выбрать интересующую и время напоминаний, но не забывайте, что самое главное - ваши старания!',
                                reply_markup=Markups.type_of_habits)
-    if point == '6':
+    if point =='6':
         spec = ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton('Перейти'))
         await bot.send_message(callback_query.from_user.id, 'Вы хотите перейти на страницу записи к психотерапевту?', reply_markup=spec)
         await FSM_classes.MultiDialog.specialist.set()
