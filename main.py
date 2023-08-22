@@ -1,7 +1,3 @@
-# from aiogram.contrib.fsm_storage.redis import RedisStorage, RedisStorage2
-# from aioredis import Redis
-
-
 import chats_id
 from PsyTests import Psy_Weariness, Psy_selfefficacy
 from AllCourses import Anxiety
@@ -37,14 +33,6 @@ from Database import db_start, data_profile, affirmation, data_feedback, pre_poi
     points_test_weariness, \
     pre_answers_test_weariness, set_user_token, get_all_user_ids, save_user_action
 
-# import redis
-#
-# r = redis.Redis(
-#   host='redis-14259.c292.ap-southeast-1-1.ec2.cloud.redislabs.com',
-#   port=14259,
-#   password='TMHsgHFXzF4ZDmYerEn7C0EOBSkKYWdT')
-#
-# redis = Redis()
 
 async def on_startup(_):
     await db_start()
