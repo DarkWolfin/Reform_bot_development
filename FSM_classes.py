@@ -51,6 +51,14 @@ class Feedback(StatesGroup):
     answer_6 = State()
     answer_extra = State()
 
+class FB_marathon(StatesGroup):
+    answer_1 = State()
+    answer_2 = State()
+    answer_3 = State()
+    answer_4 = State()
+    answer_5 = State()
+    answer_6 = State()
+
 
 class adminCommands(StatesGroup):
     getUserReportPassword = State()
@@ -62,3 +70,4 @@ class adminCommands(StatesGroup):
     getUserActionDate = State()
     getUserReportGraphDate = State()
     receiving_feedback_password = State()
+    FB_marathon_password = State()
