@@ -14,7 +14,7 @@ bot = Bot(Token)
 dp = Dispatcher(bot, storage=MemoryStorage())
 
 from Database import pre_points_test_control, points_test_control, pre_points_test_selfefficacy, \
-    points_test_selfefficacy
+    points_test_selfefficacy, save_user_action
 
 import Markups
 import FSM_classes
@@ -46,6 +46,7 @@ async def pretest_selfefficacy(message: types.message, state: FSMContext):
         data['points'] = 0
     await points_test_selfefficacy(state, user_id=message.from_user.id)
     await state.finish()
+    await save_user_action(user_id=message.from_user.id, action='Начал тест Psy_selfefficacy')
     await bot.send_message(message.from_user.id, 'Самоэффективность - уверенность в успехе собственного поведения.'
                                                  '\nВ понятие вкладывается возможность оценивать умение людей осознавать свои способности и использовать их наилучшим образом. '
                                                  'При этом особое внимание придается тому, что при более чем скромных способностях умелое их использование позволяет человеку достичь высоких результатов.'
@@ -110,6 +111,7 @@ async def answer_selfefficacy(callback_query: types.CallbackQuery):
                                    'Когда твое сердце уходит в пятки, это значит, что ты делаешь что-то важное и выходишь из зоны своей трусости.'
                                    'Когда ты делаешь что-то для тебя важное, испытывать волнение — нормально. Наслаждайся волнением и все равно действуй!',
                                    reply_markup=Markups.backIn)
+            await save_user_action(user_id=callback_query.from_user.id, action='Прошёл тест Psy_selfefficacy (Низкая самоэффективность)')
         elif (int(cur_selfefficacy.execute('SELECT points FROM points WHERE user_id = ?',
                                            (callback_query.from_user.id,)).fetchone()[0]) > 26) and (int(
                 cur_selfefficacy.execute('SELECT points FROM points WHERE user_id = ?',
@@ -125,6 +127,7 @@ async def answer_selfefficacy(callback_query: types.CallbackQuery):
                                    'Когда твое сердце уходит в пятки, это значит, что ты делаешь что-то важное и выходишь из зоны своей трусости.'
                                    'Когда ты делаешь что-то для тебя важное, испытывать волнение — нормально. Наслаждайся волнением и все равно действуй!',
                                    reply_markup=Markups.backIn)
+            await save_user_action(user_id=callback_query.from_user.id, action='Прошёл тест Psy_selfefficacy (Средняя самоэффективность)')
         else:
             await bot.send_message(callback_query.from_user.id,
                                    'Поздравляем! У вас высокий уровень самоэффективности! Продолжайте в том же духе и '
@@ -132,6 +135,7 @@ async def answer_selfefficacy(callback_query: types.CallbackQuery):
                                    '\nВ области мышления высокая самоэффективность облегчает процесс принятия решений и проявляется в разнообразных общих способностях, включая академические достижения и повышенную мотивацию к осуществлению активных действий, особенно в трудных ситуациях. '
                                    'Люди с высокой самоэффективностью предпочитают браться за более сложные задачи, они ставят перед собой более высокие цели и упорнее их добиваются!',
                                    reply_markup=Markups.backIn)
+            await save_user_action(user_id=callback_query.from_user.id, action='Прошёл тест Psy_selfefficacy (Высокая самоэффективность)')
 
 
 def register_handlers_Psy_selfefficacy(dp: Dispatcher):

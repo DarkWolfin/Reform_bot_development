@@ -10,7 +10,6 @@ class MultiDialog(StatesGroup):
     tests = State()
     test_weariness = State()
     test_stress = State()
-    test_temperament = State()
     test_selfefficacy = State()
     test_control = State()
     test_typeperson = State()
@@ -22,7 +21,7 @@ class MultiDialog(StatesGroup):
     courses = State()
     course_anxiety = State()
     specialist = State()
-
+    tech_support = State()
 
 
 class HabitSleep(StatesGroup):
@@ -30,6 +29,7 @@ class HabitSleep(StatesGroup):
     choose_action = State()
     choose_bedtime = State()
     choose_wakeup = State()
+
 
 class HabitWater(StatesGroup):
     none = State()
@@ -42,6 +42,16 @@ class Admin(StatesGroup):
     mailing_all = State()
 
 
+class Feedback(StatesGroup):
+    answer_1_yn = State()
+    answer_2_choose = State()
+    answer_3_choose = State()
+    answer_4 = State()
+    answer_5 = State()
+    answer_6 = State()
+    answer_extra = State()
+
+
 class adminCommands(StatesGroup):
     getUserReportPassword = State()
     getUserReport = State()
@@ -51,3 +61,4 @@ class adminCommands(StatesGroup):
     getUserActionId = State()
     getUserActionDate = State()
     getUserReportGraphDate = State()
+    receiving_feedback_password = State()

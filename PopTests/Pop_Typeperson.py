@@ -51,12 +51,14 @@ async def pretest_typeperson(message: types.message, state: FSMContext):
         data['points'] = 0
     await points_test_typeperson(state, user_id=message.from_user.id)
     await state.finish()
+    await save_user_action(user_id=message.from_user.id, action='Начал тест Pop_Typeperson')
     await bot.send_message(message.from_user.id, 'Тест поможет узнать вам сильные стороны и скрытые ресурсы личности.'
                                                  'Но помните, тест служит своеобразным индикатором, который только примерно может определить присущие Вам качества.'
                                                  '\n\nВам будет предложено 18 утверждений, оцените их по 5-балльной шкале, в какой степени они про вас'
                                                  '\nПриступим к тесту!', reply_markup=types.ReplyKeyboardRemove())
     await asyncio.sleep(3)
     await bot.send_message(message.from_user.id, text=typeperson_questions[0], reply_markup=typeperson_answer)
+
 
 async def answer_typeperson(callback_query: types.CallbackQuery):
     db_typeperson = sqlite3.connect('Databases/Result_Tests/POP_Typeperson.db')
@@ -85,13 +87,13 @@ async def answer_typeperson(callback_query: types.CallbackQuery):
                                    '\nЗато вы довольно-таки основательны, вас сложно вывести из равновесия. Вы редко принимаете скоропалительные решения, руководствуетесь не эмоциями, а логикой. '
                                    '\nСовет: не замыкайтесь в себе и проявляйте больше нежности к домочадцам.',
                                    reply_markup=Markups.backIn)
-            await save_user_action(user_id=callback_query.from_user.id, action='Psy_Typeperson')
+            await save_user_action(user_id=callback_query.from_user.id, action='Прошёл тест Pop_Typeperson (Малочувствительный)')
         elif (int(cur_typeperson.execute('SELECT points FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) > 25 ) and (int(cur_typeperson.execute('SELECT points FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) < 50):
             await bot.send_message(callback_query.from_user.id,
                                    'Ваш склад психики близок к золотой середине, что очень даже неплохо. '
                                    '\nПомните, умеренность может стать для вас залогом успеха!',
                                    reply_markup=Markups.backIn)
-            await save_user_action(user_id=callback_query.from_user.id, action='Psy_Typeperson')
+            await save_user_action(user_id=callback_query.from_user.id, action='Прошёл тест Pop_Typeperson (Средней чувствительности)')
         else:
             await bot.send_message(callback_query.from_user.id,
                                    'Вероятно, вы достаточно чувствительны к внешним раздражителям. Сильнее остальных страдаете от громких звуков и яркого света. '
@@ -99,7 +101,7 @@ async def answer_typeperson(callback_query: types.CallbackQuery):
                                    '\nЛюди с такой психической организацией бывают творческими личностями. '
                                    '\nСтарайтесь по возможности спокойнее реагировать на всё происходящее и не открывайте душу первому встречному.',
                                    reply_markup=Markups.backIn)
-            await save_user_action(user_id=callback_query.from_user.id, action='Psy_Typeperson')
+            await save_user_action(user_id=callback_query.from_user.id, action='Прошёл тест Pop_Typeperson (Очень чувствительный)')
 
 
 def register_handlers_Pop_typeperson(dp : Dispatcher):

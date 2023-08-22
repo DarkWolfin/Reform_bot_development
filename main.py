@@ -29,9 +29,9 @@ import aioschedule as schedule
 from aiogram.utils.exceptions import BotBlocked
 
 from Token import Token
-from Database import db_start, data_profile, affirmation, pre_points_test_weariness, points_test_weariness, \
-    pre_answers_test_weariness, set_user_token, get_all_user_ids
-
+from Database import db_start, data_profile, affirmation, data_feedback, pre_points_test_weariness, \
+    points_test_weariness, \
+    pre_answers_test_weariness, set_user_token, get_all_user_ids, save_user_action
 
 async def on_startup(_):
     await db_start()
@@ -50,11 +50,236 @@ Psy_selfefficacy.register_handlers_Psy_selfefficacy(dp)
 Psy_stress.register_handlers_Psy_stress(dp)
 Psy_Weariness.register_handlers_Psy_Weariness(dp)
 
-@dp.message_handler(commands=['admin_mailing'], state='*', chat_id=417986886)
-async def check_active_users(message: types.Message):
-    await FSM_classes.Admin.mailing_all.set()
-    await bot.send_message(message.from_user.id, text='Здравствуйте, босс! Пришлите то, что хотите разослать!',
+
+Token_Raiff = ['RCS1', 'RCS2', 'RCS3', 'RCS4', 'RCS5', 'RCS6', 'RCS7', 'RCS8', 'RCS9', 'RCS10', 'RCS11', 'RCS12', 'RCS13',
+               'RCS14', 'RCS15', 'RCS16', 'RCS17', 'RCS18', 'RCS19', 'RCS20', 'RCS21', 'RCS22', 'RCS23', 'RCS24', 'RCS25', 'RCS26',
+               'SME1', 'SME2', 'SME3', 'SME4', 'SME5', 'SME6', 'SME7', 'SME8', 'SME9', 'SME10', 'SME11', 'SME12', 'SME13', 'SME14', 'SME15',
+               'PREM1', 'PREM2', 'PREM3', 'PREM4', 'PREM5', 'PREM6', 'PREM7', 'PREM8', 'PREM9',
+               'TEST1', 'TEST2', 'TEST3', 'TEST4', 'TEST5', 'TEST00', 'TEST000',
+               'admin']
+
+
+@dp.message_handler(commands=['start'], state='*')
+async def welcome(message: types.Message):
+    await data_profile(user_id=message.from_user.id, first_name=message.from_user.first_name,
+                       username=message.from_user.username)
+    await FSM_classes.MultiDialog.getToken.set()
+    mess = f'Здравствуйте 🖐, <b>{message.from_user.first_name}</b>! Рад, что вы заботитетсь о своем ментальном здоровье! ' \
+           f'\nБот Reform - это цифровой помощник, к которому вы сможете обратиться в случае возникновения стресса, тревоги или апатии, а самое главное для того, чтобы не допустить этого!' \
+           f'\n\nОн поможет вам разобраться в проблеме и предоставит инструменты для её решения.' \
+           f'\nВы сможете преодолеть любые преграды на вашем пути, а бот поможет вам советом и рекомендацией в трудную минуту!'
+    await bot.send_message(message.from_user.id, mess, parse_mode='html')
+    await bot.send_message(message.from_user.id,
+                           "Пожалуйста введите ваш личный токен доступа, присвоенный вам \nНаш бот не в открытом доступе",
                            parse_mode='html')
+    await FSM_classes.MultiDialog.setToken.set()
+
+    await log_users(message)
+    await save_user_action(user_id=message.from_user.id, action='/start')
+
+
+@dp.message_handler(commands=['main_menu'], state='*')
+async def main_menu(message: types.Message, state: FSMContext):
+    await FSM_classes.HabitSleep.none.set()
+    await FSM_classes.MultiDialog.menu.set()
+    await bot.send_message(message.from_user.id, 'Вы в главном меню! Не знаете, что делать дальше?'
+                                                 '\n\n🧘‍♀️ Практики помогут вам разгрузиться после тяжёлого дня или успокоиться'
+                                                 '\n📝 Пройдите тесты, чтобы определить актуальное состояние и выявить проблему'
+                                                 '\n💪 Трекер привычек поможет внедрить и поддерживать полезные навыки'
+                                                 '\n🎬 Проходите курсы, узнавайте лучше себя, что поможет вам справиться с жизненными трудностями'
+                                                 '\n💬 Также вы можете обсудить проблему и получить рекомендации от специалиста'
+                                                 '\nВыберите, что вас интересует',
+                           parse_mode='html', reply_markup=Markups.main_kb)
+    await log_users(message)
+    await save_user_action(user_id=message.from_user.id, action='/main_menu')
+
+
+@dp.message_handler(state=FSM_classes.MultiDialog.setToken)
+async def set_token(message: types.Message):
+    Welcome_kb = InlineKeyboardMarkup()
+    Welcome_kb.add(InlineKeyboardButton(
+        'Приятно познакомиться!', callback_data='Welcome_btn0'))
+    if message.text in Token_Raiff:
+        try:
+            await set_user_token(user_id=message.from_user.id, token=message.text)
+            await bot.send_message(message.from_user.id, "Спасибо! Токен установлен корректно!", parse_mode='html',
+                                   reply_markup=Welcome_kb)
+            await FSM_classes.MultiDialog.menu.set()
+        except Exception:
+            await bot.send_message(message.from_user.id, "Произошла ошибка, попробуйте ещё раз", parse_mode='html')
+    else:
+        await bot.send_message(message.from_user.id, "Вы ввели некорректный токен, пожалуйста введите токен, который вы получили на работе, "
+                                                     "он состоит из заглавных букв английского алфавита и числа, записанных слитно (например, SME16, RCS28 и др.)", parse_mode='html')
+    await log_users(message)
+
+
+@dp.message_handler(state=FSM_classes.MultiDialog.tech_support)
+async def inline_quick_help(message: types.Message):
+    db_data = sqlite3.connect('Databases/Data_users.db')
+    cur_data = db_data.cursor()
+    user_support = cur_data.execute('SELECT token FROM profile WHERE user_id = ?', (message.from_user.id,)).fetchone()
+    await bot.send_message(chat_id=chats_id.support_chat_id, text=f"{str(message.from_user.id)}\n{user_support[0]}\n{str(message.text)}", parse_mode='html')
+    await bot.send_message(message.from_user.id, 'Ваш отчёт об ошибке успешно отправлен разработчикам! '
+                                                 '\nСпасибо, что помогаете сделать бот лучше!'
+                                                 '\n\nЕсли хотите сообщить ещё об одной ошибке, просто введите команду /support')
+
+
+@dp.message_handler(commands=['fix_tokens'], state='*', chat_id=[417986886,chats_id.commands_chat_id])
+async def fix_tokens_users(message: types.Message):
+    users_fix_tokens = [417986886, 860113766, 1499938354, 566646368, 389638229, 5203851196, 324651616, 656293519]
+    for i in range(len(users_fix_tokens)):
+        await bot.send_message(chat_id=users_fix_tokens[i], text='Добрый день! \nВ прошлое наше знакомство вы ввели некорректный токен доступа к боту, '
+                                                                 'пожалуйста напишите правильный токен доступа, который вы получили на работе, '
+                                                                 'он состоит из заглавных букв английского алфавита и числа, записанных слитно (например, SME16, RCS28 и др.)'
+                                                                 '\n\nВпереди мы готовим много интересного для вас! Подключайтесь! '
+                                                                 '\nБудем благодарны вам за помощь в тестировании!', parse_mode='html')
+        state = dp.current_state(chat=users_fix_tokens[i], user=users_fix_tokens[i])
+        await state.set_state(FSM_classes.MultiDialog.setToken)
+        await bot.send_message(message.chat.id, text='Отправлено '+str(users_fix_tokens[i]))
+
+
+@dp.message_handler(commands=['get_db'], state='*', chat_id=[417986886,chats_id.commands_chat_id])
+async def get_db(message: types.Message):
+    await bot.send_document(message.chat.id, open('Databases/Data_users.db', 'rb'))
+
+
+@dp.message_handler(commands=['admin_mailing'], state='*', chat_id=[417986886, chats_id.commands_chat_id])
+async def check_active_users(message: types.Message):
+    state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
+    await state.set_state(FSM_classes.Admin.mailing_all)
+    await bot.send_message(message.chat.id, text='Здравствуйте, босс! Пришлите то, что хотите разослать!',
+                           parse_mode='html')
+
+
+@dp.message_handler(commands=['receiving_feedback'], state='*')
+async def start_feedback(message: types.Message):
+    await bot.send_message(message.chat.id, text='Введите пароль:')
+    state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
+    await state.set_state(FSM_classes.adminCommands.receiving_feedback_password)
+
+
+@dp.message_handler(state=FSM_classes.adminCommands.receiving_feedback_password, chat_id=[417986886,chats_id.commands_chat_id])
+async def process_feedback(message: types.Message):
+    if message.text == 'ad12min3':
+        await bot.send_message(message.chat.id,
+                               text='Рассылка опроса началась')
+        start_of_feedback = 'Добрый день! ' \
+                            '\n\nНе могли бы вы уделить немного времени и поделиться вашими впечатлениями о чат-боте? (6 вопросов отнимут у вас не более 3 минут)' \
+                            '\nВаш ответ поможет нам улучшить качество предоставляемых услуг. ' \
+                            '\n\nПожалуйста, оцените следующие утверждения, выбрав наиболее подходящий вариант: ' \
+                            '\n\n1. Взаимодействовали ли вы с чат-ботом? '
+        answer_1_keyboard = ReplyKeyboardMarkup(row_width=1, resize_keyboard=True).add(KeyboardButton('Да'), KeyboardButton('Нет'))
+        db_data = sqlite3.connect('Databases/Data_users.db')
+        cur_data = db_data.cursor()
+        users = cur_data.execute(
+            'SELECT user_id FROM profile').fetchall()
+        for user_mailing in range(len(users)):
+            try:
+                await bot.send_message(chat_id=(users[user_mailing][0]),
+                                       text=start_of_feedback, parse_mode='html', reply_markup=answer_1_keyboard)
+                await data_feedback(user_id=users[user_mailing][0])
+                state = dp.current_state(chat=users[user_mailing][0], user=users[user_mailing][0])
+                await state.set_state(FSM_classes.Feedback.answer_1_yn)
+                await asyncio.sleep(0.1)
+            except BotBlocked:
+                cur_data.execute('UPDATE profile SET user_id = 0 WHERE user_id = ?',
+                                 (users[user_mailing][0],))
+                db_data.commit()
+        cur_data.execute('DELETE FROM profile WHERE user_id = ?', (int(0),))
+        db_data.commit()
+        await bot.send_message(message.chat.id,
+                               text='Опросы успешно разосланы!')
+    else:
+        await bot.send_message(message.from_user.id, text='Ошибка доступа!'
+                                                          '\n/receiving_feedback - ввести другой пароль '
+                                                          '\n/main_menu - перейти в главное меню')
+
+
+@dp.message_handler(content_types=['text'], state=FSM_classes.Feedback.answer_1_yn)
+async def feedback_answer_1(message: types.Message):
+    db_f = sqlite3.connect('Databases/Data_users.db')
+    cur_f = db_f.cursor()
+    cur_f.execute("UPDATE feedback SET answer_1_yn = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    db_f.commit()
+    answer_2_keyboard = ReplyKeyboardMarkup(row_width=1, resize_keyboard=True).add(KeyboardButton('Очень полезен'), KeyboardButton('Полезен, но есть недостатки'),
+                                                  KeyboardButton('Есть польза, но много недостатков'), KeyboardButton('Бесполезен'), KeyboardButton('Ещё не взаимодействовал'))
+    await bot.send_message(message.from_user.id,
+                           text='2. Насколько был полезен для вас чат-бот?', parse_mode='html', reply_markup=answer_2_keyboard)
+    await FSM_classes.Feedback.answer_2_choose.set()
+
+
+@dp.message_handler(content_types=['text'], state=FSM_classes.Feedback.answer_2_choose)
+async def feedback_answer_2(message: types.Message):
+    db_f = sqlite3.connect('Databases/Data_users.db')
+    cur_f = db_f.cursor()
+    cur_f.execute("UPDATE feedback SET answer_2_choose = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    db_f.commit()
+    answer_3_keyboard = ReplyKeyboardMarkup(row_width=1, resize_keyboard=True).add(KeyboardButton('Общаться комфортно'), KeyboardButton('Общаться скорее комфортно, но есть недостатки'),
+                                                  KeyboardButton('Большинство общения неприятно'), KeyboardButton('Неприятно общаться, так как затрагиваются личные темы'))
+    await bot.send_message(message.from_user.id,
+                           text='3. Как бы вы оценили уровень общения с чат-ботом на темы, связанные с вашим психологическим состоянием?', parse_mode='html', reply_markup=answer_3_keyboard)
+    await FSM_classes.Feedback.answer_3_choose.set()
+
+
+@dp.message_handler(content_types=['text'], state=FSM_classes.Feedback.answer_3_choose)
+async def feedback_answer_2(message: types.Message):
+    db_f = sqlite3.connect('Databases/Data_users.db')
+    cur_f = db_f.cursor()
+    cur_f.execute("UPDATE feedback SET answer_3_choose = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    db_f.commit()
+    await bot.send_message(message.from_user.id,
+                           text='4. Были ли у вас какие-либо негативные или позитивные эмоции, связанные с использованием чат-бота для психологической поддержки (прохождение тестов, использование практик, система рекомендаций)? '
+                                '\nЕсли да, то будем признательны, если вы поделитесь вашим опытом', parse_mode='html', reply_markup=types.ReplyKeyboardRemove())
+    await FSM_classes.Feedback.answer_4.set()
+
+
+@dp.message_handler(content_types=['text'], state=FSM_classes.Feedback.answer_4)
+async def feedback_answer_2(message: types.Message):
+    db_f = sqlite3.connect('Databases/Data_users.db')
+    cur_f = db_f.cursor()
+    cur_f.execute("UPDATE feedback SET answer_4 = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    db_f.commit()
+    await bot.send_message(message.from_user.id,
+                           text='5. Изменили ли вы что-то в текущем чат-боте? '
+                                '\nЕсли да, то пожалуйста напишите', parse_mode='html')
+    await FSM_classes.Feedback.answer_5.set()
+
+
+@dp.message_handler(content_types=['text'], state=FSM_classes.Feedback.answer_5)
+async def feedback_answer_2(message: types.Message):
+    db_f = sqlite3.connect('Databases/Data_users.db')
+    cur_f = db_f.cursor()
+    cur_f.execute("UPDATE feedback SET answer_5 = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    db_f.commit()
+    await bot.send_message(message.from_user.id,
+                           text='6. Есть ли то, что вы бы хотели видеть в чат-боте в будущем? '
+                                '\nЕсли да, то будем признательны за то, что поделились', parse_mode='html')
+    await FSM_classes.Feedback.answer_6.set()
+
+
+@dp.message_handler(content_types=['text'], state=FSM_classes.Feedback.answer_6)
+async def feedback_answer_2(message: types.Message):
+    db_f = sqlite3.connect('Databases/Data_users.db')
+    cur_f = db_f.cursor()
+    cur_f.execute("UPDATE feedback SET answer_6 = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    db_f.commit()
+    await bot.send_message(message.from_user.id,
+                           text='Если у вас есть пожелания или дополнительные комментарии которыми вы бы хотели поделиться? '
+                                '\nЕсли нет, то напишите пожалуйста “нет”', parse_mode='html')
+    await FSM_classes.Feedback.answer_extra.set()
+
+
+@dp.message_handler(content_types=['text'], state=FSM_classes.Feedback.answer_extra)
+async def feedback_answer_2(message: types.Message, state: FSMContext):
+    db_f = sqlite3.connect('Databases/Data_users.db')
+    cur_f = db_f.cursor()
+    cur_f.execute("UPDATE feedback SET answer_extra = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    db_f.commit()
+    await bot.send_message(message.from_user.id,
+                           text='Спасибо вам за участие в опросе! '
+                                '\nВаши ответы помогут нам сделать чат-бот психологической поддержки более эффективным и удобным для вашего использования!', parse_mode='html')
+    await FSM_classes.MultiDialog.menu.set()
+    await main_menu(message, state)
 
 
 @dp.callback_query_handler(state=FSM_classes.MultiDialog.quick_help)
@@ -70,21 +295,20 @@ async def reply_quick_help(message: types.Message, state: FSMContext):
     await quick_help.all_way_quick_help(message)
 
 
-
 @dp.message_handler(commands=['getuserreport'], state='*')
 async def get_user_report(message: types.Message):
-    await bot.send_message(message.from_user.id, text='Введите пароль:')
+    await bot.send_message(message.chat.id, text='Введите пароль:')
     await FSM_classes.adminCommands.getUserReportPassword.set()
 
 
 @dp.message_handler(state=FSM_classes.adminCommands.getUserReportPassword)
 async def get_user_report(message: types.Message, state: FSMContext):
     if message.text == 'admin123':
-        await bot.send_message(message.from_user.id,
+        await bot.send_message(message.chat.id,
                                text='Введите id нужных юзеров через пробел или напишите слово "все"')
         await FSM_classes.adminCommands.getUserReportId.set()
     else:
-        await bot.send_message(message.from_user.id, text='Ошибка доступа!'
+        await bot.send_message(message.chat.id, text='Ошибка доступа!'
                                                           '\n/getuserreport - ввести другой пароль '
                                                           '\n/main_menu - перейти в главное меню')
 
@@ -92,7 +316,7 @@ async def get_user_report(message: types.Message, state: FSMContext):
 @dp.message_handler(state=FSM_classes.adminCommands.getUserReportId)
 async def get_user_report(message: types.Message, state: FSMContext):
     await state.set_data({"users": message.text})
-    await bot.send_message(message.from_user.id,
+    await bot.send_message(message.chat.id,
                            text='Введите дату начала и конца наблюдений через пробел в формате гггг:мм:дд')
     await FSM_classes.adminCommands.getUserReportDate.set()
 
@@ -103,7 +327,7 @@ async def get_user_report(message: types.Message, state: FSMContext):
     try:
         startDate, endDate = message.text.split(' ')
     except:
-        await bot.send_message(message.from_user.id, text='Ошибка при вводе даты, попробуйте ещё')
+        await bot.send_message(message.chat.id, text='Ошибка при вводе даты, попробуйте ещё')
         await FSM_classes.adminCommands.getUserReportDate.set()
         return
 
@@ -121,18 +345,18 @@ async def get_user_report(message: types.Message, state: FSMContext):
 
 @dp.message_handler(commands=['getuseractions'], state='*')
 async def get_user_report(message: types.Message):
-    await bot.send_message(message.from_user.id, text='Введите пароль:')
+    await bot.send_message(message.chat.id, text='Введите пароль:')
     await FSM_classes.adminCommands.getUserActionPassword.set()
 
 
 @dp.message_handler(state=FSM_classes.adminCommands.getUserActionPassword)
 async def get_user_report(message: types.Message, state: FSMContext):
     if message.text == 'admin123':
-        await bot.send_message(message.from_user.id,
+        await bot.send_message(message.chat.id,
                                text='Введите токены нужных юзеров через пробел или напишите слово "все"')
         await FSM_classes.adminCommands.getUserActionId.set()
     else:
-        await bot.send_message(message.from_user.id, text='Ошибка доступа!'
+        await bot.send_message(message.chat.id, text='Ошибка доступа!'
                                                           '\n/getuserreport - ввести другой пароль '
                                                           '\n/main_menu - перейти в главное меню')
 
@@ -140,7 +364,7 @@ async def get_user_report(message: types.Message, state: FSMContext):
 @dp.message_handler(state=FSM_classes.adminCommands.getUserActionId)
 async def get_user_report(message: types.Message, state: FSMContext):
     await state.set_data({"users": message.text})
-    await bot.send_message(message.from_user.id, text='Введите дату начала и конца наблюдений через пробел')
+    await bot.send_message(message.chat.id, text='Введите дату начала и конца наблюдений через пробел')
     await FSM_classes.adminCommands.getUserActionDate.set()
 
 
@@ -156,7 +380,7 @@ async def get_user_report(message: types.Message, state: FSMContext):
         await admin_commands.createExcelFileActionCommand(startDate, endDate, tokens)
 
     with open('getUserAction.xlsx', 'rb') as f:
-        await bot.send_document(chat_id=message.from_user.id, document=InputFile(f))
+        await bot.send_document(chat_id=message.chat.id, document=InputFile(f))
     await FSM_classes.MultiDialog.menu.set()
     await main_menu(message, state)
 
@@ -183,8 +407,7 @@ async def get_user_report(message: types.Message, state: FSMContext):
         await FSM_classes.adminCommands.getUserReportGraphDate.set()
 
 
-
-@dp.message_handler(content_types=['photo'], state=FSM_classes.Admin.mailing_all)
+@dp.message_handler(content_types=['photo'], state=FSM_classes.Admin.mailing_all, chat_id=[417986886, chats_id.commands_chat_id])
 async def mailing_photo(message: types.Message):
     await message.photo[-1].download(destination_file='mailing.jpg')
     db_user_blocked = sqlite3.connect('Databases/Data_users.db')
@@ -195,63 +418,37 @@ async def mailing_photo(message: types.Message):
         try:
             photo_mailing = open('mailing.jpg', 'rb')
             await bot.send_photo(chat_id=(users[user][0]), photo=photo_mailing, parse_mode='html')
+            await bot.send_message(chat_id=message.chat.id, text='Отправлено ' + str(users[user][0]), parse_mode='html')
             await asyncio.sleep(0.1)
         except BotBlocked:
             cur_user_blocked.execute(
                 'UPDATE profile SET active = "Нет" WHERE user_id = ?', (users[user][0],))
+            await bot.send_message(chat_id=message.chat.id, text='Бот заблолкирован '+str(users[user][0]), parse_mode='html')
             db_user_blocked.commit()
+    await bot.send_message(chat_id=message.chat.id, text='Ваше изображение успешно отправлено! Вы молодец, босс!')
 
 
-@dp.message_handler(content_types=['text'], state=FSM_classes.Admin.mailing_all)
+@dp.message_handler(content_types=['text'], state=FSM_classes.Admin.mailing_all, chat_id=[417986886, chats_id.commands_chat_id])
 async def mailing_text(message: types.Message):
     db_user_blocked = sqlite3.connect('Databases/Data_users.db')
     cur_user_blocked = db_user_blocked.cursor()
     users = cur_user_blocked.execute('SELECT user_id FROM profile').fetchall()
+    await bot.send_message(chat_id=message.chat.id, text='Получено',
+                           parse_mode='html')
     await FSM_classes.MultiDialog.menu.set()
     for user in range(len(users)):
         try:
             await bot.send_message(chat_id=(users[user][0]),
                                    text=message.text, parse_mode='html')
+            await bot.send_message(chat_id=message.chat.id, text='Отправлено ' + str(users[user][0]),
+                                   parse_mode='html')
             await asyncio.sleep(0.1)
         except BotBlocked:
             cur_user_blocked.execute(
                 'UPDATE profile SET active = "Нет" WHERE user_id = ?', (users[user][0],))
+            await bot.send_message(chat_id=message.chat.id, text='Бот заблолкирован '+str(users[user][0]), parse_mode='html')
             db_user_blocked.commit()
-
-
-@dp.message_handler(commands=['start'], state='*')
-async def welcome(message: types.Message):
-    await data_profile(user_id=message.from_user.id, first_name=message.from_user.first_name,
-                       username=message.from_user.username)
-    await FSM_classes.MultiDialog.getToken.set()
-    mess = f'Здравствуйте 🖐, <b>{message.from_user.first_name}</b>! Рад, что вы заботитетсь о своем ментальном здоровье! ' \
-           f'\nБот Reform - это цифровой помощник, к которому вы сможете обратиться в случае возникновения стресса, тревоги или апатии, а самое главное для того, чтобы не допустить этого!' \
-           f'\n\nОн поможет вам разобраться в проблеме и предоставит инструменты для её решения.' \
-           f'\nВы сможете преодолеть любые преграды на вашем пути, а бот поможет вам советом и рекомендацией в трудную минуту!'
-    await bot.send_message(message.from_user.id, mess, parse_mode='html')
-    await bot.send_message(message.from_user.id,
-                           "Наш бот не в открытом доступе, по этому нужно ввести личный токен доступа",
-                           parse_mode='html')
-    await FSM_classes.MultiDialog.setToken.set()
-
-    await log_users(message)
-
-
-@dp.message_handler(state=FSM_classes.MultiDialog.setToken)
-async def set_token(message: types.Message):
-    Welcome_kb = InlineKeyboardMarkup()
-    Welcome_kb.add(InlineKeyboardButton(
-        'Приятно познакомиться!', callback_data='Welcome_btn0'))
-
-    await FSM_classes.MultiDialog.menu.set()
-    try:
-        await set_user_token(user_id=message.from_user.id, token=message.text)
-        await bot.send_message(message.from_user.id, "Токен установлен корректно!", parse_mode='html',
-                               reply_markup=Welcome_kb)
-    except Exception:
-        await bot.send_message(message.from_user.id, "Произошла ошибка, попробуйте ещё раз", parse_mode='html')
-
-    await log_users(message)
+    await bot.send_message(chat_id=message.chat.id, text='Ваше сообщение успешно отправлено! Вы молодец, босс!')
 
 
 
@@ -269,25 +466,19 @@ async def mailing(callback_query: types.CallbackQuery, state: FSMContext):
                                parse_mode='html', reply_markup=enterIn)
 
 
-@dp.message_handler(commands=['main_menu'], state='*')
-async def main_menu(message: types.Message, state: FSMContext):
-    await FSM_classes.HabitSleep.none.set()
-    await FSM_classes.MultiDialog.menu.set()
-    await bot.send_message(message.from_user.id, 'Вы в главном меню! Не знаете, что делать дальше?'
-                                                 '\n\n🧘‍♀️ Практики помогут вам разгрузиться после тяжёлого дня или успокоиться'
-                                                 '\n📝 Пройдите тесты, чтобы определить актуальное состояние и выявить проблему'
-                                                 '\n💪 Трекер привычек поможет внедрить и поддерживать полезные навыки'
-                                                 '\n🎬 Проходите курсы, узнавайте лучше себя, что поможет вам справиться с жизненными трудностями'
-                                                 '\n💬 Также вы можете обсудить проблему и получить рекомендации от специалиста'
-                                                 '\nВыберите, что вас интересует',
-                           parse_mode='html', reply_markup=Markups.main_kb)
-    await log_users(message)
-
-
 @dp.message_handler(commands=['practices'], state='*')
 async def practices(message: types.Message):
     await FSM_classes.MultiDialog.practices.set()
     await Practices.type_practices(message)
+    await save_user_action(user_id=message.from_user.id, action='/practices')
+
+
+@dp.message_handler(commands=['support'], state='*')
+async def support(message: types.Message):
+    await bot.send_message(message.from_user.id,
+                           text='Пожалуйста, опишите ошибку с которой вы столкнулись и отправьте одним сообщением')
+    await FSM_classes.MultiDialog.tech_support.set()
+    await save_user_action(user_id=message.from_user.id, action='/support')
 
 
 @dp.message_handler(commands=['test'], state='*')
@@ -295,6 +486,7 @@ async def test(message: types.message, state: FSMContext):
     await FSM_classes.MultiDialog.tests.set()
     await Tests.pretest(message, state)
     await log_users(message)
+    await save_user_action(user_id=message.from_user.id, action='/test')
 
 
 @dp.message_handler(commands=['courses'], state='*')
@@ -302,6 +494,7 @@ async def courses(message: types.Message, state: FSMContext):
     await FSM_classes.MultiDialog.courses.set()
     await Courses.precourse(message, state)
     await log_users(message)
+    await save_user_action(user_id=message.from_user.id, action='/courses')
 
 
 @dp.message_handler(commands=['contacts'], state='*')
@@ -312,20 +505,8 @@ async def contacts(message: types.Message):
                                                  'Если у вас есть вопросы или вы обнаружили ошибку, вы можете обратиться к @APecherkin.',
                            parse_mode='html', reply_markup=Markups.cont)
     await log_users(message)
+    await save_user_action(user_id=message.from_user.id, action='/contacts')
 
-
-# @dp.callback_query_handler(lambda c: c.data and c.data.startswith('fullversion'), state=FSM_classes.MultiDialog)
-# async def fullversion_callback(callback_query: types.CallbackQuery, state: FSMContext):
-#     await bot.send_message(callback_query.from_user.id, 'Полный доступ доступен в платной версии.'
-#                                                         '\nВ платной версии:'
-#                                                         '❇️25 медитаций'
-#                                                         '❇️10 дыхательных практик'
-#                                                         '❇️Таймер Помодоро'
-#                                                         '❇️Система ежедневных напоминаний и мотиваций'
-#                                                         '❇️Рекомендации по сну, питанию и отдыху от ведущих специалистов'
-#                                                         '\n\nОформить подписку за 499 рублей в месяц?',
-#                            parse_mode='html')
-#
 
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('Main_menu'), state='*')
 async def main_menu_callback(callback_query: types.CallbackQuery, state: FSMContext):
@@ -348,6 +529,7 @@ async def reply_practices(message: types.Message, state: FSMContext):
     await Practices.allreply_practices(message)
     await log_users(message)
 
+
 @dp.message_handler(state=FSM_classes.MultiDialog.specialist)
 async def reply_specialist(message: types.Message, state: FSMContext):
     if message.text == 'Перейти':
@@ -357,6 +539,7 @@ async def reply_specialist(message: types.Message, state: FSMContext):
         await main_menu(message, state)
     await Specialists.test_holms(message, state)
     await log_users(message)
+
 
 @dp.message_handler(state=FSM_classes.MultiDialog.tests)
 async def reply_tests(message: types.Message, state: FSMContext):
@@ -462,6 +645,7 @@ async def reply_specialist(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state='*')
 async def reply_all(message: types.Message, state: FSMContext):
+    await save_user_action(user_id=message.from_user.id, action=message.text)
     if message.text == 'Вернуться в главное меню':
         await main_menu(message, state)
         await log_users(message)
@@ -498,7 +682,7 @@ async def reply_all(message: types.Message, state: FSMContext):
         await Tests.pretest(message, state)
         await log_users(message)
 
-    if message.text == '💪 Мои привычки':
+    if message.text == '💪 Привычки':
         await FSM_classes.MultiDialog.habits.set()
         await Habit.prehabits(message, state)
         await log_users(message)
@@ -521,12 +705,10 @@ async def reply_all(message: types.Message, state: FSMContext):
         await contacts(message)
         await log_users(message)
 
-    if message.text == 'Получить свой ID':
-        await bot.send_message(message.from_user.id,
-                               text="Ваш id: `{}`".format(message.from_user.id),
-                               parse_mode='markdown')
+    if message.text == '⚙️ Техподдержка':
+        await bot.send_message(message.from_user.id, text='Пожалуйста, опишите ошибку с которой вы столкнулись и отправьте одним сообщением')
+        await FSM_classes.MultiDialog.tech_support.set()
         await log_users(message)
-
 
     if message.text == 'Что ты умеешь?':
         back = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
@@ -548,17 +730,17 @@ async def affirmation_mailing_text(message: types.Message):
     db_data = sqlite3.connect('Databases/Data_users.db')
     cur_data = db_data.cursor()
     users_affirmation = cur_data.execute(
-        'SELECT user_id FROM affirmation').fetchall()
+        'SELECT user_id FROM profile').fetchall()
     for user_miling in range(len(users_affirmation)):
         try:
             await bot.send_message(chat_id=(users_affirmation[user_miling][0]),
                                    text=message.text, parse_mode='html')
             await asyncio.sleep(0.1)
         except BotBlocked:
-            cur_data.execute('UPDATE affirmation SET user_id = 0 WHERE user_id = ?',
+            cur_data.execute('UPDATE profile SET user_id = 0 WHERE user_id = ?',
                              (users_affirmation[user_miling][0],))
             db_data.commit()
-    cur_data.execute('DELETE FROM affirmation WHERE user_id = ?', (int(0),))
+    cur_data.execute('DELETE FROM profile WHERE user_id = ?', (int(0),))
     db_data.commit()
 
 
@@ -568,7 +750,7 @@ async def affirmation_mailing_photo(message: types.Message):
     db_data = sqlite3.connect('Databases/Data_users.db')
     cur_data = db_data.cursor()
     users_affirmation = cur_data.execute(
-        'SELECT user_id FROM affirmation').fetchall()
+        'SELECT user_id FROM profile').fetchall()
     await asyncio.sleep(1)
     for user_miling in range(len(users_affirmation)):
         try:
@@ -577,28 +759,31 @@ async def affirmation_mailing_photo(message: types.Message):
                                  photo=photo, parse_mode='html')
             await asyncio.sleep(0.1)
         except BotBlocked:
-            cur_data.execute('UPDATE affirmation SET user_id = 0 WHERE user_id = ?',
+            cur_data.execute('UPDATE profile SET user_id = 0 WHERE user_id = ?',
                              (users_affirmation[user_miling][0],))
             db_data.commit()
-    cur_data.execute('DELETE FROM affirmation WHERE user_id = ?', (int(0),))
+    cur_data.execute('DELETE FROM profile WHERE user_id = ?', (int(0),))
     db_data.commit()
+
 
 
 async def scheduler_sleep_message_wakeup():
     db_scheduler_sleep = sqlite3.connect('Databases/Current_habits.db')
     cur_scheduler = db_scheduler_sleep.cursor()
+    cur_scheduler_check = db_scheduler_sleep.cursor()
     now = datetime.utcnow() + timedelta(hours=3, minutes=0)
     users_wakeup = cur_scheduler.execute(
         'SELECT user_id FROM sleep WHERE wakeup = ?', (now.strftime('%H:%M'),)).fetchall()
     for user_wakeup in range(len(users_wakeup)):
-        try:
-            await bot.send_message(chat_id=users_wakeup[user_wakeup][0], text='Пора вставать! '
-                                                                              '\nНачинать никогда не поздно! А всё начинается с небольших изменений!')
-            await asyncio.sleep(0.1)
-        except BotBlocked:
-            cur_scheduler.execute(
-                'UPDATE sleep SET user_id = 0 WHERE user_id = ?', (users_wakeup[user_wakeup][0],))
-            db_scheduler_sleep.commit()
+        if cur_scheduler_check.execute('SELECT active FROM sleep WHERE user_id = ?', (users_wakeup[user_wakeup][0],)) == 1:
+            try:
+                await bot.send_message(chat_id=users_wakeup[user_wakeup][0], text='Пора вставать! '
+                                                                                  '\nНачинать никогда не поздно! А всё начинается с небольших изменений!')
+                await asyncio.sleep(0.1)
+            except BotBlocked:
+                cur_scheduler.execute(
+                    'UPDATE sleep SET user_id = 0 WHERE user_id = ?', (users_wakeup[user_wakeup][0],))
+                db_scheduler_sleep.commit()
     cur_scheduler.execute('DELETE FROM sleep WHERE user_id = ?', (int(0),))
     db_scheduler_sleep.commit()
 
@@ -606,20 +791,22 @@ async def scheduler_sleep_message_wakeup():
 async def scheduler_sleep_message_bedtime():
     db_scheduler_sleep = sqlite3.connect('Databases/Current_habits.db')
     cur_scheduler = db_scheduler_sleep.cursor()
+    cur_scheduler_check = db_scheduler_sleep.cursor()
     now = datetime.utcnow() + timedelta(hours=3, minutes=0)
     users_bedtime = cur_scheduler.execute(
         'SELECT user_id FROM sleep WHERE bedtime = ?', (now.strftime('%H:%M'),)).fetchall()
     for user_bedtime in range(len(users_bedtime)):
-        try:
-            await bot.send_message(chat_id=users_bedtime[user_bedtime][0],
-                                   text='Вы просили напомнить, что вам пора ложиться спать!'
-                                        '\nЗавтра вас ждёт отличный день! '
-                                        '\nПомните, великое начинется с малого!')
-            await asyncio.sleep(0.1)
-        except BotBlocked:
-            cur_scheduler.execute(
-                'UPDATE sleep SET user_id = 0 WHERE user_id = ?', (users_bedtime[user_bedtime][0],))
-            db_scheduler_sleep.commit()
+        if cur_scheduler_check.execute('SELECT active FROM sleep WHERE user_id = ?', (users_bedtime[user_bedtime][0],)) == 1:
+            try:
+                await bot.send_message(chat_id=users_bedtime[user_bedtime][0],
+                                       text='Вы просили напомнить, что вам пора ложиться спать!'
+                                            '\nЗавтра вас ждёт отличный день! '
+                                            '\nПомните, великое начинется с малого!')
+                await asyncio.sleep(0.1)
+            except BotBlocked:
+                cur_scheduler.execute(
+                    'UPDATE sleep SET user_id = 0 WHERE user_id = ?', (users_bedtime[user_bedtime][0],))
+                db_scheduler_sleep.commit()
     cur_scheduler.execute('DELETE FROM sleep WHERE user_id = ?', (int(0),))
     db_scheduler_sleep.commit()
 
