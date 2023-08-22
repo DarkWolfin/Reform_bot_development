@@ -136,7 +136,7 @@ async def inline_quick_help(message: types.Message):
                                                  '\n\nЕсли хотите сообщить ещё об одной ошибке, просто введите команду /support')
 
 
-@dp.message_handler(commands=['fix_tokens'], state='*', chat_id=417986886)
+@dp.message_handler(commands=['fix_tokens'], state='*', chat_id=[417986886,chats_id.commands_chat_id])
 async def fix_tokens_users(message: types.Message):
     users_fix_tokens = [417986886, 860113766, 1499938354, 566646368, 389638229, 5203851196, 324651616, 656293519]
     for i in range(len(users_fix_tokens)):
@@ -147,31 +147,32 @@ async def fix_tokens_users(message: types.Message):
                                                                  '\nБудем благодарны вам за помощь в тестировании!', parse_mode='html')
         state = dp.current_state(chat=users_fix_tokens[i], user=users_fix_tokens[i])
         await state.set_state(FSM_classes.MultiDialog.setToken)
-        await bot.send_message(message.from_user.id, text='Отправлено '+str(users_fix_tokens[i]))
+        await bot.send_message(message.chat.id, text='Отправлено '+str(users_fix_tokens[i]))
 
 
-@dp.message_handler(commands=['get_db'], state='*', chat_id=417986886)
+@dp.message_handler(commands=['get_db'], state='*', chat_id=[417986886,chats_id.commands_chat_id])
 async def get_db(message: types.Message):
-    await bot.send_document(message.from_user.id, open('Databases/Data_users.db', 'rb'))
+    await bot.send_document(message.chat.id, open('Databases/Data_users.db', 'rb'))
 
 
-@dp.message_handler(commands=['admin_mailing'], state='*', chat_id=417986886)
+@dp.message_handler(commands=['admin_mailing'], state='*', chat_id=[417986886,chats_id.commands_chat_id])
 async def check_active_users(message: types.Message):
     await FSM_classes.Admin.mailing_all.set()
-    await bot.send_message(message.from_user.id, text='Здравствуйте, босс! Пришлите то, что хотите разослать!',
+    await bot.send_message(message.chat.id, text='Здравствуйте, босс! Пришлите то, что хотите разослать!',
                            parse_mode='html')
 
 
 @dp.message_handler(commands=['receiving_feedback'], state='*')
 async def start_feedback(message: types.Message):
-    await bot.send_message(message.from_user.id, text='Введите пароль:')
-    await FSM_classes.adminCommands.receiving_feedback_password.set()
+    await bot.send_message(message.chat.id, text='Введите пароль:')
+    state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
+    await state.set_state(FSM_classes.adminCommands.receiving_feedback_password)
 
 
-@dp.message_handler(state=FSM_classes.adminCommands.receiving_feedback_password)
+@dp.message_handler(state=FSM_classes.adminCommands.receiving_feedback_password, chat_id=[417986886,chats_id.commands_chat_id])
 async def process_feedback(message: types.Message):
     if message.text == 'ad12min3':
-        await bot.send_message(message.from_user.id,
+        await bot.send_message(message.chat.id,
                                text='Рассылка опроса началась')
         start_of_feedback = 'Добрый день! ' \
                             '\n\nНе могли бы вы уделить немного времени и поделиться вашими впечатлениями о чат-боте? (6 вопросов отнимут у вас не более 3 минут)' \
@@ -197,7 +198,7 @@ async def process_feedback(message: types.Message):
                 db_data.commit()
         cur_data.execute('DELETE FROM profile WHERE user_id = ?', (int(0),))
         db_data.commit()
-        await bot.send_message(message.from_user.id,
+        await bot.send_message(message.chat.id,
                                text='Опросы успешно разосланы!')
     else:
         await bot.send_message(message.from_user.id, text='Ошибка доступа!'
@@ -307,18 +308,18 @@ async def reply_quick_help(message: types.Message, state: FSMContext):
 
 @dp.message_handler(commands=['getuserreport'], state='*')
 async def get_user_report(message: types.Message):
-    await bot.send_message(message.from_user.id, text='Введите пароль:')
+    await bot.send_message(message.chat.id, text='Введите пароль:')
     await FSM_classes.adminCommands.getUserReportPassword.set()
 
 
 @dp.message_handler(state=FSM_classes.adminCommands.getUserReportPassword)
 async def get_user_report(message: types.Message, state: FSMContext):
     if message.text == 'admin123':
-        await bot.send_message(message.from_user.id,
+        await bot.send_message(message.chat.id,
                                text='Введите id нужных юзеров через пробел или напишите слово "все"')
         await FSM_classes.adminCommands.getUserReportId.set()
     else:
-        await bot.send_message(message.from_user.id, text='Ошибка доступа!'
+        await bot.send_message(message.chat.id, text='Ошибка доступа!'
                                                           '\n/getuserreport - ввести другой пароль '
                                                           '\n/main_menu - перейти в главное меню')
 
@@ -326,7 +327,7 @@ async def get_user_report(message: types.Message, state: FSMContext):
 @dp.message_handler(state=FSM_classes.adminCommands.getUserReportId)
 async def get_user_report(message: types.Message, state: FSMContext):
     await state.set_data({"users": message.text})
-    await bot.send_message(message.from_user.id,
+    await bot.send_message(message.chat.id,
                            text='Введите дату начала и конца наблюдений через пробел в формате гггг:мм:дд')
     await FSM_classes.adminCommands.getUserReportDate.set()
 
@@ -337,7 +338,7 @@ async def get_user_report(message: types.Message, state: FSMContext):
     try:
         startDate, endDate = message.text.split(' ')
     except:
-        await bot.send_message(message.from_user.id, text='Ошибка при вводе даты, попробуйте ещё')
+        await bot.send_message(message.chat.id, text='Ошибка при вводе даты, попробуйте ещё')
         await FSM_classes.adminCommands.getUserReportDate.set()
         return
 
@@ -355,18 +356,18 @@ async def get_user_report(message: types.Message, state: FSMContext):
 
 @dp.message_handler(commands=['getuseractions'], state='*')
 async def get_user_report(message: types.Message):
-    await bot.send_message(message.from_user.id, text='Введите пароль:')
+    await bot.send_message(message.chat.id, text='Введите пароль:')
     await FSM_classes.adminCommands.getUserActionPassword.set()
 
 
 @dp.message_handler(state=FSM_classes.adminCommands.getUserActionPassword)
 async def get_user_report(message: types.Message, state: FSMContext):
     if message.text == 'admin123':
-        await bot.send_message(message.from_user.id,
+        await bot.send_message(message.chat.id,
                                text='Введите токены нужных юзеров через пробел или напишите слово "все"')
         await FSM_classes.adminCommands.getUserActionId.set()
     else:
-        await bot.send_message(message.from_user.id, text='Ошибка доступа!'
+        await bot.send_message(message.chat.id, text='Ошибка доступа!'
                                                           '\n/getuserreport - ввести другой пароль '
                                                           '\n/main_menu - перейти в главное меню')
 
@@ -374,7 +375,7 @@ async def get_user_report(message: types.Message, state: FSMContext):
 @dp.message_handler(state=FSM_classes.adminCommands.getUserActionId)
 async def get_user_report(message: types.Message, state: FSMContext):
     await state.set_data({"users": message.text})
-    await bot.send_message(message.from_user.id, text='Введите дату начала и конца наблюдений через пробел')
+    await bot.send_message(message.chat.id, text='Введите дату начала и конца наблюдений через пробел')
     await FSM_classes.adminCommands.getUserActionDate.set()
 
 
@@ -390,7 +391,7 @@ async def get_user_report(message: types.Message, state: FSMContext):
         await admin_commands.createExcelFileActionCommand(startDate, endDate, tokens)
 
     with open('getUserAction.xlsx', 'rb') as f:
-        await bot.send_document(chat_id=message.from_user.id, document=InputFile(f))
+        await bot.send_document(chat_id=message.chat.id, document=InputFile(f))
     await FSM_classes.MultiDialog.menu.set()
     await main_menu(message, state)
 
