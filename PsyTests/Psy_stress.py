@@ -63,7 +63,6 @@ async def pretest_stress(message: types.message, state: FSMContext):
         data['points'] = 0
     await points_test_stress(state, user_id=message.from_user.id)
     await state.finish()
-    await save_user_action(user_id=message.from_user.id, action='Начал тест Psy_stress')
     await bot.send_message(message.from_user.id, 'Тест на стрессоустойчивость'
                            '\nСодержащиеся в тесте симптомы стресса могут послужить предупреждением, особенно если они проявляются у вас довольно часто.'
                            '\n Приступим к тесту!', reply_markup=types.ReplyKeyboardRemove())
@@ -72,7 +71,6 @@ async def pretest_stress(message: types.message, state: FSMContext):
     db_stress = sqlite3.connect('Databases/Result_Tests/PSY_stress.db')
     cur_stress = db_stress.cursor()
     cur_stress.execute("UPDATE answers SET countOfAnswers = 0 WHERE user_id = ?", (message.from_user.id,))
-
 
 async def answer_stress(callback_query: types.CallbackQuery, state: FSMContext):
     point = callback_query.data[-1]
@@ -126,7 +124,7 @@ async def answer_stress(callback_query: types.CallbackQuery, state: FSMContext):
             await bot.send_message(callback_query.from_user.id, 'Результаты показывают, что Вы можете радоваться своей относительно здоровой стрессовой устойчивости. Если вы в данный момент прибегнете к мерам по преодолению стресса, то они, в первую очередь, будут иметь для вас профилактическое значение. Вы можете ожидать, что ваши недомогания, если они вообще есть, постепенно пойдут на убыль или вовсе исчезнут.', reply_markup=munebut)
             cur_stress.execute("UPDATE answers SET countOfAnswers = 0")
             db_stress.commit()
-            await save_user_action(user_id=callback_query.from_user.id, action='Прошёл тест Psy_stress (Хорошая стрессоустойчивость)')
+            await save_user_action(user_id=callback_query.from_user.id, action='Psy_stress')
         elif (int(cur_stress.execute('SELECT points FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) > 12) and (int(cur_stress.execute('SELECT points FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) <= 27):
             munebut = InlineKeyboardMarkup(row_width=1)
             munebut.add(InlineKeyboardButton(
@@ -134,14 +132,14 @@ async def answer_stress(callback_query: types.CallbackQuery, state: FSMContext):
             await bot.send_message(callback_query.from_user.id, 'Результаты показывают, что У вас уже проявляются цепные реакции физических и умственно-психических нарушений. Вам необходимо как можно скорее начать использовать в повседневной жизни упражнения по преодолению стресса. Уже через несколько недель в вашем состоянии наступит заметное улучшение благодаря ослаблению стрессовых симптомов или их снятию, а также повысится работоспособность.', reply_markup=munebut)
             cur_stress.execute("UPDATE answers SET countOfAnswers = 0")
             db_stress.commit()
-            await save_user_action(user_id=callback_query.from_user.id, action='Прошёл тест Psy_stress (Средняя стрессоустойчивость)')
+            await save_user_action(user_id=callback_query.from_user.id, action='Psy_stress')
         elif (int(cur_stress.execute('SELECT points FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) > 27) and (int(cur_stress.execute('SELECT points FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) <= 66):
             munebut = InlineKeyboardMarkup(row_width=1)
             munebut.add(InlineKeyboardButton(
                 'Вернуться в меню', callback_data='Main_menu'))
             cur_stress.execute("UPDATE answers SET countOfAnswers = 0")
             db_stress.commit()
-            await save_user_action(user_id=callback_query.from_user.id, action='Прошёл тест Psy_stress (Слабая стрессоустойчивость)')
+            await save_user_action(user_id=callback_query.from_user.id, action='Psy_stress')
         await bot.send_message(callback_query.from_user.id, 'Результаты показывают, что Вы глубоко увязли в замкнутом круге чрезмерных напряжений, чувствительных нагрузок и заметного расстройства здоровья. Вы должны предпринять какие-то целенаправленные действия против одолевающего вас стресса, чтобы тем самым вернуть себе спокойствие, уверенность, работоспособность.', reply_markup=munebut)
 
 

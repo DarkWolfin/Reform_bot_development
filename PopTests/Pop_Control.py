@@ -127,14 +127,12 @@ async def pretest_control(message: types.message, state: FSMContext):
         data['points'] = 0
     await points_test_control(state, user_id=message.from_user.id)
     await state.finish()
-    await save_user_action(user_id=message.from_user.id, action='Начал тест Pop_Control')
     await bot.send_message(message.from_user.id, 'Нередко даже самая уверенная в себе личность идет на поводу обстоятельств или подчиняется чужим манипуляциям. '
                                                  '\nЧто и говорить, когда даже выбор одежды давно превратился в соревнование не только марок, но и умений эту вещь выгоднее продать.'
                                                  '\n\nТест подскажет вам, к какому типу людей относитесь вы, а в конце вас ждут рекомендации в зависимости от полученного вами результата. '
                                                  '\nПравила просты: читайте вопрос и выбирайте из предложенных вариантов один подходящий. Всего 10 вопросов', reply_markup=types.ReplyKeyboardRemove())
     await asyncio.sleep(5)
     await bot.send_message(message.from_user.id, text=control_questions[0], reply_markup=control_answer0)
-
 
 async def answer_control(callback_query: types.CallbackQuery):
     point = callback_query.data[-1]
@@ -158,14 +156,14 @@ async def answer_control(callback_query: types.CallbackQuery):
                                                                 '\n\nВы строите свою жизнь, опираясь на собственные принципы, а не на интересы окружающих, а также способны распознать манипуляцию и пресечь попытку управлять вами. '
                                                                 '\nНо будьте осторожны, категоричность суждений может вызывать у ваших близких сложности при общении с вами, рассмотрев в вас излишне жесткого или недоверчивого человека. '
                                                                 '\nПомните, что открытя улыбка располагает людей к вам и при этом вовсе не обязывает идти у кого-то на поводу', reply_markup=Markups.backIn)
-            await save_user_action(user_id=callback_query.from_user.id, action='Прошёл тест Pop_Control (+)')
+            await save_user_action(user_id=callback_query.from_user.id, action='Psy_Control')
         elif (int(cur_control.execute('SELECT points FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) > 9 ) and (int(cur_control.execute('SELECT points FROM points WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0]) < 16):
             await bot.send_message(callback_query.from_user.id,
                                    'Выстраивая взаимоотношения с людьми и собственную жизнь, вы достаточно хорошо разбираетесь в причинно-следственных связях. '
                                    '\nПовлиять на вашу личность не так-то просто!'
                                    '\nНо иногда вы все же можете попасть впросак. Чтобы лучше ориентироваться в происходящем, вы можете узнать психологические приемы, которые помогают управлять людьми, и чаще действовать в своих интересах.',
                                    reply_markup=Markups.backIn)
-            await save_user_action(user_id=callback_query.from_user.id, action='Прошёл тест Pop_Control (+-)')
+            await save_user_action(user_id=callback_query.from_user.id, action='Psy_Control')
         else:
             await bot.send_message(callback_query.from_user.id,
                                    'Возможно, не все решения в жизни вы приняли, руководствуясь собственными интересами. '
@@ -173,7 +171,7 @@ async def answer_control(callback_query: types.CallbackQuery):
                                    '\nВы сможете найти золотую середину, не отпугнув окружающих, но при этом начав жить по своим правилам! '
                                    '\nХорошим решением будет повышение самооценки. Помня о своей ценности для мира, избавившись от комплексов и полюбив себя, вы можете изменить жизнь и взять ее в свои руки.',
                                    reply_markup=Markups.backIn)
-            await save_user_action(user_id=callback_query.from_user.id, action='Прошёл тест Pop_Control (-)')
+            await save_user_action(user_id=callback_query.from_user.id, action='Psy_Control')
 
 
 def register_handlers_Pop_Control(dp : Dispatcher):

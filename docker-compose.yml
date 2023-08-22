@@ -6,4 +6,3 @@ services:
     volumes:
       - ./Databases:/app/Databases
       - ./LogsBot:/app/LogsBot
-    restart: unless-stopped
