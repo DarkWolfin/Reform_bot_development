@@ -1,3 +1,4 @@
+import os
 import chats_id
 from PsyTests import Psy_Weariness, Psy_selfefficacy
 from AllCourses import Anxiety
@@ -26,7 +27,7 @@ from aiogram.utils import executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 import aioschedule as schedule
 
-from aiogram.utils.exceptions import BotBlocked
+from aiogram.utils.exceptions import BotBlocked, BotKicked
 
 from Token import Token
 from Database import db_start, data_profile, affirmation, data_feedback, pre_points_test_weariness, \
@@ -413,19 +414,27 @@ async def mailing_photo(message: types.Message):
     db_user_blocked = sqlite3.connect('Databases/Data_users.db')
     cur_user_blocked = db_user_blocked.cursor()
     users = cur_user_blocked.execute('SELECT user_id FROM profile').fetchall()
+    await bot.send_message(chat_id=message.chat.id, text='Получено, рассылка началась',
+                           parse_mode='html')
     await FSM_classes.MultiDialog.menu.set()
+    file = open('Mailing_report.txt', 'w')
     for user in range(len(users)):
         try:
             photo_mailing = open('mailing.jpg', 'rb')
             await bot.send_photo(chat_id=(users[user][0]), photo=photo_mailing, parse_mode='html')
-            await bot.send_message(chat_id=message.chat.id, text='Отправлено ' + str(users[user][0]), parse_mode='html')
+            file.write(f'\nОтправлено '+str(users[user][0]))
             await asyncio.sleep(0.1)
         except BotBlocked:
             cur_user_blocked.execute(
                 'UPDATE profile SET active = "Нет" WHERE user_id = ?', (users[user][0],))
-            await bot.send_message(chat_id=message.chat.id, text='Бот заблолкирован '+str(users[user][0]), parse_mode='html')
+            await bot.send_message(chat_id=message.chat.id, text='Бот заблокирован '+str(users[user][0]), parse_mode='html')
+            file.write(f'\nБот заблокирован '+str(users[user][0]))
             db_user_blocked.commit()
+    file = open('Mailing_report.txt', 'rb')
     await bot.send_message(chat_id=message.chat.id, text='Ваше изображение успешно отправлено! Вы молодец, босс!')
+    await bot.send_document(message.chat.id, file)
+    file.close()
+    os.remove('Mailing_report.txt')
 
 
 @dp.message_handler(content_types=['text'], state=FSM_classes.Admin.mailing_all, chat_id=[417986886, chats_id.commands_chat_id])
@@ -433,22 +442,28 @@ async def mailing_text(message: types.Message):
     db_user_blocked = sqlite3.connect('Databases/Data_users.db')
     cur_user_blocked = db_user_blocked.cursor()
     users = cur_user_blocked.execute('SELECT user_id FROM profile').fetchall()
-    await bot.send_message(chat_id=message.chat.id, text='Получено',
+    await bot.send_message(chat_id=message.chat.id, text='Получено, рассылка началась',
                            parse_mode='html')
     await FSM_classes.MultiDialog.menu.set()
+    file = open('Mailing_report.txt', 'w')
     for user in range(len(users)):
         try:
             await bot.send_message(chat_id=(users[user][0]),
                                    text=message.text, parse_mode='html')
-            await bot.send_message(chat_id=message.chat.id, text='Отправлено ' + str(users[user][0]),
-                                   parse_mode='html')
+            file.write(f'\nОтправлено '+str(users[user][0]))
             await asyncio.sleep(0.1)
         except BotBlocked:
             cur_user_blocked.execute(
                 'UPDATE profile SET active = "Нет" WHERE user_id = ?', (users[user][0],))
-            await bot.send_message(chat_id=message.chat.id, text='Бот заблолкирован '+str(users[user][0]), parse_mode='html')
+            await bot.send_message(chat_id=message.chat.id, text='Бот заблокирован '+str(users[user][0]), parse_mode='html')
+            file.write(f'\nБот заблокирован '+str(users[user][0]))
             db_user_blocked.commit()
+    file = open('Mailing_report.txt', 'rb')
     await bot.send_message(chat_id=message.chat.id, text='Ваше сообщение успешно отправлено! Вы молодец, босс!')
+    await bot.send_document(message.chat.id, file)
+    file.close()
+    os.remove('Mailing_report.txt')
+
 
 
 
