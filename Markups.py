@@ -3,14 +3,14 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardBut
 # Main_menu
 Practise_btn = KeyboardButton('🧘‍♀️ Практики')
 Tests_btn = KeyboardButton('📝 Тесты')
-Habits_btn = KeyboardButton('💪 Мои привычки')
+Habits_btn = KeyboardButton('💪 Привычки')
 Help_btn = KeyboardButton('🌳 Самоанализ')
 Specialist_btn = KeyboardButton('💬 Обсудить проблему')
 Contacts_btn = KeyboardButton('📥 Контакты')
-MyCode_btn = KeyboardButton('Получить свой ID')
+TechSupport_btn = KeyboardButton('⚙️ Техподдержка')
 main_kb = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
 main_kb.add(Help_btn, Practise_btn, Specialist_btn,
-            Tests_btn, Habits_btn, Contacts_btn, MyCode_btn)
+            Tests_btn, Habits_btn, Contacts_btn, TechSupport_btn)
 
 # Practices
 Duh_btn = KeyboardButton('Дыхательные практики')

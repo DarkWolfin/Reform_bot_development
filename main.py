@@ -1,3 +1,7 @@
+from aiogram.contrib.fsm_storage.redis import RedisStorage, RedisStorage2
+from aioredis import Redis
+
+import chats_id
 from PsyTests import Psy_Weariness, Psy_selfefficacy
 from AllCourses import Anxiety
 from Habits import Sleep, Water, Reading, Body
@@ -28,9 +32,18 @@ import aioschedule as schedule
 from aiogram.utils.exceptions import BotBlocked
 
 from Token import Token
-from Database import db_start, data_profile, affirmation, data_feedback, pre_points_test_weariness, points_test_weariness, \
-    pre_answers_test_weariness, set_user_token, get_all_user_ids
+from Database import db_start, data_profile, affirmation, data_feedback, pre_points_test_weariness, \
+    points_test_weariness, \
+    pre_answers_test_weariness, set_user_token, get_all_user_ids, save_user_action
 
+# import redis
+#
+# r = redis.Redis(
+#   host='redis-14259.c292.ap-southeast-1-1.ec2.cloud.redislabs.com',
+#   port=14259,
+#   password='TMHsgHFXzF4ZDmYerEn7C0EOBSkKYWdT')
+#
+# redis = Redis()
 
 async def on_startup(_):
     await db_start()
@@ -74,6 +87,7 @@ async def welcome(message: types.Message):
     await FSM_classes.MultiDialog.setToken.set()
 
     await log_users(message)
+    await save_user_action(user_id=message.from_user.id, action='/start')
 
 
 @dp.message_handler(commands=['main_menu'], state='*')
@@ -89,6 +103,7 @@ async def main_menu(message: types.Message, state: FSMContext):
                                                  '\nВыберите, что вас интересует',
                            parse_mode='html', reply_markup=Markups.main_kb)
     await log_users(message)
+    await save_user_action(user_id=message.from_user.id, action='/main_menu')
 
 
 @dp.message_handler(state=FSM_classes.MultiDialog.setToken)
@@ -108,6 +123,17 @@ async def set_token(message: types.Message):
         await bot.send_message(message.from_user.id, "Вы ввели некорректный токен, пожалуйста введите токен, который вы получили на работе, "
                                                      "он состоит из заглавных букв английского алфавита и числа, записанных слитно (например, SME16, RCS28 и др.)", parse_mode='html')
     await log_users(message)
+
+
+@dp.message_handler(state=FSM_classes.MultiDialog.tech_support)
+async def inline_quick_help(message: types.Message):
+    db_data = sqlite3.connect('Databases/Data_users.db')
+    cur_data = db_data.cursor()
+    user_support = cur_data.execute('SELECT token FROM profile WHERE user_id = ?', (message.from_user.id,)).fetchone()
+    await bot.send_message(chat_id=chats_id.support_chat_id, text=f"{str(message.from_user.id)}\n{user_support[0]}\n{str(message.text)}", parse_mode='html')
+    await bot.send_message(message.from_user.id, 'Ваш отчёт об ошибке успешно отправлен разработчикам! '
+                                                 '\nСпасибо, что помогаете сделать бот лучше!'
+                                                 '\n\nЕсли хотите сообщить ещё об одной ошибке, просто введите команду /support')
 
 
 @dp.message_handler(commands=['fix_tokens'], state='*', chat_id=417986886)
@@ -444,6 +470,15 @@ async def mailing(callback_query: types.CallbackQuery, state: FSMContext):
 async def practices(message: types.Message):
     await FSM_classes.MultiDialog.practices.set()
     await Practices.type_practices(message)
+    await save_user_action(user_id=message.from_user.id, action='/practices')
+
+
+@dp.message_handler(commands=['support'], state='*')
+async def support(message: types.Message):
+    await bot.send_message(message.from_user.id,
+                           text='Пожалуйста, опишите ошибку с которой вы столкнулись и отправьте одним сообщением')
+    await FSM_classes.MultiDialog.tech_support.set()
+    await save_user_action(user_id=message.from_user.id, action='/support')
 
 
 @dp.message_handler(commands=['test'], state='*')
@@ -451,6 +486,7 @@ async def test(message: types.message, state: FSMContext):
     await FSM_classes.MultiDialog.tests.set()
     await Tests.pretest(message, state)
     await log_users(message)
+    await save_user_action(user_id=message.from_user.id, action='/test')
 
 
 @dp.message_handler(commands=['courses'], state='*')
@@ -458,6 +494,7 @@ async def courses(message: types.Message, state: FSMContext):
     await FSM_classes.MultiDialog.courses.set()
     await Courses.precourse(message, state)
     await log_users(message)
+    await save_user_action(user_id=message.from_user.id, action='/courses')
 
 
 @dp.message_handler(commands=['contacts'], state='*')
@@ -468,20 +505,8 @@ async def contacts(message: types.Message):
                                                  'Если у вас есть вопросы или вы обнаружили ошибку, вы можете обратиться к @APecherkin.',
                            parse_mode='html', reply_markup=Markups.cont)
     await log_users(message)
+    await save_user_action(user_id=message.from_user.id, action='/contacts')
 
-
-# @dp.callback_query_handler(lambda c: c.data and c.data.startswith('fullversion'), state=FSM_classes.MultiDialog)
-# async def fullversion_callback(callback_query: types.CallbackQuery, state: FSMContext):
-#     await bot.send_message(callback_query.from_user.id, 'Полный доступ доступен в платной версии.'
-#                                                         '\nВ платной версии:'
-#                                                         '❇️25 медитаций'
-#                                                         '❇️10 дыхательных практик'
-#                                                         '❇️Таймер Помодоро'
-#                                                         '❇️Система ежедневных напоминаний и мотиваций'
-#                                                         '❇️Рекомендации по сну, питанию и отдыху от ведущих специалистов'
-#                                                         '\n\nОформить подписку за 499 рублей в месяц?',
-#                            parse_mode='html')
-#
 
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('Main_menu'), state='*')
 async def main_menu_callback(callback_query: types.CallbackQuery, state: FSMContext):
@@ -504,6 +529,7 @@ async def reply_practices(message: types.Message, state: FSMContext):
     await Practices.allreply_practices(message)
     await log_users(message)
 
+
 @dp.message_handler(state=FSM_classes.MultiDialog.specialist)
 async def reply_specialist(message: types.Message, state: FSMContext):
     if message.text == 'Перейти':
@@ -513,6 +539,7 @@ async def reply_specialist(message: types.Message, state: FSMContext):
         await main_menu(message, state)
     await Specialists.test_holms(message, state)
     await log_users(message)
+
 
 @dp.message_handler(state=FSM_classes.MultiDialog.tests)
 async def reply_tests(message: types.Message, state: FSMContext):
@@ -618,6 +645,7 @@ async def reply_specialist(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state='*')
 async def reply_all(message: types.Message, state: FSMContext):
+    await save_user_action(user_id=message.from_user.id, action=message.text)
     if message.text == 'Вернуться в главное меню':
         await main_menu(message, state)
         await log_users(message)
@@ -654,7 +682,7 @@ async def reply_all(message: types.Message, state: FSMContext):
         await Tests.pretest(message, state)
         await log_users(message)
 
-    if message.text == '💪 Мои привычки':
+    if message.text == '💪 Привычки':
         await FSM_classes.MultiDialog.habits.set()
         await Habit.prehabits(message, state)
         await log_users(message)
@@ -677,12 +705,10 @@ async def reply_all(message: types.Message, state: FSMContext):
         await contacts(message)
         await log_users(message)
 
-    if message.text == 'Получить свой ID':
-        await bot.send_message(message.from_user.id,
-                               text="Ваш id: `{}`".format(message.from_user.id),
-                               parse_mode='markdown')
+    if message.text == '⚙️ Техподдержка':
+        await bot.send_message(message.from_user.id, text='Пожалуйста, опишите ошибку с которой вы столкнулись и отправьте одним сообщением')
+        await FSM_classes.MultiDialog.tech_support.set()
         await log_users(message)
-
 
     if message.text == 'Что ты умеешь?':
         back = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
@@ -743,18 +769,20 @@ async def affirmation_mailing_photo(message: types.Message):
 async def scheduler_sleep_message_wakeup():
     db_scheduler_sleep = sqlite3.connect('Databases/Current_habits.db')
     cur_scheduler = db_scheduler_sleep.cursor()
+    cur_scheduler_check = db_scheduler_sleep.cursor()
     now = datetime.utcnow() + timedelta(hours=3, minutes=0)
     users_wakeup = cur_scheduler.execute(
         'SELECT user_id FROM sleep WHERE wakeup = ?', (now.strftime('%H:%M'),)).fetchall()
     for user_wakeup in range(len(users_wakeup)):
-        try:
-            await bot.send_message(chat_id=users_wakeup[user_wakeup][0], text='Пора вставать! '
-                                                                              '\nНачинать никогда не поздно! А всё начинается с небольших изменений!')
-            await asyncio.sleep(0.1)
-        except BotBlocked:
-            cur_scheduler.execute(
-                'UPDATE sleep SET user_id = 0 WHERE user_id = ?', (users_wakeup[user_wakeup][0],))
-            db_scheduler_sleep.commit()
+        if cur_scheduler_check.execute('SELECT active FROM sleep WHERE user_id = ?', (users_wakeup[user_wakeup][0],)) == 1:
+            try:
+                await bot.send_message(chat_id=users_wakeup[user_wakeup][0], text='Пора вставать! '
+                                                                                  '\nНачинать никогда не поздно! А всё начинается с небольших изменений!')
+                await asyncio.sleep(0.1)
+            except BotBlocked:
+                cur_scheduler.execute(
+                    'UPDATE sleep SET user_id = 0 WHERE user_id = ?', (users_wakeup[user_wakeup][0],))
+                db_scheduler_sleep.commit()
     cur_scheduler.execute('DELETE FROM sleep WHERE user_id = ?', (int(0),))
     db_scheduler_sleep.commit()
 
@@ -762,20 +790,22 @@ async def scheduler_sleep_message_wakeup():
 async def scheduler_sleep_message_bedtime():
     db_scheduler_sleep = sqlite3.connect('Databases/Current_habits.db')
     cur_scheduler = db_scheduler_sleep.cursor()
+    cur_scheduler_check = db_scheduler_sleep.cursor()
     now = datetime.utcnow() + timedelta(hours=3, minutes=0)
     users_bedtime = cur_scheduler.execute(
         'SELECT user_id FROM sleep WHERE bedtime = ?', (now.strftime('%H:%M'),)).fetchall()
     for user_bedtime in range(len(users_bedtime)):
-        try:
-            await bot.send_message(chat_id=users_bedtime[user_bedtime][0],
-                                   text='Вы просили напомнить, что вам пора ложиться спать!'
-                                        '\nЗавтра вас ждёт отличный день! '
-                                        '\nПомните, великое начинется с малого!')
-            await asyncio.sleep(0.1)
-        except BotBlocked:
-            cur_scheduler.execute(
-                'UPDATE sleep SET user_id = 0 WHERE user_id = ?', (users_bedtime[user_bedtime][0],))
-            db_scheduler_sleep.commit()
+        if cur_scheduler_check.execute('SELECT active FROM sleep WHERE user_id = ?', (users_bedtime[user_bedtime][0],)) == 1:
+            try:
+                await bot.send_message(chat_id=users_bedtime[user_bedtime][0],
+                                       text='Вы просили напомнить, что вам пора ложиться спать!'
+                                            '\nЗавтра вас ждёт отличный день! '
+                                            '\nПомните, великое начинется с малого!')
+                await asyncio.sleep(0.1)
+            except BotBlocked:
+                cur_scheduler.execute(
+                    'UPDATE sleep SET user_id = 0 WHERE user_id = ?', (users_bedtime[user_bedtime][0],))
+                db_scheduler_sleep.commit()
     cur_scheduler.execute('DELETE FROM sleep WHERE user_id = ?', (int(0),))
     db_scheduler_sleep.commit()
 

@@ -10,7 +10,6 @@ class MultiDialog(StatesGroup):
     tests = State()
     test_weariness = State()
     test_stress = State()
-    test_temperament = State()
     test_selfefficacy = State()
     test_control = State()
     test_typeperson = State()
@@ -22,6 +21,7 @@ class MultiDialog(StatesGroup):
     courses = State()
     course_anxiety = State()
     specialist = State()
+    tech_support = State()
 
 
 class HabitSleep(StatesGroup):
