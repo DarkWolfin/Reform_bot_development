@@ -1,3 +1,4 @@
+import chats_id
 from PsyTests import Psy_Weariness, Psy_selfefficacy
 from AllCourses import Anxiety
 from Habits import Sleep, Water, Reading, Body
