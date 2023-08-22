@@ -1,15 +1,3 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-# from aiogram.contrib.fsm_storage.redis import RedisStorage, RedisStorage2
-# from aioredis import Redis
-
->>>>>>> parent of 1a80a6c... fix
-=======
-from aiogram.contrib.fsm_storage.redis import RedisStorage, RedisStorage2
-from aioredis import Redis
-
->>>>>>> parent of 8ec8863... add administrator's group, add tracking and add tech_support
 import chats_id
 from PsyTests import Psy_Weariness, Psy_selfefficacy
 from AllCourses import Anxiety
@@ -44,15 +32,6 @@ from Token import Token
 from Database import db_start, data_profile, affirmation, data_feedback, pre_points_test_weariness, \
     points_test_weariness, \
     pre_answers_test_weariness, set_user_token, get_all_user_ids, save_user_action
-
-# import redis
-#
-# r = redis.Redis(
-#   host='redis-14259.c292.ap-southeast-1-1.ec2.cloud.redislabs.com',
-#   port=14259,
-#   password='TMHsgHFXzF4ZDmYerEn7C0EOBSkKYWdT')
-#
-# redis = Redis()
 
 async def on_startup(_):
     await db_start()
