@@ -143,9 +143,10 @@ async def get_db(message: types.Message):
     await bot.send_document(message.chat.id, open('Databases/Data_users.db', 'rb'))
 
 
-@dp.message_handler(commands=['admin_mailing'], state='*', chat_id=[417986886,chats_id.commands_chat_id])
+@dp.message_handler(commands=['admin_mailing'], state='*', chat_id=[417986886, chats_id.commands_chat_id])
 async def check_active_users(message: types.Message):
-    await FSM_classes.Admin.mailing_all.set()
+    state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
+    await state.set_state(FSM_classes.Admin.mailing_all)
     await bot.send_message(message.chat.id, text='Здравствуйте, босс! Пришлите то, что хотите разослать!',
                            parse_mode='html')
 
@@ -406,7 +407,7 @@ async def get_user_report(message: types.Message, state: FSMContext):
         await FSM_classes.adminCommands.getUserReportGraphDate.set()
 
 
-@dp.message_handler(content_types=['photo'], state=FSM_classes.Admin.mailing_all)
+@dp.message_handler(content_types=['photo'], state=FSM_classes.Admin.mailing_all, chat_id=[417986886, chats_id.commands_chat_id])
 async def mailing_photo(message: types.Message):
     await message.photo[-1].download(destination_file='mailing.jpg')
     db_user_blocked = sqlite3.connect('Databases/Data_users.db')
@@ -417,28 +418,38 @@ async def mailing_photo(message: types.Message):
         try:
             photo_mailing = open('mailing.jpg', 'rb')
             await bot.send_photo(chat_id=(users[user][0]), photo=photo_mailing, parse_mode='html')
+            await bot.send_message(chat_id=message.chat.id, text='Отправлено ' + str(users[user][0]), parse_mode='html')
             await asyncio.sleep(0.1)
         except BotBlocked:
             cur_user_blocked.execute(
                 'UPDATE profile SET active = "Нет" WHERE user_id = ?', (users[user][0],))
+            await bot.send_message(chat_id=message.chat.id, text='Бот заблолкирован '+str(users[user][0]), parse_mode='html')
             db_user_blocked.commit()
+    await bot.send_message(chat_id=message.chat.id, text='Ваше изображение успешно отправлено! Вы молодец, босс!')
 
 
-@dp.message_handler(content_types=['text'], state=FSM_classes.Admin.mailing_all)
+@dp.message_handler(content_types=['text'], state=FSM_classes.Admin.mailing_all, chat_id=[417986886, chats_id.commands_chat_id])
 async def mailing_text(message: types.Message):
     db_user_blocked = sqlite3.connect('Databases/Data_users.db')
     cur_user_blocked = db_user_blocked.cursor()
     users = cur_user_blocked.execute('SELECT user_id FROM profile').fetchall()
+    await bot.send_message(chat_id=message.chat.id, text='Получено',
+                           parse_mode='html')
     await FSM_classes.MultiDialog.menu.set()
     for user in range(len(users)):
         try:
             await bot.send_message(chat_id=(users[user][0]),
                                    text=message.text, parse_mode='html')
+            await bot.send_message(chat_id=message.chat.id, text='Отправлено ' + str(users[user][0]),
+                                   parse_mode='html')
             await asyncio.sleep(0.1)
         except BotBlocked:
             cur_user_blocked.execute(
                 'UPDATE profile SET active = "Нет" WHERE user_id = ?', (users[user][0],))
+            await bot.send_message(chat_id=message.chat.id, text='Бот заблолкирован '+str(users[user][0]), parse_mode='html')
             db_user_blocked.commit()
+    await bot.send_message(chat_id=message.chat.id, text='Ваше сообщение успешно отправлено! Вы молодец, босс!')
+
 
 
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('Welcome_btn'), state=FSM_classes.MultiDialog.menu)
@@ -719,17 +730,17 @@ async def affirmation_mailing_text(message: types.Message):
     db_data = sqlite3.connect('Databases/Data_users.db')
     cur_data = db_data.cursor()
     users_affirmation = cur_data.execute(
-        'SELECT user_id FROM affirmation').fetchall()
+        'SELECT user_id FROM profile').fetchall()
     for user_miling in range(len(users_affirmation)):
         try:
             await bot.send_message(chat_id=(users_affirmation[user_miling][0]),
                                    text=message.text, parse_mode='html')
             await asyncio.sleep(0.1)
         except BotBlocked:
-            cur_data.execute('UPDATE affirmation SET user_id = 0 WHERE user_id = ?',
+            cur_data.execute('UPDATE profile SET user_id = 0 WHERE user_id = ?',
                              (users_affirmation[user_miling][0],))
             db_data.commit()
-    cur_data.execute('DELETE FROM affirmation WHERE user_id = ?', (int(0),))
+    cur_data.execute('DELETE FROM profile WHERE user_id = ?', (int(0),))
     db_data.commit()
 
 
@@ -739,7 +750,7 @@ async def affirmation_mailing_photo(message: types.Message):
     db_data = sqlite3.connect('Databases/Data_users.db')
     cur_data = db_data.cursor()
     users_affirmation = cur_data.execute(
-        'SELECT user_id FROM affirmation').fetchall()
+        'SELECT user_id FROM profile').fetchall()
     await asyncio.sleep(1)
     for user_miling in range(len(users_affirmation)):
         try:
@@ -748,11 +759,12 @@ async def affirmation_mailing_photo(message: types.Message):
                                  photo=photo, parse_mode='html')
             await asyncio.sleep(0.1)
         except BotBlocked:
-            cur_data.execute('UPDATE affirmation SET user_id = 0 WHERE user_id = ?',
+            cur_data.execute('UPDATE profile SET user_id = 0 WHERE user_id = ?',
                              (users_affirmation[user_miling][0],))
             db_data.commit()
-    cur_data.execute('DELETE FROM affirmation WHERE user_id = ?', (int(0),))
+    cur_data.execute('DELETE FROM profile WHERE user_id = ?', (int(0),))
     db_data.commit()
+
 
 
 async def scheduler_sleep_message_wakeup():
