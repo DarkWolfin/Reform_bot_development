@@ -5,3 +5,4 @@ aioschedule
 pandas
 openpyxl
 matplotlib
+aioredis
