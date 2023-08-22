@@ -304,6 +304,8 @@ async def process_fb_marathon(message: types.Message):
         answer_1_keyboard = ReplyKeyboardMarkup(row_width=5, resize_keyboard=True).add(KeyboardButton('😭'), KeyboardButton('2'), KeyboardButton('3'), KeyboardButton('4'), KeyboardButton('😕'), KeyboardButton('😐'), KeyboardButton('7'), KeyboardButton('8'), KeyboardButton('9'), KeyboardButton('😃'))
         db_data = sqlite3.connect('Databases/Data_users.db')
         cur_data = db_data.cursor()
+        db_da = sqlite3.connect('Databases/Data_users.db')
+        cur_da = db_da.cursor()
         users = cur_data.execute(
             'SELECT user_id FROM profile').fetchall()
         file = open('Quiz_report.txt', 'w')
@@ -312,11 +314,12 @@ async def process_fb_marathon(message: types.Message):
                 await bot.send_message(chat_id=(users[user_mailing][0]),
                                        text=start_of_feedback, parse_mode='html', reply_markup=answer_1_keyboard)
                 await data_FB_marathon(user_id=users[user_mailing][0])
-                cur_data.execute("UPDATE FB_marathon SET token = ? WHERE user_id = ?", (cur_data.execute('SELECT token FROM profile WHERE user_id = ?', (users[user_mailing][0],)).fetchone()[0], users[user_mailing][0]))
+                cur_data.execute("UPDATE FB_marathon SET token = ? WHERE user_id = ?", (cur_da.execute('SELECT token FROM profile WHERE user_id = ?', (users[user_mailing][0],)).fetchone()[0], users[user_mailing][0]))
                 file.write(f'\nОтправлено ' + str(users[user_mailing][0]))
                 state = dp.current_state(chat=users[user_mailing][0], user=users[user_mailing][0])
                 await state.set_state(FSM_classes.FB_marathon.answer_1)
                 await asyncio.sleep(0.1)
+                db_data.commit()
             except BotBlocked:
                 cur_data.execute('UPDATE profile SET user_id = 0 WHERE user_id = ?',
                                  (users[user_mailing][0],))
