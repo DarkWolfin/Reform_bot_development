@@ -32,7 +32,8 @@ from aiogram.utils.exceptions import BotBlocked, BotKicked
 from Token import Token
 from Database import db_start, data_profile, affirmation, data_feedback, pre_points_test_weariness, \
     points_test_weariness, \
-    pre_answers_test_weariness, set_user_token, get_all_user_ids, save_user_action
+    pre_answers_test_weariness, set_user_token, get_all_user_ids, save_user_action, data_FB_marathon
+
 
 async def on_startup(_):
     await db_start()
@@ -275,6 +276,134 @@ async def feedback_answer_2(message: types.Message, state: FSMContext):
     db_f = sqlite3.connect('Databases/Data_users.db')
     cur_f = db_f.cursor()
     cur_f.execute("UPDATE feedback SET answer_extra = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    db_f.commit()
+    await bot.send_message(message.from_user.id,
+                           text='Спасибо вам за участие в опросе! '
+                                '\nВаши ответы помогут нам сделать чат-бот психологической поддержки более эффективным и удобным для вашего использования!', parse_mode='html')
+    await FSM_classes.MultiDialog.menu.set()
+    await main_menu(message, state)
+
+## Feedback marathon
+
+
+@dp.message_handler(commands=['fb_marathon'], state='*')
+async def start_fb_marathon(message: types.Message):
+    await bot.send_message(message.chat.id, text='Введите пароль:')
+    state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
+    await state.set_state(FSM_classes.adminCommands.FB_marathon_password)
+
+
+@dp.message_handler(state=FSM_classes.adminCommands.FB_marathon_password, chat_id=[417986886, chats_id.commands_chat_id])
+async def process_fb_marathon(message: types.Message):
+    if message.text == 'ad12min3':
+        await bot.send_message(message.chat.id,
+                               text='Рассылка опроса началась')
+        start_of_feedback = 'Добрый вечер! ' \
+                            '\n\nНе могли бы вы уделить немного времени и поделиться вашими впечатлениями о первом дне нашего пути? \n6 вопросов с вариантами ответов займут не более минуты, но помогут нам предоставлять вам более качественный продукт' \
+                            '\n\n1) Как прошёл ваш день? (оцените по шкале от 1 до 10)'
+        answer_1_keyboard = ReplyKeyboardMarkup(row_width=5, resize_keyboard=True).add(KeyboardButton('😭'), KeyboardButton('2'), KeyboardButton('3'), KeyboardButton('4'), KeyboardButton('😕'), KeyboardButton('😐'), KeyboardButton('7'), KeyboardButton('8'), KeyboardButton('9'), KeyboardButton('😃'))
+        db_data = sqlite3.connect('Databases/Data_users.db')
+        cur_data = db_data.cursor()
+        users = cur_data.execute(
+            'SELECT user_id FROM profile').fetchall()
+        file = open('Quiz_report.txt', 'w')
+        for user_mailing in range(len(users)):
+            try:
+                await bot.send_message(chat_id=(users[user_mailing][0]),
+                                       text=start_of_feedback, parse_mode='html', reply_markup=answer_1_keyboard)
+                await data_FB_marathon(user_id=users[user_mailing][0])
+                cur_data.execute("UPDATE FB_marathon SET token = ? WHERE user_id = ?", (cur_data.execute('SELECT token FROM profile WHERE user_id = ?', (users[user_mailing][0],)).fetchone()[0], users[user_mailing][0]))
+                file.write(f'\nОтправлено ' + str(users[user_mailing][0]))
+                state = dp.current_state(chat=users[user_mailing][0], user=users[user_mailing][0])
+                await state.set_state(FSM_classes.FB_marathon.answer_1)
+                await asyncio.sleep(0.1)
+            except BotBlocked:
+                cur_data.execute('UPDATE profile SET user_id = 0 WHERE user_id = ?',
+                                 (users[user_mailing][0],))
+                file.write(f'\nБот заблокирован ' + str(users[user_mailing][0]))
+                db_data.commit()
+        cur_data.execute('DELETE FROM profile WHERE user_id = ?', (int(0),))
+        db_data.commit()
+        file = open('Quiz_report.txt', 'rb')
+        await bot.send_message(chat_id=message.chat.id, text='Опрос успешно разослан!')
+        await bot.send_document(message.chat.id, file)
+        file.close()
+        os.remove('Quiz_report.txt')
+    else:
+        await bot.send_message(message.chat.id, text='Ошибка доступа!'
+                                                          '\n/receiving_feedback - ввести другой пароль '
+                                                          '\n/main_menu - перейти в главное меню')
+
+
+@dp.message_handler(content_types=['text'], state=FSM_classes.FB_marathon.answer_1)
+async def feedback_answer_1(message: types.Message):
+    db_f = sqlite3.connect('Databases/Data_users.db')
+    cur_f = db_f.cursor()
+    cur_f.execute("UPDATE FB_marathon SET answer_1 = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    db_f.commit()
+    answer_2_keyboard = ReplyKeyboardMarkup(row_width=3, resize_keyboard=True).add(KeyboardButton('Да'), KeyboardButton('Не уверен'), KeyboardButton('Нет'))
+    await bot.send_message(message.from_user.id,
+                           text='2) Принёс ли вам сегодняшний день новые и интересные события?', parse_mode='html', reply_markup=answer_2_keyboard)
+    await FSM_classes.FB_marathon.answer_2.set()
+
+
+@dp.message_handler(content_types=['text'], state=FSM_classes.FB_marathon.answer_2)
+async def feedback_answer_2(message: types.Message):
+    db_f = sqlite3.connect('Databases/Data_users.db')
+    cur_f = db_f.cursor()
+    cur_f.execute("UPDATE FB_marathon SET answer_2 = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    db_f.commit()
+    answer_3_keyboard = ReplyKeyboardMarkup(row_width=3, resize_keyboard=True).add(KeyboardButton('Да'), KeyboardButton('Не уверен'),
+                                                  KeyboardButton('Нет'))
+    await bot.send_message(message.from_user.id,
+                           text='3) Понравилась ли вам сегодняшняя подборка психологической теории?', parse_mode='html', reply_markup=answer_3_keyboard)
+    await FSM_classes.FB_marathon.answer_3.set()
+
+
+@dp.message_handler(content_types=['text'], state=FSM_classes.FB_marathon.answer_3)
+async def feedback_answer_3(message: types.Message):
+    db_f = sqlite3.connect('Databases/Data_users.db')
+    cur_f = db_f.cursor()
+    cur_f.execute("UPDATE FB_marathon SET answer_3 = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    db_f.commit()
+    answer_4_keyboard = ReplyKeyboardMarkup(row_width=3, resize_keyboard=True).add(KeyboardButton('Да'), KeyboardButton('Не уверен'),
+                                                  KeyboardButton('Нет'))
+    await bot.send_message(message.from_user.id,
+                           text='4) Интересно ли было выполнять ежедневную практику и лучше узнавать себя?', parse_mode='html', reply_markup=answer_4_keyboard)
+    await FSM_classes.FB_marathon.answer_4.set()
+
+
+@dp.message_handler(content_types=['text'], state=FSM_classes.FB_marathon.answer_4)
+async def feedback_answer_4(message: types.Message):
+    db_f = sqlite3.connect('Databases/Data_users.db')
+    cur_f = db_f.cursor()
+    cur_f.execute("UPDATE FB_marathon SET answer_4 = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    db_f.commit()
+    answer_5_keyboard = ReplyKeyboardMarkup(row_width=3, resize_keyboard=True).add(KeyboardButton('Да'), KeyboardButton('Не уверен'),
+                                                  KeyboardButton('Нет'))
+    await bot.send_message(message.from_user.id,
+                           text='5) Ежедневная практика помогала быть в ресурсе и позитивно настроенным(-ой) в течение дня?', parse_mode='html', reply_markup=answer_5_keyboard)
+    await FSM_classes.FB_marathon.answer_5.set()
+
+
+@dp.message_handler(content_types=['text'], state=FSM_classes.FB_marathon.answer_5)
+async def feedback_answer_5(message: types.Message):
+    db_f = sqlite3.connect('Databases/Data_users.db')
+    cur_f = db_f.cursor()
+    cur_f.execute("UPDATE FB_marathon SET answer_5 = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    db_f.commit()
+    answer_6_keyboard = ReplyKeyboardMarkup(row_width=3, resize_keyboard=True).add(KeyboardButton('Да'), KeyboardButton('Не уверен'),
+                                                  KeyboardButton('Нет'))
+    await bot.send_message(message.from_user.id,
+                           text='6) Удалось настроится на новый день с позитивными мыслями?', parse_mode='html', reply_markup=answer_6_keyboard)
+    await FSM_classes.FB_marathon.answer_6.set()
+
+
+@dp.message_handler(content_types=['text'], state=FSM_classes.FB_marathon.answer_6)
+async def feedback_answer_6(message: types.Message, state: FSMContext):
+    db_f = sqlite3.connect('Databases/Data_users.db')
+    cur_f = db_f.cursor()
+    cur_f.execute("UPDATE FB_marathon SET answer_6 = ? WHERE user_id = ?", (message.text, message.from_user.id))
     db_f.commit()
     await bot.send_message(message.from_user.id,
                            text='Спасибо вам за участие в опросе! '
