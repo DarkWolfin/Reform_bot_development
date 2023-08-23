@@ -1,6 +1,5 @@
 /venv/
 /.idea/
-Token.py
 LogsBot
 *.db
 /AllCourses/__pycache__/

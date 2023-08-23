@@ -3,12 +3,13 @@ from aiogram.dispatcher.filters.state import StatesGroup, State
 
 class MultiDialog(StatesGroup):
     quick_help = State()
+    getToken = State()
+    setToken = State()
     menu = State()
     practices = State()
     tests = State()
     test_weariness = State()
     test_stress = State()
-    test_temperament = State()
     test_selfefficacy = State()
     test_control = State()
     test_typeperson = State()
@@ -20,7 +21,7 @@ class MultiDialog(StatesGroup):
     courses = State()
     course_anxiety = State()
     specialist = State()
-
+    tech_support = State()
 
 
 class HabitSleep(StatesGroup):
@@ -28,6 +29,7 @@ class HabitSleep(StatesGroup):
     choose_action = State()
     choose_bedtime = State()
     choose_wakeup = State()
+
 
 class HabitWater(StatesGroup):
     none = State()
@@ -38,6 +40,29 @@ class HabitWater(StatesGroup):
 
 class Admin(StatesGroup):
     mailing_all = State()
+    smart_mailing = State()
+    send_to_user_id =State()
+    send_to_user_message = State()
+
+
+class Feedback(StatesGroup):
+    answer_1_yn = State()
+    answer_2_choose = State()
+    answer_3_choose = State()
+    answer_4 = State()
+    answer_5 = State()
+    answer_6 = State()
+    answer_extra = State()
+
+
+class FB_marathon(StatesGroup):
+    answer_1 = State()
+    answer_2 = State()
+    answer_3 = State()
+    answer_4 = State()
+    answer_5 = State()
+    answer_6 = State()
+    answer_7 =State()
 
 
 class adminCommands(StatesGroup):
@@ -49,3 +74,5 @@ class adminCommands(StatesGroup):
     getUserActionId = State()
     getUserActionDate = State()
     getUserReportGraphDate = State()
+    receiving_feedback_password = State()
+    FB_marathon_password = State()

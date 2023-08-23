@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  tg-bot:
+    build: '.'
+    volumes:
+      - ./Databases:/app/Databases
+      - ./LogsBot:/app/LogsBot
+    restart: unless-stopped

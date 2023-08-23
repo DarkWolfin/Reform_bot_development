@@ -36,14 +36,14 @@ async def allreply_practices(message: types.Message):
     if message.text == 'Медитативные практики':
         MedPractice = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
         Mexr1 = types.KeyboardButton('Яблоневый сад (4 мин)')
-        Mexr2 = types.KeyboardButton('Полёт к звезде (7 мин)')
-        Mexr3 = types.KeyboardButton('Путешествие на воздушном шаре (5 мин)')
+        Mexr2 = types.KeyboardButton('Путешествие к звезде (7 мин)')
+        Mexr3 = types.KeyboardButton('Полёт на воздушном шаре (5 мин)')
         MedPractice.add(Mexr1, Mexr2, Mexr3)
         await bot.send_message(message.chat.id,
                                'Выберите медитативную практику', reply_markup=MedPractice)
 
     if message.text == "Расслабление через напряжение (6 мин)":
-        await save_user_action(user_id=message.from_user.id, action='Расслабление через напряжение (6 мин)')
+        await save_user_action(user_id=message.from_user.id, action='Практика "Расслабление через напряжение"')
 
         await bot.send_message(message.chat.id,
                                "Практика направлена на то, чтобы через физическое напряжение и расслабление добиться расслабления нашего ума. "
@@ -55,7 +55,7 @@ async def allreply_practices(message: types.Message):
         await bot.send_audio(message.chat.id, ExVisualAudio1, reply_markup=Markups.endpractice)
 
     elif message.text == "Дыхание квадрат (4 мин)":
-        await save_user_action(user_id=message.from_user.id, action="Дыхание квадрат (4 мин)")
+        await save_user_action(user_id=message.from_user.id, action='Практика "Дыхание квадрат"')
         await bot.send_message(message.chat.id,
                                "Вдох, выдох и пауза примерно равны друг другу по длительности, комфортный ритм – примерно 4 секунд")
         ExVisualAudio2 = open('Exercises/Дыхание квадрат.mp3', 'rb')
@@ -63,7 +63,7 @@ async def allreply_practices(message: types.Message):
         await bot.send_photo(message.chat.id, ExVisualPhoto2)
         await bot.send_audio(message.chat.id, ExVisualAudio2, reply_markup=Markups.endpractice)
     elif message.text == "Асимметричное дыхание (2 мин)":
-        await save_user_action(user_id=message.from_user.id, action="Асимметричное дыхание (2 мин)")
+        await save_user_action(user_id=message.from_user.id, action='Практика "Асимметричное дыхание"')
 
         await bot.send_message(message.chat.id,
                                "Вдыхать нужно через нос, а выдыхать через рот  делать выдох в 5 раз длиннее вдоха (рекомендуется 2 секунд вдох, 10 секунд выдох")
@@ -73,7 +73,7 @@ async def allreply_practices(message: types.Message):
         await bot.send_audio(message.chat.id, ExVisualAudio3, reply_markup=Markups.endpractice)
 
     if message.text == "Яблоневый сад (4 мин)":
-        await save_user_action(user_id=message.from_user.id, action="Яблоневый сад (4 мин)")
+        await save_user_action(user_id=message.from_user.id, action='Практика "Яблоневый сад"')
         await bot.send_message(message.chat.id,
                                "Рекомендуется занять удобную позу сидя и расслабиться, если есть возможность лечь на коврик на спину в позу морской звезды")
         ExVisualAudio1 = open('Exercises/Яблоневый сад.mp3', 'rb')
@@ -81,7 +81,7 @@ async def allreply_practices(message: types.Message):
         await bot.send_photo(message.chat.id, ExVisualPhoto1)
         await bot.send_audio(message.chat.id, ExVisualAudio1, reply_markup=Markups.endpractice)
     elif message.text == "Путешествие к звезде (7 мин)":
-        await save_user_action(user_id=message.from_user.id, action="Полёт к звезде (7 мин)")
+        await save_user_action(user_id=message.from_user.id, action='Практика "Путешествие к звезде"')
         await bot.send_message(message.chat.id,
                                "Рекомендуется занять удобную позу сидя и расслабиться, если есть возможность лечь на коврик на спину в позу морской звезды")
         ExVisualAudio2 = open('Exercises/Путешествие к звезде.mp3', 'rb')
@@ -89,7 +89,7 @@ async def allreply_practices(message: types.Message):
         await bot.send_photo(message.chat.id, ExVisualPhoto2)
         await bot.send_audio(message.chat.id, ExVisualAudio2, reply_markup=Markups.endpractice)
     elif message.text == "Полёт на воздушном шаре (5 мин)":
-        await save_user_action(user_id=message.from_user.id, action="Путешествие на воздушном шаре (5 мин)")
+        await save_user_action(user_id=message.from_user.id, action='Практика "Полёт на воздушном шаре"')
         await bot.send_message(message.chat.id,
                                "Рекомендуется занять удобную позу сидя и расслабиться, если есть возможность лечь на коврик на спину в позу морской звезды")
         ExVisualAudio3 = open('Exercises/Полет на воздушном шаре.mp3', 'rb')
