@@ -604,7 +604,7 @@ async def smart_mailing(message: types.Message):
     global text_smart_mailing
     global keyboards_
     text_smart_mailing = []
-    keyboards_ = ['Добрый день! Расскажи поподробнее', 'Продолжай', 'Дальше', 'Продолжай']
+    keyboards_ = ['Доброе утро! Расскажи поподробнее', 'Продолжай', 'Дальше', 'Продолжай']
     await bot.send_message(message.chat.id, text='Смело отправляйте мне 5 кусков текста разными сообщениями и я запомню их последовательно',
                            parse_mode='html')
 
@@ -651,7 +651,7 @@ async def smart_mailing_continue(callback_query: types.CallbackQuery, state: FSM
                            reply_markup=InlineKeyboardMarkup(resize_keyboard=True).add(InlineKeyboardButton(text=str(keyboards_[int(callback_query.data[-1])]), callback_data='smart_mailing_continue'+str(int(int(callback_query.data[-1])+1)))))
     else:
         await bot.send_message(chat_id=chats_id.reports_chat_id,
-                               text=f"{str(callback_query.from_user.id)}\nВзаимодействие с рассылкой марафона",
+                               text=f"{str(callback_query.from_user.id)}\nПользователь прочитал ежедневную рассылку",
                                parse_mode='html')
         await bot.send_message(callback_query.from_user.id, text=text_smart_mailing[int(callback_query.data[-1])], parse_mode='html')
 
