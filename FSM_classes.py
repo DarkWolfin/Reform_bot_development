@@ -59,6 +59,7 @@ class FB_marathon(StatesGroup):
     answer_4 = State()
     answer_5 = State()
     answer_6 = State()
+    answer_7 =State()
 
 
 class adminCommands(StatesGroup):

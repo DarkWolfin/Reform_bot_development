@@ -18,7 +18,7 @@ async def db_start():
         "CREATE TABLE IF NOT EXISTS feedback(user_id INT PRIMARY KEY, answer_1_yn TEXT, answer_2_choose TEXT, answer_3_choose TEXT, answer_4 TEXT, answer_5 TEXT, answer_6 TEXT, answer_extra TEXT)")
     db_data.commit()
     cur_data.execute(
-        "CREATE TABLE IF NOT EXISTS FB_marathon(user_id INT PRIMARY KEY, token TEXT, answer_1 TEXT, answer_2 TEXT, answer_3 TEXT, answer_4 TEXT, answer_5 TEXT, answer_6 TEXT)")
+        "CREATE TABLE IF NOT EXISTS FB_marathon_2(user_id INT PRIMARY KEY, token TEXT, answer_1 TEXT, answer_2 TEXT, answer_3 TEXT, answer_4 TEXT, answer_5 TEXT, answer_6 TEXT, answer_7 TEXT)")
     db_data.commit()
 
     db_test_weariness = sq.connect('Databases/Result_Tests/PSY_Weariness.db')
@@ -126,10 +126,10 @@ async def data_feedback(user_id):
 
 async def data_FB_marathon(user_id):
     user = cur_data.execute(
-        "SELECT 1 FROM FB_marathon WHERE user_id == '{key}'".format(key=user_id)).fetchone()
+        "SELECT 1 FROM FB_marathon_2 WHERE user_id == '{key}'".format(key=user_id)).fetchone()
     if not user:
-        cur_data.execute("INSERT INTO FB_marathon VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
-                         (user_id, '', '', '', '', '', '', ''))
+        cur_data.execute("INSERT INTO FB_marathon_2 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                         (user_id, '', '', '', '', '', '', '', ''))
         db_data.commit()
 
 
