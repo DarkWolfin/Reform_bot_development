@@ -143,6 +143,33 @@ async def fix_tokens_users(message: types.Message):
 @dp.message_handler(commands=['get_db'], state='*', chat_id=[417986886,chats_id.commands_chat_id])
 async def get_db(message: types.Message):
     await bot.send_document(message.chat.id, open('Databases/Data_users.db', 'rb'))
+    await bot.send_document(message.chat.id, open('Databases/Current_habits.db', 'rb'))
+
+
+@dp.message_handler(commands=['send_to_user'], state='*', chat_id=[417986886, chats_id.commands_chat_id])
+async def send_to_user(message: types.Message):
+    state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
+    await state.set_state(FSM_classes.Admin.send_to_user_id)
+    await bot.send_message(message.chat.id, text='Добрый день, начальник! Пришлите ID пользователя',
+                           parse_mode='html')
+
+
+@dp.message_handler(state=FSM_classes.Admin.send_to_user_id, chat_id=[417986886,chats_id.commands_chat_id])
+async def send_to_user_id(message: types.Message):
+    global send_to_user_id_remember
+    send_to_user_id_remember = int(message.text)
+    await bot.send_message(message.chat.id, text='Теперь напишите, что ему передать',
+                           parse_mode='html')
+    state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
+    await state.set_state(FSM_classes.Admin.send_to_user_message)
+
+
+@dp.message_handler(state=FSM_classes.Admin.send_to_user_message, chat_id=[417986886,chats_id.commands_chat_id])
+async def send_to_user_message(message: types.Message):
+    await bot.send_message(chat_id=send_to_user_id_remember, text=message.text, parse_mode='html')
+    state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
+    await state.set_state(FSM_classes.MultiDialog.menu)
+    await bot.send_message(message.chat.id, 'Сообщение пользователю '+str(send_to_user_id_remember)+' успешно отправлено')
 
 
 @dp.message_handler(commands=['admin_mailing'], state='*', chat_id=[417986886, chats_id.commands_chat_id])
@@ -981,7 +1008,6 @@ async def affirmation_mailing_photo(message: types.Message):
     db_data.commit()
 
 
-
 async def scheduler_sleep_message_wakeup():
     db_scheduler_sleep = sqlite3.connect('Databases/Current_habits.db')
     cur_scheduler = db_scheduler_sleep.cursor()
@@ -989,8 +1015,10 @@ async def scheduler_sleep_message_wakeup():
     now = datetime.utcnow() + timedelta(hours=3, minutes=0)
     users_wakeup = cur_scheduler.execute(
         'SELECT user_id FROM sleep WHERE wakeup = ?', (now.strftime('%H:%M'),)).fetchall()
+    print(users_wakeup)
     for user_wakeup in range(len(users_wakeup)):
-        if cur_scheduler_check.execute('SELECT active FROM sleep WHERE user_id = ?', (users_wakeup[user_wakeup][0],)) == 1:
+        print(users_wakeup[user_wakeup][0])
+        if cur_scheduler_check.execute('SELECT active FROM sleep WHERE user_id = ?', (users_wakeup[user_wakeup][0],)).fetchone()[0] == str(1):
             try:
                 await bot.send_message(chat_id=users_wakeup[user_wakeup][0], text='Пора вставать! '
                                                                                   '\nНачинать никогда не поздно! А всё начинается с небольших изменений!')
@@ -1011,7 +1039,7 @@ async def scheduler_sleep_message_bedtime():
     users_bedtime = cur_scheduler.execute(
         'SELECT user_id FROM sleep WHERE bedtime = ?', (now.strftime('%H:%M'),)).fetchall()
     for user_bedtime in range(len(users_bedtime)):
-        if cur_scheduler_check.execute('SELECT active FROM sleep WHERE user_id = ?', (users_bedtime[user_bedtime][0],)) == 1:
+        if cur_scheduler_check.execute('SELECT active FROM sleep WHERE user_id = ?', (users_bedtime[user_bedtime][0],)).fetchone()[0] == str(1):
             try:
                 await bot.send_message(chat_id=users_bedtime[user_bedtime][0],
                                        text='Вы просили напомнить, что вам пора ложиться спать!'
