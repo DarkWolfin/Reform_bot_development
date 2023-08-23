@@ -597,6 +597,63 @@ async def mailing_text(message: types.Message):
     os.remove('Mailing_report.txt')
 
 
+@dp.message_handler(commands=['smart_mailing'], state='*', chat_id=[417986886, chats_id.commands_chat_id])
+async def smart_mailing(message: types.Message):
+    state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
+    await state.set_state(FSM_classes.Admin.smart_mailing)
+    global text_smart_mailing
+    global keyboards_
+    text_smart_mailing = []
+    keyboards_ = ['Доброе утро! Расскажи поподробнее', 'Продолжай', 'Дальше', 'Продолжай']
+    await bot.send_message(message.chat.id, text='Смело отправляйте мне 5 кусков текста разными сообщениями и я запомню их последовательно',
+                           parse_mode='html')
+
+
+@dp.message_handler(content_types=['text'], state=FSM_classes.Admin.smart_mailing, chat_id=[417986886, chats_id.commands_chat_id])
+async def smart_mailing_text_recording(message: types.Message):
+    text_smart_mailing.append(str(message.text))
+    if len(text_smart_mailing) <= 4:
+        await bot.send_message(message.chat.id, text='Получил часть № '+str(len(text_smart_mailing)))
+    else:
+        await bot.send_message(message.chat.id, text='Получил часть № '+str(len(text_smart_mailing)))
+        db_user_blocked = sqlite3.connect('Databases/Data_users.db')
+        cur_user_blocked = db_user_blocked.cursor()
+        users = cur_user_blocked.execute('SELECT user_id FROM profile').fetchall()
+        await bot.send_message(chat_id=message.chat.id, text='Получено, рассылка началась',
+                               parse_mode='html')
+        await FSM_classes.MultiDialog.menu.set()
+        file = open('Smart_mailing_report.txt', 'w')
+        for user in range(len(users)):
+            try:
+                await bot.send_message(chat_id=(users[user][0]),
+                                       text=text_smart_mailing[0], parse_mode='html',
+                                       reply_markup=InlineKeyboardMarkup(resize_keyboard=True).add(InlineKeyboardButton(text=str(keyboards_[0]), callback_data='smart_mailing_continue1')))
+                file.write(f'\nОтправлено ' + str(users[user][0]))
+                await asyncio.sleep(0.1)
+            except BotBlocked:
+                cur_user_blocked.execute(
+                    'UPDATE profile SET active = "Нет" WHERE user_id = ?', (users[user][0],))
+                await bot.send_message(chat_id=message.chat.id, text='Бот заблокирован ' + str(users[user][0]),
+                                       parse_mode='html')
+                file.write(f'\nБот заблокирован ' + str(users[user][0]))
+                db_user_blocked.commit()
+        file = open('Smart_mailing_report.txt', 'rb')
+        await bot.send_message(chat_id=message.chat.id, text='Рассылка успешно завершена')
+        await bot.send_document(message.chat.id, file)
+        file.close()
+        os.remove('Smart_mailing_report.txt')
+
+
+@dp.callback_query_handler(lambda c: c.data and c.data.startswith('smart_mailing_continue'), state='*')
+async def smart_mailing_continue(callback_query: types.CallbackQuery, state: FSMContext):
+    if int(callback_query.data[-1]) < 4:
+        await bot.send_message(callback_query.from_user.id, text=text_smart_mailing[int(callback_query.data[-1])], parse_mode='html',
+                           reply_markup=InlineKeyboardMarkup(resize_keyboard=True).add(InlineKeyboardButton(text=str(keyboards_[int(callback_query.data[-1])]), callback_data='smart_mailing_continue'+str(int(int(callback_query.data[-1])+1)))))
+    else:
+        await bot.send_message(chat_id=chats_id.reports_chat_id,
+                               text=f"{str(callback_query.from_user.id)}\nПользователь прочитал ежедневную рассылку",
+                               parse_mode='html')
+        await bot.send_message(callback_query.from_user.id, text=text_smart_mailing[int(callback_query.data[-1])], parse_mode='html')
 
 
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('Welcome_btn'), state=FSM_classes.MultiDialog.menu)

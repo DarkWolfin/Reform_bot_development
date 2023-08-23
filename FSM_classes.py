@@ -40,6 +40,7 @@ class HabitWater(StatesGroup):
 
 class Admin(StatesGroup):
     mailing_all = State()
+    smart_mailing = State()
 
 
 class Feedback(StatesGroup):
