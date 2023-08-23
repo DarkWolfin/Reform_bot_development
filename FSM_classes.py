@@ -41,6 +41,8 @@ class HabitWater(StatesGroup):
 class Admin(StatesGroup):
     mailing_all = State()
     smart_mailing = State()
+    send_to_user_id =State()
+    send_to_user_message = State()
 
 
 class Feedback(StatesGroup):
@@ -52,6 +54,7 @@ class Feedback(StatesGroup):
     answer_6 = State()
     answer_extra = State()
 
+
 class FB_marathon(StatesGroup):
     answer_1 = State()
     answer_2 = State()
@@ -59,6 +62,7 @@ class FB_marathon(StatesGroup):
     answer_4 = State()
     answer_5 = State()
     answer_6 = State()
+    answer_7 =State()
 
 
 class adminCommands(StatesGroup):

@@ -143,6 +143,33 @@ async def fix_tokens_users(message: types.Message):
 @dp.message_handler(commands=['get_db'], state='*', chat_id=[417986886,chats_id.commands_chat_id])
 async def get_db(message: types.Message):
     await bot.send_document(message.chat.id, open('Databases/Data_users.db', 'rb'))
+    await bot.send_document(message.chat.id, open('Databases/Current_habits.db', 'rb'))
+
+
+@dp.message_handler(commands=['send_to_user'], state='*', chat_id=[417986886, chats_id.commands_chat_id])
+async def send_to_user(message: types.Message):
+    state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
+    await state.set_state(FSM_classes.Admin.send_to_user_id)
+    await bot.send_message(message.chat.id, text='Добрый день, начальник! Пришлите ID пользователя',
+                           parse_mode='html')
+
+
+@dp.message_handler(state=FSM_classes.Admin.send_to_user_id, chat_id=[417986886,chats_id.commands_chat_id])
+async def send_to_user_id(message: types.Message):
+    global send_to_user_id_remember
+    send_to_user_id_remember = int(message.text)
+    await bot.send_message(message.chat.id, text='Теперь напишите, что ему передать',
+                           parse_mode='html')
+    state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
+    await state.set_state(FSM_classes.Admin.send_to_user_message)
+
+
+@dp.message_handler(state=FSM_classes.Admin.send_to_user_message, chat_id=[417986886,chats_id.commands_chat_id])
+async def send_to_user_message(message: types.Message):
+    await bot.send_message(chat_id=send_to_user_id_remember, text=message.text, parse_mode='html')
+    state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
+    await state.set_state(FSM_classes.MultiDialog.menu)
+    await bot.send_message(message.chat.id, 'Сообщение пользователю '+str(send_to_user_id_remember)+' успешно отправлено')
 
 
 @dp.message_handler(commands=['admin_mailing'], state='*', chat_id=[417986886, chats_id.commands_chat_id])
@@ -299,7 +326,7 @@ async def process_fb_marathon(message: types.Message):
         await bot.send_message(message.chat.id,
                                text='Рассылка опроса началась')
         start_of_feedback = 'Добрый вечер! ' \
-                            '\n\nНе могли бы вы уделить немного времени и поделиться вашими впечатлениями о первом дне нашего пути? \n6 вопросов с вариантами ответов займут не более минуты, но помогут нам предоставлять вам более качественный продукт' \
+                            '\n\nНе могли бы вы уделить немного времени и поделиться вашими впечатлениями о втором дне нашего пути? \nЭто поможет в будущем предоставлять вам более качественный продукт' \
                             '\n\n1) Как прошёл ваш день? (оцените по шкале от 1 до 10)'
         answer_1_keyboard = ReplyKeyboardMarkup(row_width=5, resize_keyboard=True).add(KeyboardButton('😭'), KeyboardButton('2'), KeyboardButton('3'), KeyboardButton('4'), KeyboardButton('😕'), KeyboardButton('😐'), KeyboardButton('7'), KeyboardButton('8'), KeyboardButton('9'), KeyboardButton('😃'))
         db_data = sqlite3.connect('Databases/Data_users.db')
@@ -314,7 +341,7 @@ async def process_fb_marathon(message: types.Message):
                 await bot.send_message(chat_id=(users[user_mailing][0]),
                                        text=start_of_feedback, parse_mode='html', reply_markup=answer_1_keyboard)
                 await data_FB_marathon(user_id=users[user_mailing][0])
-                cur_data.execute("UPDATE FB_marathon SET token = ? WHERE user_id = ?", (cur_da.execute('SELECT token FROM profile WHERE user_id = ?', (users[user_mailing][0],)).fetchone()[0], users[user_mailing][0]))
+                cur_data.execute("UPDATE FB_marathon_2 SET token = ? WHERE user_id = ?", (cur_da.execute('SELECT token FROM profile WHERE user_id = ?', (users[user_mailing][0],)).fetchone()[0], users[user_mailing][0]))
                 file.write(f'\nОтправлено ' + str(users[user_mailing][0]))
                 state = dp.current_state(chat=users[user_mailing][0], user=users[user_mailing][0])
                 await state.set_state(FSM_classes.FB_marathon.answer_1)
@@ -342,7 +369,7 @@ async def process_fb_marathon(message: types.Message):
 async def feedback_answer_1(message: types.Message):
     db_f = sqlite3.connect('Databases/Data_users.db')
     cur_f = db_f.cursor()
-    cur_f.execute("UPDATE FB_marathon SET answer_1 = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    cur_f.execute("UPDATE FB_marathon_2 SET answer_1 = ? WHERE user_id = ?", (message.text, message.from_user.id))
     db_f.commit()
     answer_2_keyboard = ReplyKeyboardMarkup(row_width=3, resize_keyboard=True).add(KeyboardButton('Да'), KeyboardButton('Не уверен'), KeyboardButton('Нет'))
     await bot.send_message(message.from_user.id,
@@ -354,7 +381,7 @@ async def feedback_answer_1(message: types.Message):
 async def feedback_answer_2(message: types.Message):
     db_f = sqlite3.connect('Databases/Data_users.db')
     cur_f = db_f.cursor()
-    cur_f.execute("UPDATE FB_marathon SET answer_2 = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    cur_f.execute("UPDATE FB_marathon_2 SET answer_2 = ? WHERE user_id = ?", (message.text, message.from_user.id))
     db_f.commit()
     answer_3_keyboard = ReplyKeyboardMarkup(row_width=3, resize_keyboard=True).add(KeyboardButton('Да'), KeyboardButton('Не уверен'),
                                                   KeyboardButton('Нет'))
@@ -367,12 +394,12 @@ async def feedback_answer_2(message: types.Message):
 async def feedback_answer_3(message: types.Message):
     db_f = sqlite3.connect('Databases/Data_users.db')
     cur_f = db_f.cursor()
-    cur_f.execute("UPDATE FB_marathon SET answer_3 = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    cur_f.execute("UPDATE FB_marathon_2 SET answer_3 = ? WHERE user_id = ?", (message.text, message.from_user.id))
     db_f.commit()
     answer_4_keyboard = ReplyKeyboardMarkup(row_width=3, resize_keyboard=True).add(KeyboardButton('Да'), KeyboardButton('Не уверен'),
                                                   KeyboardButton('Нет'))
     await bot.send_message(message.from_user.id,
-                           text='4) Интересно ли было выполнять ежедневную практику и лучше узнавать себя?', parse_mode='html', reply_markup=answer_4_keyboard)
+                           text='4) Интересно ли было выполнять ежедневную практику?', parse_mode='html', reply_markup=answer_4_keyboard)
     await FSM_classes.FB_marathon.answer_4.set()
 
 
@@ -380,12 +407,12 @@ async def feedback_answer_3(message: types.Message):
 async def feedback_answer_4(message: types.Message):
     db_f = sqlite3.connect('Databases/Data_users.db')
     cur_f = db_f.cursor()
-    cur_f.execute("UPDATE FB_marathon SET answer_4 = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    cur_f.execute("UPDATE FB_marathon_2 SET answer_4 = ? WHERE user_id = ?", (message.text, message.from_user.id))
     db_f.commit()
     answer_5_keyboard = ReplyKeyboardMarkup(row_width=3, resize_keyboard=True).add(KeyboardButton('Да'), KeyboardButton('Не уверен'),
                                                   KeyboardButton('Нет'))
     await bot.send_message(message.from_user.id,
-                           text='5) Ежедневная практика помогала быть в ресурсе и позитивно настроенным(-ой) в течение дня?', parse_mode='html', reply_markup=answer_5_keyboard)
+                           text='5) Помогла ли вам ежедневная практика быть в ресурсе в течение дня?', parse_mode='html', reply_markup=answer_5_keyboard)
     await FSM_classes.FB_marathon.answer_5.set()
 
 
@@ -393,12 +420,12 @@ async def feedback_answer_4(message: types.Message):
 async def feedback_answer_5(message: types.Message):
     db_f = sqlite3.connect('Databases/Data_users.db')
     cur_f = db_f.cursor()
-    cur_f.execute("UPDATE FB_marathon SET answer_5 = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    cur_f.execute("UPDATE FB_marathon_2 SET answer_5 = ? WHERE user_id = ?", (message.text, message.from_user.id))
     db_f.commit()
     answer_6_keyboard = ReplyKeyboardMarkup(row_width=3, resize_keyboard=True).add(KeyboardButton('Да'), KeyboardButton('Не уверен'),
                                                   KeyboardButton('Нет'))
     await bot.send_message(message.from_user.id,
-                           text='6) Удалось настроится на новый день с позитивными мыслями?', parse_mode='html', reply_markup=answer_6_keyboard)
+                           text='6) Удалось ли сегодня утром позитивно настроиться?', parse_mode='html', reply_markup=answer_6_keyboard)
     await FSM_classes.FB_marathon.answer_6.set()
 
 
@@ -406,7 +433,18 @@ async def feedback_answer_5(message: types.Message):
 async def feedback_answer_6(message: types.Message, state: FSMContext):
     db_f = sqlite3.connect('Databases/Data_users.db')
     cur_f = db_f.cursor()
-    cur_f.execute("UPDATE FB_marathon SET answer_6 = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    cur_f.execute("UPDATE FB_marathon_2 SET answer_6 = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    db_f.commit()
+    await bot.send_message(message.from_user.id,
+                           text='Напишите пожалуйста, как вам общие впечатления по текущим взаимодействиям 📝 \nБудем благодарны за любую обратную связь!', parse_mode='html', reply_markup=types.ReplyKeyboardRemove())
+    await FSM_classes.FB_marathon.answer_7.set()
+
+
+@dp.message_handler(content_types=['text'], state=FSM_classes.FB_marathon.answer_7)
+async def feedback_answer_7(message: types.Message, state: FSMContext):
+    db_f = sqlite3.connect('Databases/Data_users.db')
+    cur_f = db_f.cursor()
+    cur_f.execute("UPDATE FB_marathon_2 SET answer_7 = ? WHERE user_id = ?", (message.text, message.from_user.id))
     db_f.commit()
     await bot.send_message(message.from_user.id,
                            text='Спасибо вам за участие в опросе! '
@@ -650,10 +688,10 @@ async def smart_mailing_continue(callback_query: types.CallbackQuery, state: FSM
         await bot.send_message(callback_query.from_user.id, text=text_smart_mailing[int(callback_query.data[-1])], parse_mode='html',
                            reply_markup=InlineKeyboardMarkup(resize_keyboard=True).add(InlineKeyboardButton(text=str(keyboards_[int(callback_query.data[-1])]), callback_data='smart_mailing_continue'+str(int(int(callback_query.data[-1])+1)))))
     else:
+        await bot.send_message(callback_query.from_user.id, text=text_smart_mailing[int(callback_query.data[-1])], parse_mode='html')
         await bot.send_message(chat_id=chats_id.reports_chat_id,
                                text=f"{str(callback_query.from_user.id)}\nПользователь прочитал ежедневную рассылку",
                                parse_mode='html')
-        await bot.send_message(callback_query.from_user.id, text=text_smart_mailing[int(callback_query.data[-1])], parse_mode='html')
 
 
 @dp.callback_query_handler(lambda c: c.data and c.data.startswith('Welcome_btn'), state=FSM_classes.MultiDialog.menu)
@@ -970,7 +1008,6 @@ async def affirmation_mailing_photo(message: types.Message):
     db_data.commit()
 
 
-
 async def scheduler_sleep_message_wakeup():
     db_scheduler_sleep = sqlite3.connect('Databases/Current_habits.db')
     cur_scheduler = db_scheduler_sleep.cursor()
@@ -978,8 +1015,10 @@ async def scheduler_sleep_message_wakeup():
     now = datetime.utcnow() + timedelta(hours=3, minutes=0)
     users_wakeup = cur_scheduler.execute(
         'SELECT user_id FROM sleep WHERE wakeup = ?', (now.strftime('%H:%M'),)).fetchall()
+    print(users_wakeup)
     for user_wakeup in range(len(users_wakeup)):
-        if cur_scheduler_check.execute('SELECT active FROM sleep WHERE user_id = ?', (users_wakeup[user_wakeup][0],)) == 1:
+        print(users_wakeup[user_wakeup][0])
+        if cur_scheduler_check.execute('SELECT active FROM sleep WHERE user_id = ?', (users_wakeup[user_wakeup][0],)).fetchone()[0] == str(1):
             try:
                 await bot.send_message(chat_id=users_wakeup[user_wakeup][0], text='Пора вставать! '
                                                                                   '\nНачинать никогда не поздно! А всё начинается с небольших изменений!')
@@ -1000,7 +1039,7 @@ async def scheduler_sleep_message_bedtime():
     users_bedtime = cur_scheduler.execute(
         'SELECT user_id FROM sleep WHERE bedtime = ?', (now.strftime('%H:%M'),)).fetchall()
     for user_bedtime in range(len(users_bedtime)):
-        if cur_scheduler_check.execute('SELECT active FROM sleep WHERE user_id = ?', (users_bedtime[user_bedtime][0],)) == 1:
+        if cur_scheduler_check.execute('SELECT active FROM sleep WHERE user_id = ?', (users_bedtime[user_bedtime][0],)).fetchone()[0] == str(1):
             try:
                 await bot.send_message(chat_id=users_bedtime[user_bedtime][0],
                                        text='Вы просили напомнить, что вам пора ложиться спать!'
