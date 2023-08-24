@@ -126,14 +126,14 @@ async def inline_quick_help(message: types.Message):
                                                  '\n\nЕсли хотите сообщить ещё об одной ошибке, просто введите команду /support')
 
 
-@dp.message_handler(commands=['fix_tokens'], state='*', chat_id=[417986886,chats_id.commands_chat_id])
+@dp.message_handler(commands=['fix_tokens'], state='*', chat_id=[417986886, chats_id.commands_chat_id])
 async def fix_tokens_users(message: types.Message):
-    users_fix_tokens = [417986886, 860113766, 1499938354, 566646368, 389638229, 5203851196, 324651616, 656293519]
+    users_fix_tokens = [860113766, 566646368, 389638229, 5203851196, 324651616, 2099691929, 487050823, 5372058587, 758920281, 397822431, 239034067, 417986886]
     for i in range(len(users_fix_tokens)):
-        await bot.send_message(chat_id=users_fix_tokens[i], text='Добрый день! \nВ прошлое наше знакомство вы ввели некорректный токен доступа к боту, '
-                                                                 'пожалуйста напишите правильный токен доступа, который вы получили на работе, '
-                                                                 'он состоит из заглавных букв английского алфавита и числа, записанных слитно (например, SME16, RCS28 и др.)'
-                                                                 '\n\nВпереди мы готовим много интересного для вас! Подключайтесь! '
+        await bot.send_message(chat_id=users_fix_tokens[i], text='Добрый вечер! '
+                                                                 '\nДля актуализации информации о текущих токенах пользователей, просим вас повторно ввести ваш токен доступа, выданный на работе, '
+                                                                 'он состоит из заглавных букв английского алфавита и числа, записанных слитно (например, SME16, RCS28, PREM12 и др.)'
+                                                                 '\n\nВпереди вас ждёт много интересного! Подключайтесь! '
                                                                  '\nБудем благодарны вам за помощь в тестировании!', parse_mode='html')
         state = dp.current_state(chat=users_fix_tokens[i], user=users_fix_tokens[i])
         await state.set_state(FSM_classes.MultiDialog.setToken)
