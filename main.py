@@ -32,7 +32,7 @@ from aiogram.utils.exceptions import BotBlocked, BotKicked
 from Token import Token
 from Database import db_start, data_profile, affirmation, data_feedback, pre_points_test_weariness, \
     points_test_weariness, \
-    pre_answers_test_weariness, set_user_token, get_all_user_ids, save_user_action, data_FB_marathon
+    pre_answers_test_weariness, set_user_token, get_all_user_ids, save_user_action, data_FB_marathon, NEW_affirmation
 
 
 async def on_startup(_):
@@ -143,7 +143,6 @@ async def fix_tokens_users(message: types.Message):
 @dp.message_handler(commands=['get_db'], state='*', chat_id=[417986886,chats_id.commands_chat_id])
 async def get_db(message: types.Message):
     await bot.send_document(message.chat.id, open('Databases/Data_users.db', 'rb'))
-    await bot.send_document(message.chat.id, open('Databases/Current_habits.db', 'rb'))
 
 
 @dp.message_handler(commands=['send_to_user'], state='*', chat_id=[417986886, chats_id.commands_chat_id])
@@ -170,6 +169,60 @@ async def send_to_user_message(message: types.Message):
     state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
     await state.set_state(FSM_classes.MultiDialog.menu)
     await bot.send_message(message.chat.id, 'Сообщение пользователю '+str(send_to_user_id_remember)+' успешно отправлено')
+
+
+@dp.message_handler(commands=['agreement_mailing'], state='*', chat_id=[417986886, chats_id.commands_chat_id])
+async def mailing_agreement(message: types.Message):
+    await bot.send_message(message.chat.id,
+                           text='Рассылка соглашения началась')
+    text_agreement = ('Добрый день! Подскажите, вам бы было интересно получать сообщения с подборками психологических рекомендаций и аффирмаций. '
+                      '\nВсего одно сообщение в день, рекомендуем попробовать')
+    answer_agreement = InlineKeyboardMarkup(row_width=1, resize_keyboard=True).add(InlineKeyboardButton(text='Да, можно попробовать', callback_data='agreement_y'),
+                                                                                   KeyboardButton(text='Нет', callback_data='agreement_n'))
+    db_data = sqlite3.connect('Databases/Data_users.db')
+    cur_data = db_data.cursor()
+    users = cur_data.execute(
+        'SELECT user_id FROM profile').fetchall()
+    file = open('Agreement_report.txt', 'w')
+    for user_agreement in range(len(users)):
+        try:
+            await bot.send_message(chat_id=(users[user_agreement][0]),
+                                   text=text_agreement, parse_mode='html', reply_markup=answer_agreement)
+            file.write(f'\nОтправлено ' + str(users[user_agreement][0]))
+            await asyncio.sleep(0.1)
+            db_data.commit()
+        except BotBlocked:
+            cur_data.execute('UPDATE profile SET user_id = 0 WHERE user_id = ?',
+                             (users[user_agreement][0],))
+            file.write(f'\nБот заблокирован ' + str(users[user_agreement][0]))
+            db_data.commit()
+    cur_data.execute('DELETE FROM profile WHERE user_id = ?', (int(0),))
+    db_data.commit()
+    file = open('Agreement_report.txt', 'rb')
+    await bot.send_message(chat_id=message.chat.id, text='Соглашение успешно разослано!')
+    await bot.send_document(message.chat.id, file)
+    file.close()
+    os.remove('Agreement_report.txt')
+
+
+@dp.callback_query_handler(lambda c: c.data and c.data.startswith('agreement_'), state='*')
+async def callback_agreement(callback_query: types.CallbackQuery):
+    db_data = sqlite3.connect('Databases/Data_users.db')
+    cur_data = db_data.cursor()
+    db_da = sqlite3.connect('Databases/Data_users.db')
+    cur_da = db_da.cursor()
+    await NEW_affirmation(user_id=callback_query.from_user.id, username=callback_query.from_user.username)
+    cur_data.execute("UPDATE NEW_affirmation SET token = ? WHERE user_id = ?", (
+    cur_da.execute('SELECT token FROM profile WHERE user_id = ?', (callback_query.from_user.id,)).fetchone()[0],
+    callback_query.from_user.id))
+    db_data.commit()
+    if callback_query.data[-1] == 'y':
+        cur_data.execute('UPDATE NEW_affirmation SET agree = ? WHERE user_id = ?', ('y', callback_query.from_user.id))
+        await bot.send_message(callback_query.from_user.id, 'Спасибо вам за ответ! Очень надеемся, что вам понравится!')
+    else:
+        cur_data.execute('UPDATE NEW_affirmation SET agree = ? WHERE user_id = ?', ('n', callback_query.from_user.id))
+        await bot.send_message(callback_query.from_user.id, 'Очень жаль, что вы не захотели, если передумаете, напишите нам в поддержку')
+    db_data.commit()
 
 
 @dp.message_handler(commands=['admin_mailing'], state='*', chat_id=[417986886, chats_id.commands_chat_id])
@@ -972,17 +1025,17 @@ async def affirmation_mailing_text(message: types.Message):
     db_data = sqlite3.connect('Databases/Data_users.db')
     cur_data = db_data.cursor()
     users_affirmation = cur_data.execute(
-        'SELECT user_id FROM profile').fetchall()
+        'SELECT user_id FROM NEW_affirmation WHERE agree = ?', ('y',)).fetchall()
     for user_miling in range(len(users_affirmation)):
         try:
             await bot.send_message(chat_id=(users_affirmation[user_miling][0]),
                                    text=message.text, parse_mode='html')
             await asyncio.sleep(0.1)
         except BotBlocked:
-            cur_data.execute('UPDATE profile SET user_id = 0 WHERE user_id = ?',
+            cur_data.execute('UPDATE NEW_affirmation SET user_id = 0 WHERE user_id = ?',
                              (users_affirmation[user_miling][0],))
             db_data.commit()
-    cur_data.execute('DELETE FROM profile WHERE user_id = ?', (int(0),))
+    cur_data.execute('DELETE FROM NEW_affirmation WHERE user_id = ?', (int(0),))
     db_data.commit()
 
 
@@ -992,7 +1045,7 @@ async def affirmation_mailing_photo(message: types.Message):
     db_data = sqlite3.connect('Databases/Data_users.db')
     cur_data = db_data.cursor()
     users_affirmation = cur_data.execute(
-        'SELECT user_id FROM profile').fetchall()
+        'SELECT user_id FROM NEW_affirmation WHERE agree = ?', ('y',)).fetchall()
     await asyncio.sleep(1)
     for user_miling in range(len(users_affirmation)):
         try:
@@ -1001,10 +1054,11 @@ async def affirmation_mailing_photo(message: types.Message):
                                  photo=photo, parse_mode='html')
             await asyncio.sleep(0.1)
         except BotBlocked:
-            cur_data.execute('UPDATE profile SET user_id = 0 WHERE user_id = ?',
+            cur_data.execute('UPDATE NEW_affirmation SET user_id = 0 WHERE user_id = ?',
                              (users_affirmation[user_miling][0],))
             db_data.commit()
-    cur_data.execute('DELETE FROM profile WHERE user_id = ?', (int(0),))
+    os.remove('affirmation.jpg')
+    cur_data.execute('DELETE FROM NEW_affirmation WHERE user_id = ?', (int(0),))
     db_data.commit()
 
 
@@ -1015,7 +1069,6 @@ async def scheduler_sleep_message_wakeup():
     now = datetime.utcnow() + timedelta(hours=3, minutes=0)
     users_wakeup = cur_scheduler.execute(
         'SELECT user_id FROM sleep WHERE wakeup = ?', (now.strftime('%H:%M'),)).fetchall()
-    print(users_wakeup)
     for user_wakeup in range(len(users_wakeup)):
         print(users_wakeup[user_wakeup][0])
         if cur_scheduler_check.execute('SELECT active FROM sleep WHERE user_id = ?', (users_wakeup[user_wakeup][0],)).fetchone()[0] == str(1):

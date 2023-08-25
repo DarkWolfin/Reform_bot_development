@@ -15,6 +15,9 @@ async def db_start():
         "CREATE TABLE IF NOT EXISTS affirmation(user_id INT PRIMARY KEY, first_name TEXT, username TEXT)")
     db_data.commit()
     cur_data.execute(
+        "CREATE TABLE IF NOT EXISTS NEW_affirmation(user_id INT PRIMARY KEY, username TEXT, token TEXT, agree TEXT)")
+    db_data.commit()
+    cur_data.execute(
         "CREATE TABLE IF NOT EXISTS feedback(user_id INT PRIMARY KEY, answer_1_yn TEXT, answer_2_choose TEXT, answer_3_choose TEXT, answer_4 TEXT, answer_5 TEXT, answer_6 TEXT, answer_extra TEXT)")
     db_data.commit()
     cur_data.execute(
@@ -140,6 +143,15 @@ async def set_user_token(user_id, token):
     if user:
         cur_data.execute("UPDATE profile SET token = '{token}' WHERE user_id == '{id}'".format(
             token=token, id=user_id))
+        db_data.commit()
+
+
+async def NEW_affirmation(user_id, username):
+    user = cur_data.execute(
+        "SELECT 1 FROM NEW_affirmation WHERE user_id == '{key}'".format(key=user_id)).fetchone()
+    if not user:
+        cur_data.execute("INSERT INTO NEW_affirmation VALUES(?, ?, ?, ?)",
+                         (user_id, username, '', ''))
         db_data.commit()
 
 
