@@ -1,3 +1,5 @@
+import sqlite3
+
 from aiogram import Bot, types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, \
@@ -8,6 +10,7 @@ import aioschedule as schedule
 
 from aiogram.utils.exceptions import BotBlocked
 
+from send_email import send_email
 import Markups
 from Token import Token
 bot = Bot(Token)
@@ -33,6 +36,9 @@ fear0 = InlineKeyboardMarkup().add(InlineKeyboardButton('Продолжай', ca
 
 
 async def all_way_quick_help(message:types.Message):
+    db_data = sqlite3.connect('Databases/Data_users.db')
+    cur_data = db_data.cursor()
+    user_token = cur_data.execute('SELECT token FROM profile WHERE user_id = ?', (message.from_user.id,)).fetchone()[0]
     if message.text == '🤯 Истерика':
         await bot.send_message(message.from_user.id,
                                text='Я знаю, что ты стараешься и уделяешь много внимания клиентам',
@@ -40,6 +46,8 @@ async def all_way_quick_help(message:types.Message):
         await bot.send_message(message.from_user.id,
                                text='Сегодня у тебя трудный день, однако не стоит заполнять себя этими мыслями',
                                reply_markup=hysterics0)
+        await send_email(message_content='Пользователя ID - ' + str(message.from_user.id) + ', имеющего token - ' + str(
+            user_token) + ', беспокоит ' + str(message.text))
     elif message.text == '😢 Грусть':
         await bot.send_message(message.from_user.id,
                                text='Я знаю, что ты стараешься и уделяешь много внимания клиентам',
@@ -47,6 +55,8 @@ async def all_way_quick_help(message:types.Message):
         await bot.send_message(message.from_user.id,
                                text='Сегодня у тебя трудный день, однако не стоит заполнять себя этими мыслями',
                                reply_markup=sadness0)
+        await send_email(message_content='Пользователя ID - ' + str(message.from_user.id) + ', имеющего token - ' + str(
+            user_token) + ', беспокоит ' + str(message.text))
     elif message.text == '😠 Раздражение':
         await bot.send_message(message.from_user.id,
                                text='Я знаю, что ты стараешься и уделяешь много внимания клиентам',
@@ -54,6 +64,8 @@ async def all_way_quick_help(message:types.Message):
         await bot.send_message(message.from_user.id,
                                text='Сегодня у тебя трудный день, однако не стоит заполнять себя этими мыслями',
                                reply_markup=irritation0)
+        await send_email(message_content='Пользователя ID - ' + str(message.from_user.id) + ', имеющего token - ' + str(
+            user_token) + ', беспокоит ' + str(message.text))
     elif message.text == '😔 Упадок сил':
         await bot.send_message(message.from_user.id,
                                text='Я знаю, что ты стараешься и уделяешь много внимания клиентам',
@@ -61,6 +73,8 @@ async def all_way_quick_help(message:types.Message):
         await bot.send_message(message.from_user.id,
                                text='Сегодня у тебя трудный день, однако не стоит заполнять себя этими мыслями',
                                reply_markup=prostration0)
+        await send_email(message_content='Пользователя ID - ' + str(message.from_user.id) + ', имеющего token - ' + str(
+            user_token) + ', беспокоит ' + str(message.text))
     elif message.text == '🙄 Безразличие':
         await bot.send_message(message.from_user.id,
                                text='Я знаю, что ты стараешься и уделяешь много внимания клиентам',
@@ -68,6 +82,8 @@ async def all_way_quick_help(message:types.Message):
         await bot.send_message(message.from_user.id,
                                text='Сегодня у тебя трудный день, однако не стоит заполнять себя этими мыслями',
                                reply_markup=indifference0)
+        await send_email(message_content='Пользователя ID - ' + str(message.from_user.id) + ', имеющего token - ' + str(
+            user_token) + ', беспокоит ' + str(message.text))
     elif message.text == '😩 Отчаяние':
         await bot.send_message(message.from_user.id,
                                text='Я знаю, что ты стараешься и уделяешь много внимания клиентам',
@@ -75,6 +91,8 @@ async def all_way_quick_help(message:types.Message):
         await bot.send_message(message.from_user.id,
                                text='Сегодня у тебя трудный день, однако не стоит заполнять себя этими мыслями',
                                reply_markup=despair0)
+        await send_email(message_content='Пользователя ID - ' + str(message.from_user.id) + ', имеющего token - ' + str(
+            user_token) + ', беспокоит ' + str(message.text))
     elif message.text == '😧 Страх':
         await bot.send_message(message.from_user.id,
                                text='Я знаю, что ты стараешься и уделяешь много внимания клиентам',
@@ -82,7 +100,8 @@ async def all_way_quick_help(message:types.Message):
         await bot.send_message(message.from_user.id,
                                text='Сегодня у тебя трудный день, однако не стоит заполнять себя этими мыслями',
                                reply_markup=fear0)
-
+        await send_email(message_content='Пользователя ID - ' + str(message.from_user.id) + ', имеющего token - ' + str(
+            user_token) + ', беспокоит ' + str(message.text))
 
 hysterics1 = InlineKeyboardMarkup().add(InlineKeyboardButton('Продолжай', callback_data='hysterics1'))
 sadness1 = InlineKeyboardMarkup().add(InlineKeyboardButton('Продолжай', callback_data='sadness1'))
