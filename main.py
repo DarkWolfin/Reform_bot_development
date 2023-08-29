@@ -989,7 +989,6 @@ async def reply_all(message: types.Message, state: FSMContext):
                                reply_markup=quick_help.quick_help_menu)
         await log_users(message)
         await quick_help.all_way_quick_help(message)
-        await log_users(message)
 
     if message.text == '💬 Обсудить проблему':
         await FSM_classes.MultiDialog.specialist.set()
