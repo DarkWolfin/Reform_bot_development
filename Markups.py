@@ -4,7 +4,7 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardBut
 Practise_btn = KeyboardButton('🧘‍♀️ Практики')
 Tests_btn = KeyboardButton('📝 Тесты')
 Habits_btn = KeyboardButton('💪 Привычки')
-Help_btn = KeyboardButton('🌳 Самоанализ')
+Help_btn = KeyboardButton('😨 Тревожная кнопка')
 Specialist_btn = KeyboardButton('💬 Обсудить проблему')
 Contacts_btn = KeyboardButton('📥 Контакты')
 TechSupport_btn = KeyboardButton('⚙️ Техподдержка')

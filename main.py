@@ -982,7 +982,7 @@ async def reply_all(message: types.Message, state: FSMContext):
         await Habit.prehabits(message, state)
         await log_users(message)
 
-    if message.text == '🌳 Самоанализ':
+    if message.text == '😨 Тревожная кнопка':
         await FSM_classes.MultiDialog.quick_help.set()
         await bot.send_message(message.from_user.id,
                                text='Выберите, что вы чувствуете, чтобы разобраться в проблеме поподробнее',
