@@ -660,6 +660,36 @@ async def mailing_photo(message: types.Message):
     os.remove('Mailing_report.txt')
 
 
+@dp.message_handler(content_types=['audio'], state=FSM_classes.Admin.mailing_all, chat_id=[417986886, chats_id.commands_chat_id])
+async def mailing_audio(message: types.Message):
+    await message.audio.download(destination_file=str(message.audio.file_name))
+    db_user_blocked = sqlite3.connect('Databases/Data_users.db')
+    cur_user_blocked = db_user_blocked.cursor()
+    users = cur_user_blocked.execute('SELECT user_id FROM profile').fetchall()
+    await bot.send_message(chat_id=message.chat.id, text='Получено, рассылка началась',
+                           parse_mode='html')
+    await FSM_classes.MultiDialog.menu.set()
+    file = open('Mailing_report.txt', 'w')
+    for user in range(len(users)):
+        try:
+            audio_mailing = open(str(message.audio.file_name), 'rb')
+            await bot.send_audio(chat_id=(users[user][0]), audio=audio_mailing, parse_mode='html')
+            file.write(f'\nОтправлено '+str(users[user][0]))
+            await asyncio.sleep(0.1)
+        except BotBlocked:
+            cur_user_blocked.execute(
+                'UPDATE profile SET active = "Нет" WHERE user_id = ?', (users[user][0],))
+            await bot.send_message(chat_id=message.chat.id, text='Бот заблокирован '+str(users[user][0]), parse_mode='html')
+            file.write(f'\nБот заблокирован '+str(users[user][0]))
+            db_user_blocked.commit()
+    os.remove(message.audio.file_name)
+    file = open('Mailing_report.txt', 'rb')
+    await bot.send_message(chat_id=message.chat.id, text='Ваше изображение успешно отправлено! Вы молодец, босс!')
+    await bot.send_document(message.chat.id, file)
+    file.close()
+    os.remove('Mailing_report.txt')
+
+
 @dp.message_handler(content_types=['text'], state=FSM_classes.Admin.mailing_all, chat_id=[417986886, chats_id.commands_chat_id])
 async def mailing_text(message: types.Message):
     db_user_blocked = sqlite3.connect('Databases/Data_users.db')
