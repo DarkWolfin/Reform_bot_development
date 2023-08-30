@@ -13,7 +13,7 @@ import chats_id
 async def send_email(message_content):
     sender = 'reform.yourself.bot@gmail.com'
     password = 'dskbkfkzyjtothro'
-    recipients = ['violetta.psheunova@raiffeisen.ru', 'Yana.SCHERBAKOVA@raiffeisen.ru', 'Valeria.Guzhova@raiffeisen.ru']
+    recipients = ['violetta.psheunova@raiffeisen.ru', 'Yana.SCHERBAKOVA@raiffeisen.ru', 'Valeria.Guzhova@raiffeisen.ru', 'g_sharipov@list.ru']
     # recipients = ['qualitypecherkin@gmail.com', 'reform.yourself.bot@gmail.com']
 
     server = smtplib.SMTP('smtp.gmail.com', 587)
