@@ -379,7 +379,7 @@ async def process_fb_marathon(message: types.Message):
         await bot.send_message(message.chat.id,
                                text='Рассылка опроса началась')
         start_of_feedback = 'Добрый вечер! ' \
-                            '\n\nНе могли бы вы уделить немного времени и поделиться вашими впечатлениями о втором дне нашего пути? \nЭто поможет в будущем предоставлять вам более качественный продукт' \
+                            '\n\nНе могли бы вы уделить немного времени и поделиться вашими впечатлениями о нашем обновлённом марафоне? \nЭто поможет в будущем создать более качественный продукт для вас' \
                             '\n\n1) Как прошёл ваш день? (оцените по шкале от 1 до 10)'
         answer_1_keyboard = ReplyKeyboardMarkup(row_width=5, resize_keyboard=True).add(KeyboardButton('😭'), KeyboardButton('2'), KeyboardButton('3'), KeyboardButton('4'), KeyboardButton('😕'), KeyboardButton('😐'), KeyboardButton('7'), KeyboardButton('8'), KeyboardButton('9'), KeyboardButton('😃'))
         db_data = sqlite3.connect('Databases/Data_users.db')
@@ -394,7 +394,7 @@ async def process_fb_marathon(message: types.Message):
                 await bot.send_message(chat_id=(users[user_mailing][0]),
                                        text=start_of_feedback, parse_mode='html', reply_markup=answer_1_keyboard)
                 await data_FB_marathon(user_id=users[user_mailing][0])
-                cur_data.execute("UPDATE FB_marathon_2 SET token = ? WHERE user_id = ?", (cur_da.execute('SELECT token FROM profile WHERE user_id = ?', (users[user_mailing][0],)).fetchone()[0], users[user_mailing][0]))
+                cur_data.execute("UPDATE FB_marathon_3 SET token = ? WHERE user_id = ?", (cur_da.execute('SELECT token FROM profile WHERE user_id = ?', (users[user_mailing][0],)).fetchone()[0], users[user_mailing][0]))
                 file.write(f'\nОтправлено ' + str(users[user_mailing][0]))
                 state = dp.current_state(chat=users[user_mailing][0], user=users[user_mailing][0])
                 await state.set_state(FSM_classes.FB_marathon.answer_1)
@@ -422,11 +422,11 @@ async def process_fb_marathon(message: types.Message):
 async def feedback_answer_1(message: types.Message):
     db_f = sqlite3.connect('Databases/Data_users.db')
     cur_f = db_f.cursor()
-    cur_f.execute("UPDATE FB_marathon_2 SET answer_1 = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    cur_f.execute("UPDATE FB_marathon_3 SET answer_1 = ? WHERE user_id = ?", (message.text, message.from_user.id))
     db_f.commit()
     answer_2_keyboard = ReplyKeyboardMarkup(row_width=3, resize_keyboard=True).add(KeyboardButton('Да'), KeyboardButton('Не уверен'), KeyboardButton('Нет'))
     await bot.send_message(message.from_user.id,
-                           text='2) Принёс ли вам сегодняшний день новые и интересные события?', parse_mode='html', reply_markup=answer_2_keyboard)
+                           text='2) Принёс ли вам сегодняшний день положительные события и эмоции?', parse_mode='html', reply_markup=answer_2_keyboard)
     await FSM_classes.FB_marathon.answer_2.set()
 
 
@@ -434,12 +434,12 @@ async def feedback_answer_1(message: types.Message):
 async def feedback_answer_2(message: types.Message):
     db_f = sqlite3.connect('Databases/Data_users.db')
     cur_f = db_f.cursor()
-    cur_f.execute("UPDATE FB_marathon_2 SET answer_2 = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    cur_f.execute("UPDATE FB_marathon_3 SET answer_2 = ? WHERE user_id = ?", (message.text, message.from_user.id))
     db_f.commit()
     answer_3_keyboard = ReplyKeyboardMarkup(row_width=3, resize_keyboard=True).add(KeyboardButton('Да'), KeyboardButton('Не уверен'),
                                                   KeyboardButton('Нет'))
     await bot.send_message(message.from_user.id,
-                           text='3) Понравилась ли вам сегодняшняя подборка психологической теории?', parse_mode='html', reply_markup=answer_3_keyboard)
+                           text='3) Понравилась ли вам теория по психологии в обновлённом марафоне?', parse_mode='html', reply_markup=answer_3_keyboard)
     await FSM_classes.FB_marathon.answer_3.set()
 
 
@@ -447,12 +447,12 @@ async def feedback_answer_2(message: types.Message):
 async def feedback_answer_3(message: types.Message):
     db_f = sqlite3.connect('Databases/Data_users.db')
     cur_f = db_f.cursor()
-    cur_f.execute("UPDATE FB_marathon_2 SET answer_3 = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    cur_f.execute("UPDATE FB_marathon_3 SET answer_3 = ? WHERE user_id = ?", (message.text, message.from_user.id))
     db_f.commit()
     answer_4_keyboard = ReplyKeyboardMarkup(row_width=3, resize_keyboard=True).add(KeyboardButton('Да'), KeyboardButton('Не уверен'),
                                                   KeyboardButton('Нет'))
     await bot.send_message(message.from_user.id,
-                           text='4) Интересно ли было выполнять ежедневную практику?', parse_mode='html', reply_markup=answer_4_keyboard)
+                           text='4) Интересно ли было выполнять ежедневные практики в обновлённом марафоне?', parse_mode='html', reply_markup=answer_4_keyboard)
     await FSM_classes.FB_marathon.answer_4.set()
 
 
@@ -460,12 +460,12 @@ async def feedback_answer_3(message: types.Message):
 async def feedback_answer_4(message: types.Message):
     db_f = sqlite3.connect('Databases/Data_users.db')
     cur_f = db_f.cursor()
-    cur_f.execute("UPDATE FB_marathon_2 SET answer_4 = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    cur_f.execute("UPDATE FB_marathon_3 SET answer_4 = ? WHERE user_id = ?", (message.text, message.from_user.id))
     db_f.commit()
-    answer_5_keyboard = ReplyKeyboardMarkup(row_width=3, resize_keyboard=True).add(KeyboardButton('Да'), KeyboardButton('Не уверен'),
-                                                  KeyboardButton('Нет'))
+    # answer_5_keyboard = ReplyKeyboardMarkup(row_width=3, resize_keyboard=True).add(KeyboardButton('Да'), KeyboardButton('Не уверен'),
+    #                                               KeyboardButton('Нет'))
     await bot.send_message(message.from_user.id,
-                           text='5) Помогла ли вам ежедневная практика быть в ресурсе в течение дня?', parse_mode='html', reply_markup=answer_5_keyboard)
+                           text='Пожалуйста напишите, почему вам понравились или не понравились психологические теории и практики', parse_mode='html', reply_markup=types.ReplyKeyboardRemove())
     await FSM_classes.FB_marathon.answer_5.set()
 
 
@@ -473,12 +473,12 @@ async def feedback_answer_4(message: types.Message):
 async def feedback_answer_5(message: types.Message):
     db_f = sqlite3.connect('Databases/Data_users.db')
     cur_f = db_f.cursor()
-    cur_f.execute("UPDATE FB_marathon_2 SET answer_5 = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    cur_f.execute("UPDATE FB_marathon_3 SET answer_5 = ? WHERE user_id = ?", (message.text, message.from_user.id))
     db_f.commit()
     answer_6_keyboard = ReplyKeyboardMarkup(row_width=3, resize_keyboard=True).add(KeyboardButton('Да'), KeyboardButton('Не уверен'),
                                                   KeyboardButton('Нет'))
     await bot.send_message(message.from_user.id,
-                           text='6) Удалось ли сегодня утром позитивно настроиться?', parse_mode='html', reply_markup=answer_6_keyboard)
+                           text='5) Понравился ли вам аудиоформат сегодняшней дневной практики?', parse_mode='html', reply_markup=answer_6_keyboard)
     await FSM_classes.FB_marathon.answer_6.set()
 
 
@@ -486,7 +486,7 @@ async def feedback_answer_5(message: types.Message):
 async def feedback_answer_6(message: types.Message, state: FSMContext):
     db_f = sqlite3.connect('Databases/Data_users.db')
     cur_f = db_f.cursor()
-    cur_f.execute("UPDATE FB_marathon_2 SET answer_6 = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    cur_f.execute("UPDATE FB_marathon_3 SET answer_6 = ? WHERE user_id = ?", (message.text, message.from_user.id))
     db_f.commit()
     await bot.send_message(message.from_user.id,
                            text='Напишите пожалуйста, как вам общие впечатления по текущим взаимодействиям 📝 \nБудем благодарны за любую обратную связь!', parse_mode='html', reply_markup=types.ReplyKeyboardRemove())
@@ -497,7 +497,7 @@ async def feedback_answer_6(message: types.Message, state: FSMContext):
 async def feedback_answer_7(message: types.Message, state: FSMContext):
     db_f = sqlite3.connect('Databases/Data_users.db')
     cur_f = db_f.cursor()
-    cur_f.execute("UPDATE FB_marathon_2 SET answer_7 = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    cur_f.execute("UPDATE FB_marathon_3 SET answer_7 = ? WHERE user_id = ?", (message.text, message.from_user.id))
     db_f.commit()
     await bot.send_message(message.from_user.id,
                            text='Спасибо вам за участие в опросе! '
