@@ -18,7 +18,7 @@ async def db_start():
         "CREATE TABLE IF NOT EXISTS NEW_affirmation(user_id INT PRIMARY KEY, username TEXT, token TEXT, agree TEXT)")
     db_data.commit()
     cur_data.execute(
-        "CREATE TABLE IF NOT EXISTS feedback(user_id INT PRIMARY KEY, answer_1_yn TEXT, answer_2_choose TEXT, answer_3_choose TEXT, answer_4 TEXT, answer_5 TEXT, answer_6 TEXT, answer_extra TEXT)")
+        "CREATE TABLE IF NOT EXISTS feedback_2(user_id INT PRIMARY KEY, token TEXT, answer_1 TEXT, answer_2 TEXT, answer_3 TEXT, answer_4 TEXT, answer_5 TEXT, answer_6 TEXT, answer_7 TEXT)")
     db_data.commit()
     cur_data.execute(
         "CREATE TABLE IF NOT EXISTS FB_marathon_3(user_id INT PRIMARY KEY, token TEXT, answer_1 TEXT, answer_2 TEXT, answer_3 TEXT, answer_4 TEXT, answer_5 TEXT, answer_6 TEXT, answer_7 TEXT)")
@@ -120,10 +120,10 @@ async def data_profile(user_id, first_name, username):
 
 async def data_feedback(user_id):
     user = cur_data.execute(
-        "SELECT 1 FROM feedback WHERE user_id == '{key}'".format(key=user_id)).fetchone()
+        "SELECT 1 FROM feedback_2 WHERE user_id == '{key}'".format(key=user_id)).fetchone()
     if not user:
-        cur_data.execute("INSERT INTO feedback VALUES(?, ?, ?, ?, ?, ?, ?, ?)",
-                         (user_id, '', '', '', '', '', '', ''))
+        cur_data.execute("INSERT INTO feedback_2 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                         (user_id, '', '', '', '', '', '', '', ''))
         db_data.commit()
 
 

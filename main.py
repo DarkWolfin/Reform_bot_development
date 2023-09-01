@@ -245,32 +245,44 @@ async def process_feedback(message: types.Message):
     if message.text == 'ad12min3':
         await bot.send_message(message.chat.id,
                                text='Рассылка опроса началась')
-        start_of_feedback = 'Добрый день! ' \
-                            '\n\nНе могли бы вы уделить немного времени и поделиться вашими впечатлениями о чат-боте? (6 вопросов отнимут у вас не более 3 минут)' \
-                            '\nВаш ответ поможет нам улучшить качество предоставляемых услуг. ' \
-                            '\n\nПожалуйста, оцените следующие утверждения, выбрав наиболее подходящий вариант: ' \
-                            '\n\n1. Взаимодействовали ли вы с чат-ботом? '
-        answer_1_keyboard = ReplyKeyboardMarkup(row_width=1, resize_keyboard=True).add(KeyboardButton('Да'), KeyboardButton('Нет'))
+        start_of_feedback = ('Добрый день, дорогой пользователь! ☀️'
+                             '\n\nВаше мнение очень важно для нас, поэтому мы просим вас поделиться впечатлениями о пройденном марафоне!🧾'
+                             '\nВаши комментарии и отзывы — это ценный источник информации, который поможет нам лучше соответствовать вашим ожиданиям и потребностям!📝'
+                             '\n\nВ опросе всего лишь 7 вопросов, которые не отнимут у вас более 5 минут, но внесут большой вклад в дальнейшее развитие!' 
+                             '\n\n1) Читали ли вы психологическую теорию и проходили ли практики, присылаемые ботом?')
+        answer_1_keyboard = ReplyKeyboardMarkup(row_width=1, resize_keyboard=True).add(KeyboardButton('Да, регулярно'), KeyboardButton('Часто'), KeyboardButton('Иногда'), KeyboardButton('Нет'))
         db_data = sqlite3.connect('Databases/Data_users.db')
         cur_data = db_data.cursor()
+        db_da = sqlite3.connect('Databases/Data_users.db')
+        cur_da = db_da.cursor()
         users = cur_data.execute(
             'SELECT user_id FROM profile').fetchall()
+        file = open('Quiz_report.txt', 'w')
         for user_mailing in range(len(users)):
             try:
                 await bot.send_message(chat_id=(users[user_mailing][0]),
                                        text=start_of_feedback, parse_mode='html', reply_markup=answer_1_keyboard)
                 await data_feedback(user_id=users[user_mailing][0])
+                cur_data.execute("UPDATE feedback_2 SET token = ? WHERE user_id = ?", (
+                cur_da.execute('SELECT token FROM profile WHERE user_id = ?', (users[user_mailing][0],)).fetchone()[0],
+                users[user_mailing][0]))
+                file.write(f'\nОтправлено ' + str(users[user_mailing][0]))
                 state = dp.current_state(chat=users[user_mailing][0], user=users[user_mailing][0])
                 await state.set_state(FSM_classes.Feedback.answer_1_yn)
                 await asyncio.sleep(0.1)
+                db_data.commit()
             except BotBlocked:
                 cur_data.execute('UPDATE profile SET user_id = 0 WHERE user_id = ?',
                                  (users[user_mailing][0],))
+                file.write(f'\nБот заблокирован ' + str(users[user_mailing][0]))
                 db_data.commit()
         cur_data.execute('DELETE FROM profile WHERE user_id = ?', (int(0),))
         db_data.commit()
-        await bot.send_message(message.chat.id,
-                               text='Опросы успешно разосланы!')
+        file = open('Quiz_report.txt', 'rb')
+        await bot.send_message(chat_id=message.chat.id, text='Опрос успешно разослан!')
+        await bot.send_document(message.chat.id, file)
+        file.close()
+        os.remove('Quiz_report.txt')
     else:
         await bot.send_message(message.from_user.id, text='Ошибка доступа!'
                                                           '\n/receiving_feedback - ввести другой пароль '
@@ -281,12 +293,11 @@ async def process_feedback(message: types.Message):
 async def feedback_answer_1(message: types.Message):
     db_f = sqlite3.connect('Databases/Data_users.db')
     cur_f = db_f.cursor()
-    cur_f.execute("UPDATE feedback SET answer_1_yn = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    cur_f.execute("UPDATE feedback_2 SET answer_1 = ? WHERE user_id = ?", (message.text, message.from_user.id))
     db_f.commit()
-    answer_2_keyboard = ReplyKeyboardMarkup(row_width=1, resize_keyboard=True).add(KeyboardButton('Очень полезен'), KeyboardButton('Полезен, но есть недостатки'),
-                                                  KeyboardButton('Есть польза, но много недостатков'), KeyboardButton('Бесполезен'), KeyboardButton('Ещё не взаимодействовал'))
+    answer_2_keyboard = ReplyKeyboardMarkup(row_width=5, resize_keyboard=True).add(KeyboardButton('1'), KeyboardButton('2'), KeyboardButton('3'), KeyboardButton('4'), KeyboardButton('5'), KeyboardButton('6'), KeyboardButton('7'), KeyboardButton('8'), KeyboardButton('9'), KeyboardButton('10'))
     await bot.send_message(message.from_user.id,
-                           text='2. Насколько был полезен для вас чат-бот?', parse_mode='html', reply_markup=answer_2_keyboard)
+                           text='2) Насколько комфортно вы себя чувствовали во время прохождении марафона? \n(1 - некомфортно; 10 - все было удобно, понятно и комфортно)', parse_mode='html', reply_markup=answer_2_keyboard)
     await FSM_classes.Feedback.answer_2_choose.set()
 
 
@@ -294,12 +305,12 @@ async def feedback_answer_1(message: types.Message):
 async def feedback_answer_2(message: types.Message):
     db_f = sqlite3.connect('Databases/Data_users.db')
     cur_f = db_f.cursor()
-    cur_f.execute("UPDATE feedback SET answer_2_choose = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    cur_f.execute("UPDATE feedback_2 SET answer_2 = ? WHERE user_id = ?", (message.text, message.from_user.id))
     db_f.commit()
-    answer_3_keyboard = ReplyKeyboardMarkup(row_width=1, resize_keyboard=True).add(KeyboardButton('Общаться комфортно'), KeyboardButton('Общаться скорее комфортно, но есть недостатки'),
-                                                  KeyboardButton('Большинство общения неприятно'), KeyboardButton('Неприятно общаться, так как затрагиваются личные темы'))
+    answer_3_keyboard = ReplyKeyboardMarkup(row_width=5, resize_keyboard=True).add(KeyboardButton('1'), KeyboardButton('2'), KeyboardButton('3'), KeyboardButton('4'), KeyboardButton('5'), KeyboardButton('6'), KeyboardButton('7'), KeyboardButton('8'), KeyboardButton('9'), KeyboardButton('10'))
     await bot.send_message(message.from_user.id,
-                           text='3. Как бы вы оценили уровень общения с чат-ботом на темы, связанные с вашим психологическим состоянием?', parse_mode='html', reply_markup=answer_3_keyboard)
+                           text='3) Как вы оцениваете влияние марафона на вашу работоспособность и эффективность? '
+                                '\n(1 - упадок сил; 5 - ничего не изменилось; 10 - прилив сил и энергии)', parse_mode='html', reply_markup=answer_3_keyboard)
     await FSM_classes.Feedback.answer_3_choose.set()
 
 
@@ -307,11 +318,11 @@ async def feedback_answer_2(message: types.Message):
 async def feedback_answer_2(message: types.Message):
     db_f = sqlite3.connect('Databases/Data_users.db')
     cur_f = db_f.cursor()
-    cur_f.execute("UPDATE feedback SET answer_3_choose = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    cur_f.execute("UPDATE feedback_2 SET answer_3 = ? WHERE user_id = ?", (message.text, message.from_user.id))
     db_f.commit()
+    answer_4_keyboard = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True).add(KeyboardButton('Да'), KeyboardButton('Нет'))
     await bot.send_message(message.from_user.id,
-                           text='4. Были ли у вас какие-либо негативные или позитивные эмоции, связанные с использованием чат-бота для психологической поддержки (прохождение тестов, использование практик, система рекомендаций)? '
-                                '\nЕсли да, то будем признательны, если вы поделитесь вашим опытом', parse_mode='html', reply_markup=types.ReplyKeyboardRemove())
+                           text='4) Заметили ли вы положительные изменения в настроении или отношении к работе после начала участия в марафоне?', parse_mode='html', reply_markup=answer_4_keyboard)
     await FSM_classes.Feedback.answer_4.set()
 
 
@@ -319,11 +330,10 @@ async def feedback_answer_2(message: types.Message):
 async def feedback_answer_2(message: types.Message):
     db_f = sqlite3.connect('Databases/Data_users.db')
     cur_f = db_f.cursor()
-    cur_f.execute("UPDATE feedback SET answer_4 = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    cur_f.execute("UPDATE feedback_2 SET answer_4 = ? WHERE user_id = ?", (message.text, message.from_user.id))
     db_f.commit()
     await bot.send_message(message.from_user.id,
-                           text='5. Изменили ли вы что-то в текущем чат-боте? '
-                                '\nЕсли да, то пожалуйста напишите', parse_mode='html')
+                           text='5) Какие взаимодейтвия с ботом вызывали у вас наиболее положительные эмоции и ощущения? \n(Эмбодимент упражнения, блгодарности, аффирмиции, дыхательные практики, медитативные упражнения, слова поддержки, теория)', parse_mode='html', reply_markup=types.ReplyKeyboardRemove())
     await FSM_classes.Feedback.answer_5.set()
 
 
@@ -331,11 +341,10 @@ async def feedback_answer_2(message: types.Message):
 async def feedback_answer_2(message: types.Message):
     db_f = sqlite3.connect('Databases/Data_users.db')
     cur_f = db_f.cursor()
-    cur_f.execute("UPDATE feedback SET answer_5 = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    cur_f.execute("UPDATE feedback_2 SET answer_5 = ? WHERE user_id = ?", (message.text, message.from_user.id))
     db_f.commit()
     await bot.send_message(message.from_user.id,
-                           text='6. Есть ли то, что вы бы хотели видеть в чат-боте в будущем? '
-                                '\nЕсли да, то будем признательны за то, что поделились', parse_mode='html')
+                           text='6) Что бы вы предложили улучшить или изменить в марафоне, чтобы он стал более полезным и интересным для вас?', parse_mode='html')
     await FSM_classes.Feedback.answer_6.set()
 
 
@@ -343,11 +352,10 @@ async def feedback_answer_2(message: types.Message):
 async def feedback_answer_2(message: types.Message):
     db_f = sqlite3.connect('Databases/Data_users.db')
     cur_f = db_f.cursor()
-    cur_f.execute("UPDATE feedback SET answer_6 = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    cur_f.execute("UPDATE feedback_2 SET answer_6 = ? WHERE user_id = ?", (message.text, message.from_user.id))
     db_f.commit()
     await bot.send_message(message.from_user.id,
-                           text='Если у вас есть пожелания или дополнительные комментарии которыми вы бы хотели поделиться? '
-                                '\nЕсли нет, то напишите пожалуйста “нет”', parse_mode='html')
+                           text='7) Представьте, что вам в двух словах нужно представить марафон другу или подруге, пожалуйста напишите, что бы вы сказали', parse_mode='html')
     await FSM_classes.Feedback.answer_extra.set()
 
 
@@ -355,7 +363,7 @@ async def feedback_answer_2(message: types.Message):
 async def feedback_answer_2(message: types.Message, state: FSMContext):
     db_f = sqlite3.connect('Databases/Data_users.db')
     cur_f = db_f.cursor()
-    cur_f.execute("UPDATE feedback SET answer_extra = ? WHERE user_id = ?", (message.text, message.from_user.id))
+    cur_f.execute("UPDATE feedback_2 SET answer_7 = ? WHERE user_id = ?", (message.text, message.from_user.id))
     db_f.commit()
     await bot.send_message(message.from_user.id,
                            text='Спасибо вам за участие в опросе! '
