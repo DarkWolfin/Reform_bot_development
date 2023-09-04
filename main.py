@@ -140,9 +140,26 @@ async def fix_tokens_users(message: types.Message):
         await bot.send_message(message.chat.id, text='Отправлено '+str(users_fix_tokens[i]))
 
 
-@dp.message_handler(commands=['get_db'], state='*', chat_id=[417986886,chats_id.commands_chat_id])
+@dp.message_handler(commands=['get_db'], state='*', chat_id=[417986886, chats_id.commands_chat_id])
 async def get_db(message: types.Message):
     await bot.send_document(message.chat.id, open('Databases/Data_users.db', 'rb'))
+
+
+@dp.message_handler(commands=['get_all_db'], state='*', chat_id=[417986886, chats_id.commands_chat_id])
+async def get_db(message: types.Message):
+    await bot.send_document(message.chat.id, open('Databases/Data_users.db', 'rb'))
+    await bot.send_document(message.chat.id, open('Databases/Current_habits.db', 'rb'))
+    await bot.send_document(message.chat.id, open('Databases/user_interactions.db', 'rb'))
+
+
+@dp.message_handler(commands=['get_test_results_db'], state='*', chat_id=[417986886, chats_id.commands_chat_id])
+async def get_db(message: types.Message):
+    await bot.send_document(message.chat.id, open('Databases/Result_Tests/Holmes-Rahe.db', 'rb'))
+    await bot.send_document(message.chat.id, open('Databases/Result_Tests/PSY_Weariness.db', 'rb'))
+    await bot.send_document(message.chat.id, open('Databases/Result_Tests/PSY_stress.db', 'rb'))
+    await bot.send_document(message.chat.id, open('Databases/Result_Tests/PSY_Selfefficacy.db', 'rb'))
+    await bot.send_document(message.chat.id, open('Databases/Result_Tests/POP_Control.db', 'rb'))
+    await bot.send_document(message.chat.id, open('Databases/Result_Tests/POP_Typeperson.db', 'rb'))
 
 
 @dp.message_handler(commands=['send_to_user'], state='*', chat_id=[417986886, chats_id.commands_chat_id])
