@@ -27,9 +27,11 @@ from aiogram.utils import executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 import aioschedule as schedule
 
+
 from aiogram.utils.exceptions import BotBlocked, BotKicked
 
 from Token import Token
+from Storage import storage
 from Database import db_start, data_profile, affirmation, data_feedback, pre_points_test_weariness, \
     points_test_weariness, \
     pre_answers_test_weariness, set_user_token, get_all_user_ids, save_user_action, data_FB_marathon, NEW_affirmation
@@ -38,9 +40,8 @@ from Database import db_start, data_profile, affirmation, data_feedback, pre_poi
 async def on_startup(_):
     await db_start()
 
-
 bot = Bot(Token)
-dp = Dispatcher(bot, storage=MemoryStorage())
+dp = Dispatcher(bot, storage=storage)
 
 
 Specialists.register_handlers_specialist(dp)

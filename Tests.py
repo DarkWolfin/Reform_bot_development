@@ -8,9 +8,10 @@ import PopTests
 import PsyTests
 
 from Token import Token
+from Storage import storage
 
 bot = Bot(Token)
-dp = Dispatcher(bot, storage=MemoryStorage())
+dp = Dispatcher(bot, storage=storage)
 
 
 async def pretest(message: types.message, state: FSMContext):

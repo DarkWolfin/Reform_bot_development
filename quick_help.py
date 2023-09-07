@@ -13,8 +13,9 @@ from aiogram.utils.exceptions import BotBlocked
 from send_email import send_email
 import Markups
 from Token import Token
+from Storage import storage
 bot = Bot(Token)
-dp = Dispatcher(bot, storage=MemoryStorage())
+dp = Dispatcher(bot, storage=storage)
 
 
 quick_help_menu = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(
