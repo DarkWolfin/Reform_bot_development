@@ -554,7 +554,7 @@ async def get_user_report(message: types.Message):
 async def get_user_report(message: types.Message, state: FSMContext):
     if message.text == 'admin123':
         await bot.send_message(message.chat.id,
-                               text='Введите id нужных юзеров через пробел или напишите слово "все"')
+                               text='Введите id нужных юзеров через пробел или напишите слово " Все"')
         await FSM_classes.adminCommands.getUserReportId.set()
     else:
         await bot.send_message(message.chat.id, text='Ошибка доступа!'
@@ -583,7 +583,7 @@ async def get_user_report(message: types.Message, state: FSMContext):
     startDate = startDate.replace(':', '')
     endDate = endDate.replace(':', '')
     users = str(users['users']).split(' ')
-    if len(users) == 1 and users[0] == 'все':
+    if len(users) == 1 and users[0] == 'Все':
         users = await get_all_user_ids()
         users = [str(user[0]) for user in users]
 
@@ -606,7 +606,7 @@ async def get_user_report(message: types.Message, state: FSMContext):
         await FSM_classes.adminCommands.getUserActionId.set()
     else:
         await bot.send_message(message.chat.id, text='Ошибка доступа!'
-                                                          '\n/getuserreport - ввести другой пароль '
+                                                          '\n/getuseractions - ввести другой пароль '
                                                           '\n/main_menu - перейти в главное меню')
 
 
@@ -629,6 +629,36 @@ async def get_user_report(message: types.Message, state: FSMContext):
         await admin_commands.createExcelFileActionCommand(startDate, endDate, tokens)
 
     with open('getUserAction.xlsx', 'rb') as f:
+        await bot.send_document(chat_id=message.chat.id, document=InputFile(f))
+    await FSM_classes.MultiDialog.menu.set()
+    await main_menu(message, state)
+
+
+@dp.message_handler(commands=['getuseractions_short'], state='*')
+async def get_user_report(message: types.Message):
+    await bot.send_message(message.chat.id, text='Введите пароль:')
+    await FSM_classes.adminCommands.getUserActionShortPassword.set()
+
+
+@dp.message_handler(state=FSM_classes.adminCommands.getUserActionShortPassword)
+async def get_user_report(message: types.Message, state: FSMContext):
+    if message.text == 'admin123':
+        await bot.send_message(message.chat.id,
+                               text='Введите дату начала и конца наблюдений через пробел в формате ЧЧ:ММ:ГГГГ')
+        await FSM_classes.adminCommands.getUserActionShortDate.set()
+    else:
+        await bot.send_message(message.chat.id, text='Ошибка доступа!'
+                                                          '\n/getuseractions_short - ввести другой пароль'
+                                                          '\n/main_menu - перейти в главное меню')
+
+
+@dp.message_handler(state=FSM_classes.adminCommands.getUserActionShortDate)
+async def get_user_report(message: types.Message, state: FSMContext):
+    startDate, endDate = message.text.split(' ')
+
+    await admin_commands.createExcelFileActionsShortForAllUsersWithTokens(startDate, endDate)
+
+    with open('getUserAction_short.xlsx', 'rb') as f:
         await bot.send_document(chat_id=message.chat.id, document=InputFile(f))
     await FSM_classes.MultiDialog.menu.set()
     await main_menu(message, state)
