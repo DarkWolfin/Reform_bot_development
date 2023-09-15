@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 async def db_start():
     global db_data, cur_data, db_test_weariness, cur_test_weariness, db_test_selfefficacy, cur_test_selfefficacy, cur_test_stress, db_test_control, cur_test_control, db_test_typeperson, cur_test_typeperson, \
-        db_habit_sleep, cur_habit_sleep, db_course_anxiety, cur_course_anxiety, db_user_interactions, db_test_stress, cur_user_interactions, db_test_holms, cur_test_holms
+        db_habit_sleep, cur_habit_sleep, db_course_anxiety, cur_course_anxiety, db_user_interactions, db_test_stress, cur_user_interactions, db_test_holms, cur_test_holms, db_helpsystem, cur_helpsystem
 
     db_data = sq.connect('Databases/Data_users.db')
     cur_data = db_data.cursor()
@@ -23,6 +23,23 @@ async def db_start():
     cur_data.execute(
         "CREATE TABLE IF NOT EXISTS FB_marathon_3(user_id INT PRIMARY KEY, token TEXT, answer_1 TEXT, answer_2 TEXT, answer_3 TEXT, answer_4 TEXT, answer_5 TEXT, answer_6 TEXT, answer_7 TEXT)")
     db_data.commit()
+
+    #help system
+    db_helpsystem = sq.connect('Databases/Help_system.db')
+    cur_helpsystem = db_helpsystem.cursor()
+    cur_helpsystem.execute(
+        "CREATE TABLE IF NOT EXISTS good(user_id INT PRIMARY KEY, username TEXT, token TEXT, time TEXT, try_practice TEXT)")
+    db_helpsystem.commit()
+    cur_helpsystem.execute(
+        "CREATE TABLE IF NOT EXISTS norm(user_id INT PRIMARY KEY, username TEXT, token TEXT, time TEXT, try_practice TEXT)")
+    db_helpsystem.commit()
+    cur_helpsystem.execute(
+        "CREATE TABLE IF NOT EXISTS bad(user_id INT PRIMARY KEY, username TEXT, token TEXT, time TEXT, try_practice TEXT)")
+    db_helpsystem.commit()
+    cur_helpsystem.execute(
+        "CREATE TABLE IF NOT EXISTS agreement(user_id INT PRIMARY KEY, username TEXT, token TEXT, time TEXT, state TEXT, choice TEXT)")
+    db_helpsystem.commit()
+
 
     db_test_weariness = sq.connect('Databases/Result_Tests/PSY_Weariness.db')
     cur_test_weariness = db_test_weariness.cursor()
@@ -153,6 +170,50 @@ async def NEW_affirmation(user_id, username):
         cur_data.execute("INSERT INTO NEW_affirmation VALUES(?, ?, ?, ?)",
                          (user_id, username, '', ''))
         db_data.commit()
+
+
+async def help_system_good(user_id):
+    user = cur_helpsystem.execute(
+        "SELECT 1 FROM good WHERE user_id == '{key}'".format(key=user_id)).fetchone()
+    if not user:
+        timeNow = datetime.now()
+        timeNow = str(timeNow)[:-7]
+        cur_helpsystem.execute("INSERT INTO good VALUES(?, ?, ?, ?, ?)",
+                         (user_id, str(cur_data.execute('SELECT username FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), str(cur_data.execute('SELECT token FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), timeNow, ''))
+        db_helpsystem.commit()
+
+
+async def help_system_norm(user_id):
+    user = cur_helpsystem.execute(
+        "SELECT 1 FROM norm WHERE user_id == '{key}'".format(key=user_id)).fetchone()
+    if not user:
+        timeNow = datetime.now()
+        timeNow = str(timeNow)[:-7]
+        cur_helpsystem.execute("INSERT INTO norm VALUES(?, ?, ?, ?, ?)",
+                         (user_id, str(cur_data.execute('SELECT username FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), str(cur_data.execute('SELECT token FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), timeNow, ''))
+        db_helpsystem.commit()
+
+
+async def help_system_bad(user_id):
+    user = cur_helpsystem.execute(
+        "SELECT 1 FROM agreement WHERE user_id == '{key}'".format(key=user_id)).fetchone()
+    if not user:
+        timeNow = datetime.now()
+        timeNow = str(timeNow)[:-7]
+        cur_helpsystem.execute("INSERT INTO agreement VALUES(?, ?, ?, ?, ?, ?)",
+                         (user_id, str(cur_data.execute('SELECT username FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), str(cur_data.execute('SELECT token FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), timeNow, '', ''))
+        db_helpsystem.commit()
+
+
+async def help_system_agreement(user_id):
+    user = cur_helpsystem.execute(
+        "SELECT 1 FROM bad WHERE user_id == '{key}'".format(key=user_id)).fetchone()
+    if not user:
+        timeNow = datetime.now()
+        timeNow = str(timeNow)[:-7]
+        cur_helpsystem.execute("INSERT INTO bad VALUES(?, ?, ?, ?, ?)",
+                         (user_id, str(cur_data.execute('SELECT username FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), str(cur_data.execute('SELECT token FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), timeNow, ''))
+        db_helpsystem.commit()
 
 
 async def get_all_user_ids():

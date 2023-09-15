@@ -108,3 +108,10 @@ appointment = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(
     KeyboardButton('Записаться'),
     KeyboardButton('Вернуться в главное меню'))
 
+
+#HelpSystem
+start_helpsystem = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1). add(KeyboardButton('Хорошо 😀'),
+                                                                               KeyboardButton('Нормально 🙂'),
+                                                                               KeyboardButton('Плохо 😢'))
+#good
+try_practice_good = InlineKeyboardMarkup(row_width=2). add(InlineKeyboardButton('Да', callback_data='try_practice_gy'), InlineKeyboardButton('Нет', callback_data='try_practice_gn'))
