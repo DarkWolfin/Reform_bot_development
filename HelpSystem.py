@@ -27,12 +27,55 @@ async def choose_helpsystem(message: types.Message, state: FSMContext):
         await state.set_state(FSM_classes.HelpSystem.good_condition)
     elif message.text == 'Нормально 🙂':
         await help_system_norm(user_id=message.from_user.id)
-        await bot.send_message(message.from_user.id, 'Вы бы хотели сделать ваше состояние еще лучше?')
+        await bot.send_message(message.from_user.id, 'Я рад, что у вас всё хорошо! Но что-то всё-таки вас беспокоит..', reply_markup=ReplyKeyboardRemove())
+        await bot.send_message(message.from_user.id, 'Вы бы хотели улучшить ваше состояние?', reply_markup=InlineKeyboardMarkup(row_width=1).add(InlineKeyboardButton('Да', callback_data='norm_condition_0_y'), InlineKeyboardButton('Нет, меня всё устраивает', callback_data='norm_condition_0_n')))
         await state.set_state(FSM_classes.HelpSystem.norm_condition)
     elif message.text == 'Плохо 😢':
         await help_system_bad(user_id=message.from_user.id)
         await bot.send_message(message.from_user.id, '')
         await state.set_state(FSM_classes.HelpSystem.bad_condition)
+
+
+async def norm_condition(callback_query: types.CallbackQuery, state: FSMContext):
+    db_helpsys = sqlite3.connect('Databases/Help_system.db')
+    cur_helpsys = db_helpsys.cursor()
+    if callback_query.data.startswith('norm_condition_0_'):
+        cur_helpsys.execute("UPDATE norm SET better = ? WHERE user_id = ?", (callback_query.data[-1], callback_query.from_user.id))
+        if callback_query.data[-1] == 'y':
+            await bot.send_message(callback_query.from_user.id, 'Регулярные физические упражнения, такие как занятия спортом, йога или даже ежедневные прогулки, могут улучшить физическое и эмоциональное состояние. '
+                                                            '\nУдается ли вам их выполнять?', reply_markup=InlineKeyboardMarkup(row_width=1).add(InlineKeyboardButton('Нет, но хотелось бы это исправить', callback_data='norm_condition_1_i'), InlineKeyboardButton('Да', callback_data='norm_condition_1_y'), InlineKeyboardButton('Нет, меня всё устраивает', callback_data='norm_condition_1_n')))
+        else:
+            await bot.send_message(callback_query.from_user.id, 'Очень жаль, что вам это неинтересно((')
+            await state.set_state(FSM_classes.MultiDialog.menu)
+        db_helpsys.commit()
+
+    elif callback_query.data[-3] == '1':
+        if callback_query.data[-1] == 'y':
+            await bot.send_message(callback_query.from_user.id,'Отлично, тогда идем дальше!')
+            cur_helpsys.execute("UPDATE norm SET sport = ? WHERE user_id = ?",
+                                ('Да', callback_query.from_user.id))
+        elif callback_query.data[-3] == 'n':
+            await bot.send_message(callback_query.from_user.id, 'Принято, тогда идем дальше!')
+            cur_helpsys.execute("UPDATE norm SET sport = ? WHERE user_id = ?",
+                                ('Нет', callback_query.from_user.id))
+        else:
+            await bot.send_message(callback_query.from_user.id, 'Как вы думаете, в чём причина этого?', reply_markup=InlineKeyboardMarkup(row_width=1).add(InlineKeyboardButton('Не хватает времени', callback_data='norm_condition_2_t'), InlineKeyboardButton('Нет мотивации', callback_data='norm_condition_2_m'), InlineKeyboardButton('Всё вместе', callback_data='norm_condition_2_b')))
+            cur_helpsys.execute("UPDATE norm SET sport = ? WHERE user_id = ?",
+                                ('Улучшить', callback_query.from_user.id))
+        db_helpsys.commit()
+
+    elif callback_query.data[-3] == '2':
+        if callback_query.data[-1] == 't':
+            cur_helpsys.execute("UPDATE norm SET cause_sport = ? WHERE user_id = ?",
+                                ('Время', callback_query.from_user.id))
+        if callback_query.data[-1] == 'm':
+            cur_helpsys.execute("UPDATE norm SET cause_sport = ? WHERE user_id = ?",
+                                ('Мотивация', callback_query.from_user.id))
+        if callback_query.data[-1] == 'b':
+            cur_helpsys.execute("UPDATE norm SET cause_sport = ? WHERE user_id = ?",
+                                ('Оба', callback_query.from_user.id))
+        db_helpsys.commit()
+
 
 
 async def try_practice(callback_query: types.CallbackQuery, state: FSMContext):
