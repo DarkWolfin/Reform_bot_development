@@ -52,10 +52,20 @@ async def norm_condition(callback_query: types.CallbackQuery, state: FSMContext)
     elif callback_query.data[-3] == '1':
         if callback_query.data[-1] == 'y':
             await bot.send_message(callback_query.from_user.id,'Отлично, тогда идем дальше!')
+            await bot.send_message(callback_query.from_user.id, 'Уравновешенное питание с разнообразными продуктами может оказать положительное воздействие на ваше здоровье и настроение! '
+                                                                '\nСтарайтесь употреблять свежие фрукты и овощи, богатые белком продукты и здоровые жиры!'
+                                                                '\nУдается ли вам это?', reply_markup=InlineKeyboardMarkup(row_width=1).add(InlineKeyboardButton('Нет, но хотелось бы это исправить', callback_data='norm_condition_3_i'), InlineKeyboardButton('Да', callback_data='norm_condition_3_y'), InlineKeyboardButton('Нет, меня всё устраивает', callback_data='norm_condition_3_n')))
             cur_helpsys.execute("UPDATE norm SET sport = ? WHERE user_id = ?",
                                 ('Да', callback_query.from_user.id))
         elif callback_query.data[-3] == 'n':
             await bot.send_message(callback_query.from_user.id, 'Принято, тогда идем дальше!')
+            await bot.send_message(callback_query.from_user.id,
+                                   'Уравновешенное питание с разнообразными продуктами может оказать положительное воздействие на ваше здоровье и настроение! '
+                                   '\nСтарайтесь употреблять свежие фрукты и овощи, богатые белком продукты и здоровые жиры!'
+                                   '\nУдается ли вам это?', reply_markup=InlineKeyboardMarkup(row_width=1).add(
+                    InlineKeyboardButton('Нет, но хотелось бы это исправить', callback_data='norm_condition_3_i'),
+                    InlineKeyboardButton('Да', callback_data='norm_condition_3_y'),
+                    InlineKeyboardButton('Нет, меня всё устраивает', callback_data='norm_condition_3_n')))
             cur_helpsys.execute("UPDATE norm SET sport = ? WHERE user_id = ?",
                                 ('Нет', callback_query.from_user.id))
         else:
@@ -66,16 +76,130 @@ async def norm_condition(callback_query: types.CallbackQuery, state: FSMContext)
 
     elif callback_query.data[-3] == '2':
         if callback_query.data[-1] == 't':
+            await bot.send_message(callback_query.from_user.id, 'Даже если у вас ограничено время, есть несколько способов внедрить регулярные физические упражнения в вашу повседневную жизнь:'
+                                                                '\n\n1. - <b>Краткие интенсивные тренировки:</b> Вы можете проводить короткие, но интенсивные тренировки, которые занимают всего несколько минут, но способствуют улучшению физической формы и здоровья.'
+                                                                '\n2. - <b>Интеграция в рутину:</b> Используйте моменты из вашей обыденной жизни для физической активности. Например, используйте лестницу вместо лифта, делайте упражнения во время перерывов на работе или даже во время просмотра телевизора.'
+                                                                '\n3. - <b>Прогулки:</b> Ежедневные прогулки, даже небольшие, могут быть отличным способом поддерживать активность. Вы можете пройти больше шагов, выбирая пешеходные маршруты вместо автомобиля или общественного транспорта.'
+                                                                '\n4. - <b>Медитация и йога:</b> Практикуйте короткие медитации или мини-йога-сессии для физической и эмоциональной релаксации. Даже несколько минут в день могут оказать положительное воздействие.'
+                                                                '\n5. - <b>Планирование:</b> Запишите физическую активность в свой расписание и придерживайтесь этого плана. Это поможет вам выделить время для занятий спортом или других видов физической активности.'
+                                                                '\n\nПомните, что даже небольшие изменения в вашей повседневной жизни могут привести к улучшению физического и эмоционального состояния. <b>Главное - постоянство и регулярность!</b>', parse_mode='html')
+            await asyncio.sleep(4)
+            await bot.send_message(callback_query.from_user.id, 'Для начала, мы можем начать с небольших утренних упражнений и разминки в течение рабочего дня, которые можно интегрировать в рабочий ритм. '
+                                                                '\nВы бы хотели попробовать подобную практику?', reply_markup=InlineKeyboardMarkup(row_width=1).add(InlineKeyboardButton('Да', callback_data='agreement_mailing_help_s_n_y'), InlineKeyboardButton('Нет, меня всё устраивает', callback_data='agreement_mailing_help_s_n_n')))
             cur_helpsys.execute("UPDATE norm SET cause_sport = ? WHERE user_id = ?",
                                 ('Время', callback_query.from_user.id))
         if callback_query.data[-1] == 'm':
+            await bot.send_message(callback_query.from_user.id,
+                                   'Для начала, мы можем начать с небольших утренних упражнений и разминки в течение рабочего дня, которые можно интегрировать в рабочий ритм. '
+                                   '\nВы бы хотели попробовать подобную практику?',
+                                   reply_markup=InlineKeyboardMarkup(row_width=1).add(
+                                       InlineKeyboardButton('Да', callback_data='agreement_mailing_help_s_n_y'),
+                                       InlineKeyboardButton('Нет, меня всё устраивает',
+                                                            callback_data='agreement_mailing_help_s_n_n')))
             cur_helpsys.execute("UPDATE norm SET cause_sport = ? WHERE user_id = ?",
                                 ('Мотивация', callback_query.from_user.id))
         if callback_query.data[-1] == 'b':
+            await bot.send_message(callback_query.from_user.id,
+                                   'Даже если у вас ограничено время, есть несколько способов внедрить регулярные физические упражнения в вашу повседневную жизнь:'
+                                   '\n\n1. - <b>Краткие интенсивные тренировки:</b> Вы можете проводить короткие, но интенсивные тренировки, которые занимают всего несколько минут, но способствуют улучшению физической формы и здоровья.'
+                                   '\n2. - <b>Интеграция в рутину:</b> Используйте моменты из вашей обыденной жизни для физической активности. Например, используйте лестницу вместо лифта, делайте упражнения во время перерывов на работе или даже во время просмотра телевизора.'
+                                   '\n3. - <b>Прогулки:</b> Ежедневные прогулки, даже небольшие, могут быть отличным способом поддерживать активность. Вы можете пройти больше шагов, выбирая пешеходные маршруты вместо автомобиля или общественного транспорта.'
+                                   '\n4. - <b>Медитация и йога:</b> Практикуйте короткие медитации или мини-йога-сессии для физической и эмоциональной релаксации. Даже несколько минут в день могут оказать положительное воздействие.'
+                                   '\n5. - <b>Планирование:</b> Запишите физическую активность в свой расписание и придерживайтесь этого плана. Это поможет вам выделить время для занятий спортом или других видов физической активности.'
+                                   '\n\nПомните, что даже небольшие изменения в вашей повседневной жизни могут привести к улучшению физического и эмоционального состояния. <b>Главное - постоянство и регулярность!</b>',
+                                   parse_mode='html')
+            await asyncio.sleep(4)
+            await bot.send_message(callback_query.from_user.id,
+                                   'Для начала, мы можем начать с небольших утренних упражнений и разминки в течение рабочего дня, которые можно интегрировать в рабочий ритм. '
+                                   '\nВы бы хотели попробовать подобную практику, реализованную в качестве рассылок с упражнениями и советами по их выполнению?',
+                                   reply_markup=InlineKeyboardMarkup(row_width=1).add(
+                                       InlineKeyboardButton('Да', callback_data='agreement_mailing_help_s_n_y'),
+                                       InlineKeyboardButton('Нет, меня всё устраивает',
+                                                            callback_data='agreement_mailing_help_s_n_n')))
             cur_helpsys.execute("UPDATE norm SET cause_sport = ? WHERE user_id = ?",
                                 ('Оба', callback_query.from_user.id))
         db_helpsys.commit()
 
+    elif callback_query.data[-3] == '3':
+        if callback_query.data[-1] == 'y':
+            await bot.send_message(callback_query.from_user.id, 'Отлично, тогда идем дальше!')
+            await bot.send_message(callback_query.from_user.id,
+                                   'Уделяйте внимание качеству сна! Регулярный и полноценный сон способствует восстановлению энергии и улучшению настроения!'
+                                   '\nУдается ли вам хорошо спать и высыпаться?', reply_markup=InlineKeyboardMarkup(row_width=1).add(
+                    InlineKeyboardButton('Да', callback_data='norm_condition_4_y'),
+                    InlineKeyboardButton('Нет', callback_data='norm_condition_4_n')))
+            cur_helpsys.execute("UPDATE norm SET food = ? WHERE user_id = ?",
+                                ('Да', callback_query.from_user.id))
+        elif callback_query.data[-1] == 'n':
+            await bot.send_message(callback_query.from_user.id, 'Принятно, тогда идем дальше!')
+            await bot.send_message(callback_query.from_user.id,
+                                   'Уделяйте внимание качеству сна! Регулярный и полноценный сон способствует восстановлению энергии и улучшению настроения!'
+                                   '\nУдается ли вам хорошо спать и высыпаться?',
+                                   reply_markup=InlineKeyboardMarkup(row_width=1).add(
+                                       InlineKeyboardButton('Да', callback_data='norm_condition_4_y'),
+                                       InlineKeyboardButton('Нет',
+                                                            callback_data='norm_condition_4_n')))
+            cur_helpsys.execute("UPDATE norm SET food = ? WHERE user_id = ?",
+                                ('Нет', callback_query.from_user.id))
+        else:
+            await bot.send_message(callback_query.from_user.id, 'Поддерживать здоровое и сбалансированное питание может быть сложной задачей, но есть несколько стратегий, которые могут помочь вам придерживаться этого:'
+                                                                '\n\n1. - <b>Постепенные изменения:</b> Начните с малого. Внесите постепенные изменения в свой рацион, добавляя больше свежих фруктов, овощей и белковых продуктов, а также уменьшая потребление процессированных продуктов и сахара.'
+                                                                '\n2. - <b>Планирование:</b> Заранее планируйте свои приемы пищи. Можете составлять меню на неделю и делать список продуктов перед походом в магазин. Это поможет избежать импульсивных покупок и соблюдать план питания.'
+                                                                '\n3. - <b>Умеренность:</b> Не нужно сразу избегать любимых продуктов. Разрешайте себе употреблять их в разумных количествах, чтобы избежать чувства лишения.'
+                                                                '\n4. - <b>Пить воду:</b> Постарайтесь употреблять достаточное количество воды в течение дня. Иногда чувство голода может быть вызвано обезвоживанием.'
+                                                                '\n5. - <b>Поддержка и мотивация:</b> Обсудите свои пищевые привычки с друзьями или семьей. Может быть, они могут вас поддержать или даже присоединиться к вам в этом усилии.'
+                                                                '\n6. - <b>Поиск альтернатив:</b> Ищите заменители нежелательных продуктов. Например, замените жареную картошку на запеченные сладкие картофели, а газированные напитки на воду с лимоном.'
+                                                                '\n7. - <b>Самомотивация:</b> Постоянно напоминайте себе о целях, которые вы хотите достичь, благодаря уравновешенному питанию. Самомотивация может быть мощным стимулом.'
+                                                                '\n\nПомните, что никто не совершенен, и иногда допускать "грехи" в питании вполне нормально. Главное - стремиться к улучшению своих пищевых привычек и делать это постепенно!',
+                                   parse_mode='html')
+            await asyncio.sleep(5)
+            await bot.send_message(callback_query.from_user.id, 'Для начала, мы можем начать с небольших информационных рассылок и опросов о вашем питании и привычках. '
+                                                                 '\nВы бы хотели попробовать подобную практику?', reply_markup=InlineKeyboardMarkup(row_width=1).add(
+                                       InlineKeyboardButton('Да', callback_data='agreement_mailing_help_f_n_y'),
+                                       InlineKeyboardButton('Нет, меня всё устраивает',
+                                                            callback_data='agreement_mailing_help_f_n_n')))
+            cur_helpsys.execute("UPDATE norm SET food = ? WHERE user_id = ?",
+                                ('Улучшить', callback_query.from_user.id))
+        db_helpsys.commit()
+
+    elif callback_query.data[-3] == '4':
+        if callback_query.data[-1] == 'y':
+            cur_helpsys.execute('UPDATE norm SET sleep = ? WHERE user_id = ?', ('Да', callback_query.from_user.id))
+            await bot.send_message(callback_query.from_user.id, 'Отлично, тогда продолжим!')
+            await asyncio.sleep(1)
+            await bot.send_message(callback_query.from_user.id, 'Вы слышали, что для крепкого и здорового сна помогают практики управления стрессом, такие как медитация, глубокое дыхание и релаксация?'
+                                                                '\n\nЭти навыки могут помочь вам справляться с ежедневными вызовами. Их вы можете найти в разделе /practices')
+            await bot.send_message(callback_query.from_user.id, 'Удавалось ли вам выполнять рекомендации, которые были предлодены на марфоне?', reply_markup=InlineKeyboardMarkup(row_width=1).add(
+                                            InlineKeyboardButton('Да, хочу продолжения!', callback_data='norm_condition_5_y'),
+                                            InlineKeyboardButton('Да, но хочу чего-то другого', callback_data='norm_condition_5_y'),
+                                            InlineKeyboardButton('Нет, но хотелось бы попробовать', callback_data='norm_condition_5_y'),
+                                            InlineKeyboardButton('Нет, мне это не интересно', callback_data='norm_condition_5_n')))
+        elif callback_query.data[-1] == 'n':
+            cur_helpsys.execute('UPDATE norm SET sleep = ? WHERE user_id = ?', ('Нет', callback_query.from_user.id))
+            await bot.send_message(callback_query.from_user.id, 'Тогда попробуем это исправить!')
+            await asyncio.sleep(1)
+            await bot.send_message(callback_query.from_user.id, 'Вы слышали, что для крепкого и здорового сна помогают практики управления стрессом, такие как медитация, глубокое дыхание и релаксация?'
+                                                                '\n\nЭти навыки могут помочь вам справляться с ежедневными вызовами. Их вы можете найти в разделе /practices')
+            await bot.send_message(callback_query.from_user.id, 'Удавалось ли вам выполнять рекомендации, которые были предлодены на марфоне?', reply_markup=InlineKeyboardMarkup(row_width=1).add(
+                                            InlineKeyboardButton('Да, хочу продолжения!', callback_data='norm_condition_5_y'),
+                                            InlineKeyboardButton('Да, но хочу чего-то другого', callback_data='norm_condition_5_y'),
+                                            InlineKeyboardButton('Нет, но хотелось бы попробовать', callback_data='norm_condition_5_y'),
+                                            InlineKeyboardButton('Нет, мне это не интересно', callback_data='norm_condition_5_n')))
+        db_helpsys.commit()
+
+    elif callback_query.data[-3] == '5':
+        if callback_query.data[-1] == 'y':
+            cur_helpsys.execute('UPDATE norm SET marathon = ? WHERE user_id = ?', ('Понравился', callback_query.from_user.id))
+            await bot.send_message(callback_query.from_user.id, 'Рады это слышать!'
+                                                                '\nИменно поэтому хотим представить вам нашу новую систему поддеожки, взаимодействующую с вами каждый день, которая будет предоставлять вам советы и рекомендации по улучшению психологического состояния, а также подборки с новыми упражнениями и практиками!'
+                                                                '\nХотите попробовать?', reply_markup=InlineKeyboardMarkup(row_width=1).add(
+                    InlineKeyboardButton('Да, можно попробовать', callback_data='agreement_mailing_help_m_n_y'),
+                    InlineKeyboardButton('Нет, не хочу', callback_data='agreement_mailing_help_m_n_n')))
+        elif callback_query.data[-1] == 'n':
+            cur_helpsys.execute('UPDATE norm SET marathon = ? WHERE user_id = ?', ('Не понравился', callback_query.from_user.id))
+            await bot.send_message(callback_query.from_user.id, 'Очень жаль, что вам неинтересна тема заботы о своём психологическом здоровье(('
+                                                                '\nХорошего вам вечера!')
+        db_helpsys.commit()
 
 
 async def try_practice(callback_query: types.CallbackQuery, state: FSMContext):
@@ -97,22 +221,22 @@ async def try_practice(callback_query: types.CallbackQuery, state: FSMContext):
             await bot.send_message(callback_query.from_user.id,
                                    'Чтобы ваше состояние оставалось всегда в норме, хотим предложить поддержку, содержащую в себе практики и упражнения для разгрузки, а также общие советы по поддержке. '
                                    '\nХотите попробовать?', reply_markup=InlineKeyboardMarkup(row_width=1).add(
-                    InlineKeyboardButton('Да, можно попробовать', callback_data='agreement_mailing_help_gy'),
-                    InlineKeyboardButton('Нет, не хочу', callback_data='agreement_mailing_help_gn')))
+                    InlineKeyboardButton('Да, можно попробовать', callback_data='agreement_mailing_help_0_g_y'),
+                    InlineKeyboardButton('Нет, не хочу', callback_data='agreement_mailing_help_0_g_n')))
         elif callback_query.data[-2] == 'n':
             cur_helpsys.execute("UPDATE norm SET try_practice = ? WHERE user_id = ?", ('Нет', callback_query.from_user.id))
             await bot.send_message(callback_query.from_user.id,
                                    'Чтобы ваше состояние оставалось всегда в норме, хотим предложить поддержку, содержащую в себе практики и упражнения для разгрузки, а также общие советы по поддержке. '
                                    '\nХотите попробовать?', reply_markup=InlineKeyboardMarkup(row_width=1).add(
-                    InlineKeyboardButton('Да, можно попробовать', callback_data='agreement_mailing_help_ny'),
-                    InlineKeyboardButton('Нет, не хочу', callback_data='agreement_mailing_help_nn')))
+                    InlineKeyboardButton('Да, можно попробовать', callback_data='agreement_mailing_help_0_n_y'),
+                    InlineKeyboardButton('Нет, не хочу', callback_data='agreement_mailing_help_0_n_n')))
         else:
             cur_helpsys.execute("UPDATE bad SET try_practice = ? WHERE user_id = ?", ('Нет', callback_query.from_user.id))
             await bot.send_message(callback_query.from_user.id,
                                    'Чтобы ваше состояние оставалось всегда в норме, хотим предложить поддержку, содержащую в себе практики и упражнения для разгрузки, а также общие советы по поддержке. '
                                    '\nХотите попробовать?', reply_markup=InlineKeyboardMarkup(row_width=1).add(
-                    InlineKeyboardButton('Да, можно попробовать', callback_data='agreement_mailing_help_by'),
-                    InlineKeyboardButton('Нет, не хочу', callback_data='agreement_mailing_help_bn')))
+                    InlineKeyboardButton('Да, можно попробовать', callback_data='agreement_mailing_help_0_b_y'),
+                    InlineKeyboardButton('Нет, не хочу', callback_data='agreement_mailing_help_0_b_n')))
         db_helpsys.commit()
 
 
@@ -120,10 +244,16 @@ async def agreement_mailing_help(callback_query: types.CallbackQuery, state: FSM
     await help_system_agreement(user_id=callback_query.from_user.id)
     db_helpsys = sqlite3.connect('Databases/Help_system.db')
     cur_helpsys = db_helpsys.cursor()
-    if callback_query.data[-2] == 'g':
+    if callback_query.data[-3] == 'g':
         cur_helpsys.execute("UPDATE agreement SET state = ? WHERE user_id = ?", ('Хорошо', callback_query.from_user.id))
-    elif callback_query.data[-2] == 'n':
+    elif callback_query.data[-3] == 'n':
         cur_helpsys.execute("UPDATE agreement SET state = ? WHERE user_id = ?",('Нормально', callback_query.from_user.id))
+        if callback_query.data[-5] == 's':
+            cur_helpsys.execute('UPDATE agreement SET subject = ? WHERE user_id = ?', ('Физическая активность', callback_query.from_user.id))
+        elif callback_query.data[-5] == 'f':
+            cur_helpsys.execute('UPDATE agreement SET subject = ? WHERE user_id = ?', ('Питание', callback_query.from_user.id))
+        elif callback_query.data[-5] == 'm':
+            cur_helpsys.execute('UPDATE agreement SET subject = ? WHERE user_id = ?', ('Марафон', callback_query.from_user.id))
     else:
         cur_helpsys.execute("UPDATE agreement SET state = ? WHERE user_id = ?", ('Плохо', callback_query.from_user.id))
     db_helpsys.commit()
@@ -141,5 +271,5 @@ async def agreement_mailing_help(callback_query: types.CallbackQuery, state: FSM
 
 
 def register_handlers_helpsystem(dp: Dispatcher):
-    dp.register_callback_query_handler(try_practice, text=['try_practice_gy', 'try_practice_ny', 'try_practice_by', 'try_practice_gn', 'try_practice_nn', 'try_practice_bn'])
-    dp.register_callback_query_handler(agreement_mailing_help, text=['agreement_mailing_help_gy', 'agreement_mailing_help_ny', 'agreement_mailing_help_by', 'agreement_mailing_help_gn', 'agreement_mailing_help_nn', 'agreement_mailing_help_bn'])
+    dp.register_callback_query_handler(norm_condition, lambda c: c.data and c.data.startswith('norm_condition_'))
+    dp.register_callback_query_handler(agreement_mailing_help, lambda c: c.data and c.data.startswith('agreement_mailing_help_'))

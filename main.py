@@ -180,9 +180,9 @@ async def start_helpsystem_for_all_users(message: types.Message, state: FSMConte
 async def try_practice(callback_query: types.CallbackQuery, state: FSMContext):
     await HelpSystem.try_practice(callback_query, state)
 
-@dp.callback_query_handler(lambda c: c.data and c.data.startswith('agreement_mailing_help_'), state=FSM_classes.HelpSystem)
-async def try_practice(callback_query: types.CallbackQuery, state: FSMContext):
-    await HelpSystem.agreement_mailing_help(callback_query, state)
+# @dp.callback_query_handler(lambda c: c.data and c.data.startswith('agreement_mailing_help_'), state=FSM_classes.HelpSystem)
+# async def try_practice(callback_query: types.CallbackQuery, state: FSMContext):
+#     await HelpSystem.agreement_mailing_help(callback_query, state)
 
 
 @dp.message_handler(commands=['get_db'], state='*', chat_id=[417986886, chats_id.commands_chat_id])
