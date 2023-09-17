@@ -2,6 +2,7 @@ import asyncio
 import os
 import sqlite3
 
+import contourpy.util.data
 from aiogram import Bot, types, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher import FSMContext
@@ -22,8 +23,8 @@ from Database import help_system_good, help_system_norm, help_system_bad, help_s
 async def choose_helpsystem(message: types.Message, state: FSMContext):
     if message.text == 'Хорошо 😀':
         await help_system_good(user_id=message.from_user.id)
-        await bot.send_message(message.from_user.id, 'Это замечательно! (Что-нибудь на позитивном + пожелание хорошего вечера)', reply_markup=ReplyKeyboardRemove())
-        await bot.send_message(message.from_user.id,'Желаете попробовать практику благодарности (запуск на 1 неделе для всех)?', reply_markup=Markups.try_practice_good)
+        await bot.send_message(message.from_user.id, 'Это замечательно!', reply_markup=ReplyKeyboardRemove())
+        await bot.send_message(message.from_user.id,'Желаете попробовать практику благодарности? Рассказать поподробнее?', InlineKeyboardMarkup(row_width=2). add(InlineKeyboardButton('Да', callback_data='try_practice_gy'), InlineKeyboardButton('Нет', callback_data='try_practice_gn')))
         await state.set_state(FSM_classes.HelpSystem.good_condition)
     elif message.text == 'Нормально 🙂':
         await help_system_norm(user_id=message.from_user.id)
@@ -213,8 +214,22 @@ async def try_practice(callback_query: types.CallbackQuery, state: FSMContext):
         else:
             cur_helpsys.execute("UPDATE bad SET try_practice = ? WHERE user_id = ?", ('Да', callback_query.from_user.id))
         db_helpsys.commit()
-
-        await bot.send_message(callback_query.from_user.id, 'Переход на практику "Благодарности"')
+        await bot.send_message(callback_query.from_user.id, 'Давайте расскажу вам поподробнее о практике "Благодарность». '
+                                                            '\n\nБлагодарному человеку легче наслаждаться позитивными ощущениями и справляться со стрессовыми ситуациями, легче поддерживать хорошие отношения с другими и в целом ощущать себя.'
+                                                            '\nЧтобы благодарность оказала влияние на ваше благополучие, прежде всего необходимо испытывать ее регулярно в какой бы то ни было форме. '
+                                                            '\nЕсли вам удастся хоть раз запустить этот позитивный цикл и поддерживать его с помощью осознанного отношения, он будет снова и снова приносить вам пользу!', parse_mode='html')
+        await asyncio.sleep(2)
+        await bot.send_message(callback_query.from_user.id, 'Вы можете завести дневник благодарности, куда будете записывать то, за что вы благодарите (даже самые незначительные на первый взгляд вещи или ситуации) '
+                                                            '\nПока пьете утренний кофе или чистите зубы, вы можете мысленно сосредоточиться на моментах для благодарности!')
+        await asyncio.sleep(2)
+        await bot.send_message(callback_query.from_user.id, 'Попробуйте записать эти действия и поступки в свой дневник, или заметки в смартфоне. '
+                                                            '\nТак у вас всегда будет возможность увидеть свои достижения и что день был проведен с пользой!')
+        await asyncio.sleep(4)
+        await bot.send_message(callback_query.from_user.id,
+                               'Чтобы ваше состояние оставалось всегда в норме, хотим предложить поддержку, содержащую в себе практики и упражнения для разгрузки, а также общие советы по поддержке. '
+                               '\nХотите попробовать?', reply_markup=InlineKeyboardMarkup(row_width=1).add(
+                InlineKeyboardButton('Да, можно попробовать', callback_data='agreement_mailing_help_0_g_y'),
+                InlineKeyboardButton('Нет, не хочу', callback_data='agreement_mailing_help_0_g_n')))
     else:
         if callback_query.data[-2] == 'g':
             cur_helpsys.execute("UPDATE good SET try_practice = ? WHERE user_id = ?", ('Нет', callback_query.from_user.id))
@@ -271,5 +286,6 @@ async def agreement_mailing_help(callback_query: types.CallbackQuery, state: FSM
 
 
 def register_handlers_helpsystem(dp: Dispatcher):
+    dp.register_callback_query_handler(try_practice, lambda c: c.data and c.data.startswith('try_practice_'))
     dp.register_callback_query_handler(norm_condition, lambda c: c.data and c.data.startswith('norm_condition_'))
     dp.register_callback_query_handler(agreement_mailing_help, lambda c: c.data and c.data.startswith('agreement_mailing_help_'))

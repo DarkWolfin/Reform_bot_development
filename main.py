@@ -176,9 +176,9 @@ async def start_help_system(message: types.Message):
 async def start_helpsystem_for_all_users(message: types.Message, state: FSMContext):
     await HelpSystem.choose_helpsystem(message, state)
 
-@dp.callback_query_handler(lambda c: c.data and c.data.startswith('try_practice_'), state=FSM_classes.HelpSystem)
-async def try_practice(callback_query: types.CallbackQuery, state: FSMContext):
-    await HelpSystem.try_practice(callback_query, state)
+# @dp.callback_query_handler(lambda c: c.data and c.data.startswith('try_practice_'), state=FSM_classes.HelpSystem)
+# async def try_practice(callback_query: types.CallbackQuery, state: FSMContext):
+#     await HelpSystem.try_practice(callback_query, state)
 
 # @dp.callback_query_handler(lambda c: c.data and c.data.startswith('agreement_mailing_help_'), state=FSM_classes.HelpSystem)
 # async def try_practice(callback_query: types.CallbackQuery, state: FSMContext):
