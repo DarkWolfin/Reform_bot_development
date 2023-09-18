@@ -11,6 +11,7 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, \
 from aiogram.utils import executor
 from aiogram.utils.exceptions import BotBlocked
 
+import quick_help
 from Token import Token
 bot = Bot(Token)
 dp = Dispatcher(bot, storage=MemoryStorage())
@@ -19,6 +20,15 @@ import Markups
 import FSM_classes
 from Database import help_system_good, help_system_norm, help_system_bad, help_system_agreement
 
+
+bad_condition_questions = ['Есть ли задачи, которые вызывают у вас беспокойство или стресс?',
+                           'Удается ли вам эффективно справляться со своей рабочей нагрузкой',
+                           'У вас достаточно времени на личную жизнь и отдых вне работы?',
+                           'Удается лм вам открыто и свободно общаться с вашими коллегами?',
+                           'Возникают ли у вас конфликты или напряженные ситуации?',
+                           'Удобное ли у вас рабочее место?',
+                           'У вас есть личные проблемы или события, которые вас беспокоят или тревожат в настоящее время?',
+                           'Существует ли что-то, что вызывает у вас беспокойство или тревожит в настоящее время?']
 
 async def choose_helpsystem(message: types.Message, state: FSMContext):
     if message.text == 'Хорошо 😀':
@@ -33,8 +43,12 @@ async def choose_helpsystem(message: types.Message, state: FSMContext):
         await state.set_state(FSM_classes.HelpSystem.norm_condition)
     elif message.text == 'Плохо 😢':
         await help_system_bad(user_id=message.from_user.id)
-        await bot.send_message(message.from_user.id, '')
+        await bot.send_message(message.from_user.id, 'Понимаю, что ваши ощущения важны, и я готов помочь! '
+                                                     '\nДавайте разберёмся с чем связано ваше плохое самочувствие?'
+                                                     '\n\nЯ задам вам несколько вопросов, отвечайте "Да", если вас это беспокоит!',
+                               reply_markup=ReplyKeyboardRemove())
         await state.set_state(FSM_classes.HelpSystem.bad_condition)
+        await bot.send_message(message.from_user.id, 'Есть ли задачи, которые вызывают у вас беспокойство или стресс?', reply_markup=InlineKeyboardMarkup(row_width=2).add(InlineKeyboardButton('Да', callback_data='bad_condition_1_0_y'), InlineKeyboardButton('Нет', callback_data='bad_condition_1_0_n')))
 
 
 async def norm_condition(callback_query: types.CallbackQuery, state: FSMContext):
@@ -201,6 +215,82 @@ async def norm_condition(callback_query: types.CallbackQuery, state: FSMContext)
             await bot.send_message(callback_query.from_user.id, 'Очень жаль, что вам неинтересна тема заботы о своём психологическом здоровье(('
                                                                 '\nХорошего вам вечера!')
         db_helpsys.commit()
+
+
+async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
+    db_helpsys = sqlite3.connect('Databases/Help_system.db')
+    cur_helpsys = db_helpsys.cursor()
+    if callback_query.data[-3] == '0':
+        await bot.delete_message(callback_query.from_user.id, callback_query.message.message_id)
+        if callback_query.data[-1] == 'y':
+            if int(callback_query.data[-5]) in [1,2,3]:
+                cur_helpsys.execute('UPDATE bad SET type_problem = ? WHERE user_id = ?', ('Высокая нагрузка', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id, 'Понимаю, что высокая рабочая нагрузка может быть очень тяжелой(( '
+                                                                    '\nВажно, чтобы вы не чувствовали себя одинокими в этой ситуации и знали, что можете рассчитывать на поддержку!')
+                await bot.send_message(callback_query.from_user.id,'Используйте методы управления стрессом, такие как медитация, глубокое дыхание и релаксационные техники, чтобы снизить уровень стресса и улучшить концентрацию!'
+                                                                   '\nВажно находить на это время!')
+                await asyncio.sleep(2)
+                await bot.send_message(callback_query.from_user.id,'Чтобы улучшить ваше состояние, хотим предложить поддержку, содержащую в себе практики и упражнения для разгрузки, а также общие советы по поддержке. '
+                               '\nХотите попробовать?', reply_markup=InlineKeyboardMarkup(row_width=1).add(
+                    InlineKeyboardButton('Да, можно попробовать', callback_data='bad_condition_1_1_y'),
+                    InlineKeyboardButton('Нет, не хочу', callback_data='bad_condition_1_1_n')))
+
+            elif int(callback_query.data[-5]) in [4,5]:
+                cur_helpsys.execute('UPDATE bad SET type_problem = ? WHERE user_id = ?', ('Коллеги', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id,
+                                       'Понимаю, что взаимодействие с коллегами может иногда вызывать трудности! '
+                                       '\nВажно помнить, что это нормальная часть рабочей жизни, и с ней можно справиться! '
+                                       '\nВот несколько советов, которые могут помочь вам улучшить отношения и справиться со сложностями с коллегами:')
+#                 ##### Continue
+            elif int(callback_query.data[-5]) == 6:
+                cur_helpsys.execute('UPDATE bad SET type_problem = ? WHERE user_id = ?', ('Рабочее место', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id,
+                                       'Давайте попробуем разобраться в этом вопросе подробнее! '
+                                       '\nМогли бы вы уточнить, что именно на вашем рабочем месте вызывает беспокойство или неудовлетворение?:')
+#                 ##### Continue
+            else:
+                cur_helpsys.execute('UPDATE bad SET type_problem = ? WHERE user_id = ?', ('Психологический дискомфорт', callback_query.from_user.id))
+                await FSM_classes.MultiDialog.quick_help.set()
+                await bot.send_message(callback_query.from_user.id,
+                                       text='Выберите, что вы чувствуете, чтобы разобраться в проблеме поподробнее',
+                                       reply_markup=quick_help.quick_help_menu)
+            db_helpsys.commit()
+
+        elif callback_query.data[-1] == 'n':
+            if int(callback_query.data[-5]) == 8:
+                cur_helpsys.execute('UPDATE bad SET type_problem = ? WHERE user_id = ?', ('Все ответы "нет"', callback_query.from_user.id))
+                await FSM_classes.MultiDialog.quick_help.set()
+                await bot.send_message(callback_query.from_user.id,
+                                       text='Выберите, что вы чувствуете, чтобы разобраться в проблеме поподробнее',
+                                       reply_markup=quick_help.quick_help_menu)
+            else:
+                await bot.send_message(callback_query.from_user.id,
+                                   text=bad_condition_questions[int(callback_query.data[-5])+1],
+                                   reply_markup=InlineKeyboardMarkup(row_width=2).add(
+                                       InlineKeyboardButton('Да', callback_data='bad_condition_'+str(int(callback_query.data[-5])+1)+'_0_y'),
+                                       InlineKeyboardButton('Нет', callback_data='bad_condition_'+str(int(callback_query.data[-5])+1)+'_0_n')))
+
+    #Высокая нагрузка
+    if callback_query.data[-3] == '1':
+        if callback_query.data[-5] == '1':
+            cur_helpsys.execute("UPDATE agreement SET state = ? WHERE user_id = ?",('Плохо', callback_query.from_user.id))
+            cur_helpsys.execute('UPDATE agreement SET subject = ? WHERE user_id = ?',
+                                ('Высокая нагрузка', callback_query.from_user.id))
+            if callback_query.data[-1] == 'y':
+                cur_helpsys.execute("UPDATE agreement SET choice = ? WHERE user_id = ?",
+                                    ('Да', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id, 'Мы поддерживаем ваш выбор!'
+                                                                    '\nЗабота о своём психологическом здоровье - это важно!')
+            if callback_query.data[-1] == 'n':
+                cur_helpsys.execute("UPDATE agreement SET choice = ? WHERE user_id = ?",
+                                    ('Нет', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id, 'Очень жаль, что вам неинтересна тема заботы о своём психологическом здоровье((')
+            await asyncio.sleep(1)
+            await bot.send_message(callback_query.from_user.id,
+                                   'Одним из решений вашей проблемы также может быть перераспределение задачи или использование дополнительных ресурсов! '
+                                   '\nВаш руководитель в скором времени сможет обсудить с вами данный вопрос! '
+                                   '\nСпасибо, что поделились!')
+            await FSM_classes.MultiDialog.menu.set()
 
 
 async def try_practice(callback_query: types.CallbackQuery, state: FSMContext):

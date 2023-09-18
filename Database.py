@@ -31,10 +31,10 @@ async def db_start():
         "CREATE TABLE IF NOT EXISTS good(user_id INT PRIMARY KEY, username TEXT, token TEXT, time TEXT, try_practice TEXT)")
     db_helpsystem.commit()
     cur_helpsystem.execute(
-        "CREATE TABLE IF NOT EXISTS norm(user_id INT PRIMARY KEY, username TEXT, token TEXT, time TEXT, better TEXT, sport TEXT, cause_sport TEXT, food TEXT, sleep TEXT, marathon TEXT")
+        "CREATE TABLE IF NOT EXISTS norm(user_id INT PRIMARY KEY, username TEXT, token TEXT, time TEXT, better TEXT, sport TEXT, cause_sport TEXT, food TEXT, sleep TEXT, marathon TEXT)")
     db_helpsystem.commit()
     cur_helpsystem.execute(
-        "CREATE TABLE IF NOT EXISTS bad(user_id INT PRIMARY KEY, username TEXT, token TEXT, time TEXT, try_practice TEXT)")
+        "CREATE TABLE IF NOT EXISTS bad(user_id INT PRIMARY KEY, username TEXT, token TEXT, time TEXT, type_problem TEXT)")
     db_helpsystem.commit()
     cur_helpsystem.execute(
         "CREATE TABLE IF NOT EXISTS agreement(user_id INT PRIMARY KEY, username TEXT, token TEXT, time TEXT, choice TEXT, state TEXT, subject TEXT)")
