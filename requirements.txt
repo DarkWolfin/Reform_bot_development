@@ -1,7 +1,8 @@
-aiogram
+aiogram<3
 db_sqlite3
 asyncio
 aioschedule
 pandas
 openpyxl
 matplotlib
+redis
