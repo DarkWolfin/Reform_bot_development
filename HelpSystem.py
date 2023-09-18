@@ -184,7 +184,7 @@ async def norm_condition(callback_query: types.CallbackQuery, state: FSMContext)
             await asyncio.sleep(1)
             await bot.send_message(callback_query.from_user.id, 'Вы слышали, что для крепкого и здорового сна помогают практики управления стрессом, такие как медитация, глубокое дыхание и релаксация?'
                                                                 '\n\nЭти навыки могут помочь вам справляться с ежедневными вызовами. Их вы можете найти в разделе /practices')
-            await bot.send_message(callback_query.from_user.id, 'Удавалось ли вам выполнять рекомендации, которые были предлодены на марфоне?', reply_markup=InlineKeyboardMarkup(row_width=1).add(
+            await bot.send_message(callback_query.from_user.id, 'Удавалось ли вам выполнять рекомендации, которые были предложены на марфоне?', reply_markup=InlineKeyboardMarkup(row_width=1).add(
                                             InlineKeyboardButton('Да, хочу продолжения!', callback_data='norm_condition_5_y'),
                                             InlineKeyboardButton('Да, но хочу чего-то другого', callback_data='norm_condition_5_y'),
                                             InlineKeyboardButton('Нет, но хотелось бы попробовать', callback_data='norm_condition_5_y'),
@@ -195,7 +195,7 @@ async def norm_condition(callback_query: types.CallbackQuery, state: FSMContext)
             await asyncio.sleep(1)
             await bot.send_message(callback_query.from_user.id, 'Вы слышали, что для крепкого и здорового сна помогают практики управления стрессом, такие как медитация, глубокое дыхание и релаксация?'
                                                                 '\n\nЭти навыки могут помочь вам справляться с ежедневными вызовами. Их вы можете найти в разделе /practices')
-            await bot.send_message(callback_query.from_user.id, 'Удавалось ли вам выполнять рекомендации, которые были предлодены на марфоне?', reply_markup=InlineKeyboardMarkup(row_width=1).add(
+            await bot.send_message(callback_query.from_user.id, 'Удавалось ли вам выполнять рекомендации, которые были предложены на марфоне?', reply_markup=InlineKeyboardMarkup(row_width=1).add(
                                             InlineKeyboardButton('Да, хочу продолжения!', callback_data='norm_condition_5_y'),
                                             InlineKeyboardButton('Да, но хочу чего-то другого', callback_data='norm_condition_5_y'),
                                             InlineKeyboardButton('Нет, но хотелось бы попробовать', callback_data='norm_condition_5_y'),
@@ -206,7 +206,7 @@ async def norm_condition(callback_query: types.CallbackQuery, state: FSMContext)
         if callback_query.data[-1] == 'y':
             cur_helpsys.execute('UPDATE norm SET marathon = ? WHERE user_id = ?', ('Понравился', callback_query.from_user.id))
             await bot.send_message(callback_query.from_user.id, 'Рады это слышать!'
-                                                                '\nИменно поэтому хотим представить вам нашу новую систему поддеожки, взаимодействующую с вами каждый день, которая будет предоставлять вам советы и рекомендации по улучшению психологического состояния, а также подборки с новыми упражнениями и практиками!'
+                                                                '\nИменно поэтому хотим представить вам нашу новую систему поддержки, взаимодействующую с вами каждый день, которая будет предоставлять вам советы и рекомендации по улучшению психологического состояния, а также подборки с новыми упражнениями и практиками!'
                                                                 '\nХотите попробовать?', reply_markup=InlineKeyboardMarkup(row_width=1).add(
                     InlineKeyboardButton('Да, можно попробовать', callback_data='agreement_mailing_help_m_n_y'),
                     InlineKeyboardButton('Нет, не хочу', callback_data='agreement_mailing_help_m_n_n')))
@@ -214,6 +214,7 @@ async def norm_condition(callback_query: types.CallbackQuery, state: FSMContext)
             cur_helpsys.execute('UPDATE norm SET marathon = ? WHERE user_id = ?', ('Не понравился', callback_query.from_user.id))
             await bot.send_message(callback_query.from_user.id, 'Очень жаль, что вам неинтересна тема заботы о своём психологическом здоровье(('
                                                                 '\nХорошего вам вечера!')
+            await FSM_classes.MultiDialog.menu.set()
         db_helpsys.commit()
 
 
@@ -241,19 +242,43 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
                                        'Понимаю, что взаимодействие с коллегами может иногда вызывать трудности! '
                                        '\nВажно помнить, что это нормальная часть рабочей жизни, и с ней можно справиться! '
                                        '\nВот несколько советов, которые могут помочь вам улучшить отношения и справиться со сложностями с коллегами:')
-#                 ##### Continue
+                await bot.send_message(callback_query.from_user.id,'Попробуйте начать разговор с коллегой и выразить свои мысли и чувства открыто и конструктивно. '
+                                                                   '\nОбмен мнениями может помочь разрешить конфликты!'
+                                                                   '\n\nПостарайтесь внимательно выслушать точку зрения коллеги и понять его или ее сторону. '
+                                                                   '\nИногда простое понимание может уменьшить напряжение!'
+                                                                   '\n\nУлучшите свои навыки общения, учитывая, как ваш стиль общения может влиять на других. '
+                                                                   '\nПостарайтесь быть ясным, уважительным и дружелюбным!'
+                                                                   '\n\nЕсли возникают конфликты, попробуйте их решить. '
+                                                                   '\nОбсудите проблему с коллегой или обратитесь за помощью к руководству или HR-специалистам!'
+                                                                   '\n\nИщите общие интересы и цели с коллегами, чтобы создать более позитивное рабочее взаимодействие!'
+                                                                   '\n\nПостарайтесь воспринимать коллег как часть команды, работающей на общий успех. '
+                                                                   '\nСовместное достижение целей может укрепить отношения!'
+                                                                   '\n\nНаучитесь управлять стрессом и конфликтами. '
+                                                                   '\nДыхательные упражнения и методы релаксации могут помочь справляться с эмоциональными вызовами!')
+                await bot.send_message(callback_query.from_user.id,' Если сложности с коллегами продолжаются, также стоит обратиться за поддержкой к вашему руководству или специалистам по персоналу!'
+                                                                   '\nМы сформировали запрос и с вами свяжуться для помощи с решением вопроса!')
+                await FSM_classes.MultiDialog.menu.set()
+
             elif int(callback_query.data[-5]) == 6:
                 cur_helpsys.execute('UPDATE bad SET type_problem = ? WHERE user_id = ?', ('Рабочее место', callback_query.from_user.id))
                 await bot.send_message(callback_query.from_user.id,
                                        'Давайте попробуем разобраться в этом вопросе подробнее! '
-                                       '\nМогли бы вы уточнить, что именно на вашем рабочем месте вызывает беспокойство или неудовлетворение?:')
-#                 ##### Continue
+                                       '\nМогли бы вы уточнить, что именно на вашем рабочем месте вызывает беспокойство и неудовлетворение?')
+                await bot.send_message(callback_query.from_user.id,
+                                       'Постарайтесь делать короткие перерывы каждый час, чтобы расслабиться и растянуться! '
+                                       '\nДаже небольшая физическая активность, такая как прогулка или упражнения на месте, могут помочь поддерживать энергию и концентрацию!')
+                await asyncio.sleep(2)
+                await bot.send_message(callback_query.from_user.id,
+                                       'Чтобы улучшить ваше состояние, хотим предложить поддержку, содержащую в себе практики и упражнения для разгрузки, а также общие советы по поддержке. '
+                                       '\nХотите попробовать?', reply_markup=InlineKeyboardMarkup(row_width=1).add(
+                        InlineKeyboardButton('Да, можно попробовать', callback_data='bad_condition_1_3_y'),
+                        InlineKeyboardButton('Нет, не хочу', callback_data='bad_condition_1_3_n')))
+
             else:
                 cur_helpsys.execute('UPDATE bad SET type_problem = ? WHERE user_id = ?', ('Психологический дискомфорт', callback_query.from_user.id))
-                await FSM_classes.MultiDialog.quick_help.set()
-                await bot.send_message(callback_query.from_user.id,
-                                       text='Выберите, что вы чувствуете, чтобы разобраться в проблеме поподробнее',
-                                       reply_markup=quick_help.quick_help_menu)
+                await bot.send_message(callback_query.from_user.id, 'Хотите ли проработать проблему?', reply_markup=InlineKeyboardMarkup(row_width=1).add(
+                        InlineKeyboardButton('Да, можно попробовать', callback_data='bad_condition_1_4_y'),
+                        InlineKeyboardButton('Нет, не хочу', callback_data='bad_condition_1_4_n')))
             db_helpsys.commit()
 
         elif callback_query.data[-1] == 'n':
@@ -289,8 +314,339 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
             await bot.send_message(callback_query.from_user.id,
                                    'Одним из решений вашей проблемы также может быть перераспределение задачи или использование дополнительных ресурсов! '
                                    '\nВаш руководитель в скором времени сможет обсудить с вами данный вопрос! '
-                                   '\nСпасибо, что поделились!')
+                                   '\n\nСпасибо, что поделились!')
+            db_helpsys.commit()
             await FSM_classes.MultiDialog.menu.set()
+
+    #Рабочее место
+    if callback_query.data[-3] == '3':
+        if callback_query.data[-5] == '1':
+            cur_helpsys.execute("UPDATE agreement SET state = ? WHERE user_id = ?",('Плохо', callback_query.from_user.id))
+            cur_helpsys.execute('UPDATE agreement SET subject = ? WHERE user_id = ?',
+                                ('Рабочее место', callback_query.from_user.id))
+            if callback_query.data[-1] == 'y':
+                cur_helpsys.execute("UPDATE agreement SET choice = ? WHERE user_id = ?",
+                                    ('Да', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id, 'Мы поддерживаем ваш выбор!'
+                                                                    '\nЗабота о своём психологическом здоровье - это важно!')
+            if callback_query.data[-1] == 'n':
+                cur_helpsys.execute("UPDATE agreement SET choice = ? WHERE user_id = ?",
+                                    ('Нет', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id, 'Очень жаль, что вам неинтересна тема заботы о своём психологическом здоровье((')
+            await asyncio.sleep(1)
+            await bot.send_message(callback_query.from_user.id,
+                                   'Убедитесь, что ваше рабочее место удобно и эффективно организовано. '
+                                   '\nЭргономические настройки, правильное освещение и удобное кресло могут сделать большую разницу в вашем комфорте.'
+                                   '\nВсего ли вам хватает? Все ли для вас удобно и доступно?',
+                                   reply_markup=InlineKeyboardMarkup(row_width=2).add(
+                                       InlineKeyboardButton('Да', callback_data='bad_condition_2_3_y'),
+                                       InlineKeyboardButton('Нет', callback_data='bad_condition_2_3_n')))
+        elif callback_query.data[-5] == '2':
+            cur_helpsys.execute('UPDATE bad SET 3_workplace = ? WHERE user_id = ?',
+                                (callback_query.data[-1], callback_query.from_user.id))
+            await bot.send_message(callback_query.from_user.id, 'Питайтесь сбалансировано и употребляйте достаточное количество воды! '
+                                                                '\nЗдоровое питание может помочь поддерживать уровень энергии на работе!'
+                                                                '\n\nВам удается придерживаться сбалансированного питания?',
+                                   reply_markup=InlineKeyboardMarkup(row_width=2).add(
+                                       InlineKeyboardButton('Да', callback_data='bad_condition_3_3_y'),
+                                       InlineKeyboardButton('Нет', callback_data='bad_condition_3_3_n')))
+        elif callback_query.data[-5] == '3':
+            cur_helpsys.execute('UPDATE bad SET 3_food = ? WHERE user_id = ?',
+                                (callback_query.data[-1], callback_query.from_user.id))
+            await bot.send_message(callback_query.from_user.id, 'Попробуйте методы управления стрессом, такие как дыхательные упражнения, медитация или просто глубокий вдох и выдох в моменты напряжения. '
+                                                                '\nЭто поможет снизить уровень стресса и повысить психологический комфорт!'
+                                                                '\n\nНайти их вы сможете в разделе "Практики" или набрав команду /practices')
+            await asyncio.sleep(2)
+            await bot.send_message(callback_query.from_user.id,
+                                   'Удавалось ли вам выполнять рекомендации, которые были предложены на марфоне?',
+                                   reply_markup=InlineKeyboardMarkup(row_width=1).add(
+                                       InlineKeyboardButton('Да, хочу продолжения!',
+                                                            callback_data='bad_condition_4_3_y'),
+                                       InlineKeyboardButton('Да, но хочу чего-то другого',
+                                                            callback_data='bad_condition_4_3_y'),
+                                       InlineKeyboardButton('Нет, но хотелось бы попробовать',
+                                                            callback_data='bad_condition_4_3_y'),
+                                       InlineKeyboardButton('Нет, мне это не интересно',
+                                                            callback_data='bad_condition_4_3_n')))
+        elif callback_query.data[-5] == '4':
+            if callback_query.data[-1] == 'y':
+                cur_helpsys.execute('UPDATE bad SET 3_marathon = ? WHERE user_id = ?',
+                                    ('Понравился', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id, 'Рады это слышать!'
+                                                                    '\nИменно поэтому хотим представить вам нашу новую систему поддержки, взаимодействующую с вами каждый день, которая будет предоставлять вам советы и рекомендации по улучшению психологического состояния, а также подборки с новыми упражнениями и практиками!'
+                                                                    '\nХотите попробовать?',
+                                       reply_markup=InlineKeyboardMarkup(row_width=1).add(
+                                           InlineKeyboardButton('Да, можно попробовать',
+                                                                callback_data='agreement_mailing_help_m_b_y'),
+                                           InlineKeyboardButton('Нет, не хочу',
+                                                                callback_data='agreement_mailing_help_m_b_n')))
+            elif callback_query.data[-1] == 'n':
+                cur_helpsys.execute('UPDATE bad SET 3_marathon = ? WHERE user_id = ?',
+                                    ('Не понравился', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id,
+                                       'Очень жаль, что вам неинтересна тема заботы о своём психологическом здоровье(('
+                                       '\nХорошего вам вечера!')
+                await FSM_classes.MultiDialog.menu.set()
+
+        db_helpsys.commit()
+
+    # Психологический дискомфорт
+    if callback_query.data[-3] == '4':
+        if callback_query.data[-5] == '1':
+            cur_helpsys.execute('UPDATE bad SET 4_elaboration = ? WHERE user_id = ?',
+                                (callback_query.data[-1], callback_query.from_user.id))
+            if callback_query.data[-1] == 'y':
+                await bot.send_message(callback_query.from_user.id, 'Данный раздел научит вас прорабатывать катастрофические мысли. '
+                                                                    '\nЗапишите пугающую мысль, ответьте последовательно на предложенные вопросы. В завершении в будущем сможете сохранить получившуюся карточку (вы сможете просматривать ее время от времени).'
+                                                                    '\n\nВозвращайтесь к этой технике каждый раз, когда почувствуете тревогу!')
+                await bot.send_message(callback_query.from_user.id,
+                                       'Запишите на листочке, что вас тревожит', reply_markup=ReplyKeyboardRemove())
+                await bot.send_message(callback_query.from_user.id, 'Есть ли сейчас в вашей жизни обстоятельства, которые указывают, что это произойдет?', reply_markup=InlineKeyboardMarkup(row_width=2).add(
+                                       InlineKeyboardButton('Да', callback_data='bad_condition_2_4_y'),
+                                       InlineKeyboardButton('Нет', callback_data='bad_condition_2_4_n')))
+            else:
+                await FSM_classes.MultiDialog.quick_help.set()
+                await bot.send_message(callback_query.from_user.id,
+                                       text='Хорошо, тогда выберите, что вы чувствуете, чтобы разобраться в проблеме поподробнее',
+                                       reply_markup=quick_help.quick_help_menu)
+        if callback_query.data[-5] == '2':
+            if callback_query.data[-1] == 'y':
+                cur_helpsys.execute('UPDATE bad SET 4_elaboration = ? WHERE user_id = ?',
+                                ('Да', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id,
+                                       'Такой исход вероятен?',
+                                       reply_markup=InlineKeyboardMarkup(row_width=2).add(
+                                           InlineKeyboardButton('Да', callback_data='bad_condition_3_4_y'),
+                                           InlineKeyboardButton('Нет', callback_data='bad_condition_3_4_n')))
+
+            elif callback_query.data[-1] == 'n':
+                cur_helpsys.execute('UPDATE bad SET 4_elaboration = ? WHERE user_id = ?',
+                                    ('Нет', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id, 'Нет смысла бояться того, что не может произойти в действительности! '
+                                                                    '\nСправиться вам смогут помочь психологические практики, которые вы сможете найти в разделе /practices')
+                await bot.send_message(callback_query.from_user.id, 'Обязательно напишите, что вы теперь об этом думаете!')
+
+        if callback_query.data[-5] == '3':
+            if callback_query.data[-1] == 'y':
+                cur_helpsys.execute('UPDATE bad SET 4_probability = ? WHERE user_id = ?',
+                                ('Да', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id,
+                                       'Возможно ли что-то сделать чтобы снизить последствия?',
+                                       reply_markup=InlineKeyboardMarkup(row_width=2).add(
+                                           InlineKeyboardButton('Да', callback_data='bad_condition_4_4_y'),
+                                           InlineKeyboardButton('Нет', callback_data='bad_condition_4_4_n')))
+
+            elif callback_query.data[-1] == 'n':
+                cur_helpsys.execute('UPDATE bad SET 4_probability = ? WHERE user_id = ?',
+                                    ('Нет', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id, 'Нет смысла бояться того, что не может произойти в действительности!'
+                                                                    '\nСправиться вам может помочь "Терапия спокойствием", в достижении которой вы можете воспользоваться практиками /practices')
+                await bot.send_message(callback_query.from_user.id, 'Обязательно напишите, что вы теперь об этом думаете!')
+
+        if callback_query.data[-5] == '4':
+            if callback_query.data[-1] == 'y':
+                cur_helpsys.execute('UPDATE bad SET 4_actions = ? WHERE user_id = ?',
+                                ('Да', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id,
+                                       'Отравляет ли вашу жизнь этот страх?',
+                                       reply_markup=InlineKeyboardMarkup(row_width=2).add(
+                                           InlineKeyboardButton('Да', callback_data='bad_condition_5_4_y'),
+                                           InlineKeyboardButton('Нет', callback_data='bad_condition_5_4_n')))
+
+            elif callback_query.data[-1] == 'n':
+                cur_helpsys.execute('UPDATE bad SET 4_actions = ? WHERE user_id = ?',
+                                    ('Нет', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id,
+                                       'Если это случится, это можно будет исправить?',
+                                       reply_markup=InlineKeyboardMarkup(row_width=2).add(
+                                           InlineKeyboardButton('Да', callback_data='bad_condition_5_4_u'),
+                                           InlineKeyboardButton('Нет', callback_data='bad_condition_5_4_m')))
+
+        if callback_query.data[-5] == '5':
+            if callback_query.data[-1] == 'y':
+                cur_helpsys.execute('UPDATE bad SET 4_ruin = ? WHERE user_id = ?',
+                                ('Да', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id,
+                                       'Часто ли эта мысль приходит в вашу голову?',
+                                       reply_markup=InlineKeyboardMarkup(row_width=2).add(
+                                           InlineKeyboardButton('Да', callback_data='bad_condition_6_4_y'),
+                                           InlineKeyboardButton('Нет', callback_data='bad_condition_6_4_n')))
+
+            elif callback_query.data[-1] == 'n':
+                cur_helpsys.execute('UPDATE bad SET 4_ruin = ? WHERE user_id = ?',
+                                    ('Нет', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id,
+                                       'Иногда бояться чего-то это норма! '
+                                       '\nЧувствовать меньше напряжения вам поможет релаксация, в помощь вам раздел с практиками /practices')
+
+            elif callback_query.data[-1] == 'u':
+                cur_helpsys.execute('UPDATE bad SET 4_correct = ? WHERE user_id = ?',
+                                    ('Да', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id,
+                                       'Значит это поправимо и вам по силам!'
+                                       '\nХотим представить вам нашу новую систему поддержки, взаимодействующую с вами каждый день, которая будет предоставлять вам советы и рекомендации по улучшению психологического состояния, а также подборки с новыми упражнениями и практиками!'
+                                        '\nНапример, вечерняя практика "Дневник мыслей" поможет проанализировать прошедший день, осознать свои эмоции и действия, а также улучшить самосознание и эмоциональное состояние!'
+                                       '\nХотите попробовать?',
+                                       reply_markup=InlineKeyboardMarkup(row_width=1).add(
+                                           InlineKeyboardButton('Да, можно попробовать',
+                                                                callback_data='agreement_mailing_help_p_b_y'),
+                                           InlineKeyboardButton('Нет, не хочу',
+                                                                callback_data='agreement_mailing_help_p_b_n')))
+
+            elif callback_query.data[-1] == 'm':
+                cur_helpsys.execute('UPDATE bad SET 4_correct = ? WHERE user_id = ?',
+                                ('Нет', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id,
+                                       'Если этого же боялся бы ваш близкий человек, вы бы поддержали его страх?',
+                                       reply_markup=InlineKeyboardMarkup(row_width=2).add(
+                                           InlineKeyboardButton('Да', callback_data='bad_condition_6_4_u'),
+                                           InlineKeyboardButton('Нет', callback_data='bad_condition_6_4_m')))
+
+        if callback_query.data[-5] == '6':
+            if callback_query.data[-1] == 'y':
+                cur_helpsys.execute('UPDATE bad SET 4_thought = ? WHERE user_id = ?',
+                                    ('Да', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id,
+                                       'Умеете ли вы с ней справляться?',
+                                       reply_markup=InlineKeyboardMarkup(row_width=2).add(
+                                           InlineKeyboardButton('Да', callback_data='bad_condition_7_4_y'),
+                                           InlineKeyboardButton('Нет', callback_data='bad_condition_7_4_n')))
+
+            elif callback_query.data[-1] == 'n':
+                cur_helpsys.execute('UPDATE bad SET 4_thought = ? WHERE user_id = ?',
+                                    ('Нет', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id,
+                                       'Иногда бояться чего-то это норма! Чувствовать меньше напряжения вам помогут разгружающие практики!'
+                                       '\n\nИменно поэтому хотим представить вам нашу новую систему поддержки, взаимодействующую с вами каждый день, которая будет предоставлять вам советы и рекомендации по улучшению психологического состояния, а также подборки с новыми упражнениями и практиками!'
+                                       '\nНапример, вечерняя практика "Дневник мыслей" поможет проанализировать прошедший день, осознать свои эмоции и действия, а также улучшить самосознание и эмоциональное состояние!'
+                                       '\nХотите попробовать?',
+                                       reply_markup=InlineKeyboardMarkup(row_width=1).add(
+                                           InlineKeyboardButton('Да, можно попробовать',
+                                                                callback_data='agreement_mailing_help_p_b_y'),
+                                           InlineKeyboardButton('Нет, не хочу',
+                                                                callback_data='agreement_mailing_help_p_b_n')))
+
+            elif callback_query.data[-1] == 'u':
+                cur_helpsys.execute('UPDATE bad SET 4_close = ? WHERE user_id = ?',
+                                    ('Да', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id,
+                                       'Отравляет и ограничивает ли вашу жизнь этот страх?',
+                                       reply_markup=InlineKeyboardMarkup(row_width=2).add(
+                                           InlineKeyboardButton('Да', callback_data='bad_condition_7_4_u'),
+                                           InlineKeyboardButton('Нет', callback_data='bad_condition_7_4_m')))
+
+            elif callback_query.data[-1] == 'm':
+                cur_helpsys.execute('UPDATE bad SET 4_close = ? WHERE user_id = ?',
+                                    ('Нет', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id, 'Если ваш близкий человек не должен переживать, то почему вы должны?'
+                                                                    '\nРешение страхов и трудностей может потребовать различных методов и подходов в каждом конкретном случае. '
+                                                                    '\nИногда поддержка близких людей может быть источником вдохновения и сил для борьбы со своими собственными страхами. '
+                                                                    '\nОднако важно также понимать, что каждый человек имеет свои собственные страхи и собственный путь их преодоления.'
+                                                                    '\n\nПредлагаем попробовать улучшить ваше состояние с помощью набора вечерних разгружающих практик, мотивирующих утренних и динамичные дневные практики.')
+                await bot.send_message(callback_query.from_user.id,
+                                       'Именно поэтому хотим представить вам нашу новую систему поддержки, взаимодействующую с вами каждый день, которая будет предоставлять вам советы и рекомендации по улучшению психологического состояния, а также подборки с новыми упражнениями и практиками!'
+                                        '\nНапример, вечерняя практика "Дневник мыслей" поможет проанализировать прошедший день, осознать свои эмоции и действия, а также улучшить самосознание и эмоциональное состояние!'
+                                       '\nХотите попробовать?',
+                                       reply_markup=InlineKeyboardMarkup(row_width=1).add(
+                                           InlineKeyboardButton('Да, можно попробовать',
+                                                                callback_data='agreement_mailing_help_p_b_y'),
+                                           InlineKeyboardButton('Нет, не хочу',
+                                                                callback_data='agreement_mailing_help_p_b_n')))
+
+        if callback_query.data[-5] == '7':
+            if callback_query.data[-1] == 'y':
+                cur_helpsys.execute('UPDATE bad SET 4_success = ? WHERE user_id = ?',
+                                    ('Да', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id,
+                                       'Вы на верном пути! Вам могут помочь наши дневник юлагодарностей, релаксация и терапия спокойствием!'
+                                       '\n\nИменно поэтому хотим представить вам нашу новую систему поддержки, взаимодействующую с вами каждый день, которая будет предоставлять вам советы и рекомендации по улучшению психологического состояния, а также подборки с новыми упражнениями и практиками!'
+                                       '\nНапример, вечерняя практика "Дневник мыслей" поможет проанализировать прошедший день, осознать свои эмоции и действия, а также улучшить самосознание и эмоциональное состояние!'
+                                       '\nХотите попробовать?',
+                                       reply_markup=InlineKeyboardMarkup(row_width=1).add(
+                                           InlineKeyboardButton('Да, можно попробовать',
+                                                                callback_data='agreement_mailing_help_p_b_y'),
+                                           InlineKeyboardButton('Нет, не хочу',
+                                                                callback_data='agreement_mailing_help_p_b_n')))
+
+            elif callback_query.data[-1] == 'n':
+                cur_helpsys.execute('UPDATE bad SET 4_success = ? WHERE user_id = ?',
+                                    ('Нет', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id,
+                                       'Похоже у вас не получается самостоятельно справится с этой катастрофической мыслью(( '
+                                       '\nРекомендуем обратиться к специалисту!')
+                await state.set_state(FSM_classes.MultiDialog.menu)
+
+            elif callback_query.data[-1] == 'u':
+                cur_helpsys.execute('UPDATE bad SET 4_barrier = ? WHERE user_id = ?',
+                                    ('Да', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id,
+                                       'Часто ли эта мысль приходит в вашу голову?',
+                                       reply_markup=InlineKeyboardMarkup(row_width=2).add(
+                                           InlineKeyboardButton('Да', callback_data='bad_condition_8_4_u'),
+                                           InlineKeyboardButton('Нет', callback_data='bad_condition_8_4_m')))
+
+            elif callback_query.data[-1] == 'm':
+                cur_helpsys.execute('UPDATE bad SET 4_barrier = ? WHERE user_id = ?',
+                                    ('Нет', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id,
+                                       'Иногда бояться чего-то это норма! Чувствовать меньше напряжения вам помогут разгружающие практики!'
+                                       '\n\nИменно поэтому хотим представить вам нашу новую систему поддержки, взаимодействующую с вами каждый день, которая будет предоставлять вам советы и рекомендации по улучшению психологического состояния, а также подборки с новыми упражнениями и практиками!'
+                                       '\nНапример, вечерняя практика "Дневник мыслей" поможет проанализировать прошедший день, осознать свои эмоции и действия, а также улучшить самосознание и эмоциональное состояние!'
+                                       '\nХотите попробовать?',
+                                       reply_markup=InlineKeyboardMarkup(row_width=1).add(
+                                           InlineKeyboardButton('Да, можно попробовать',
+                                                                callback_data='agreement_mailing_help_p_b_y'),
+                                           InlineKeyboardButton('Нет, не хочу',
+                                                                callback_data='agreement_mailing_help_p_b_n')))
+
+        if callback_query.data[-5] == '8':
+            if callback_query.data[-1] == 'u':
+                cur_helpsys.execute('UPDATE bad SET 4_thought = ? WHERE user_id = ?',
+                                    ('Да', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id,
+                                       'Умеете ли вы с ней справляться?',
+                                       reply_markup=InlineKeyboardMarkup(row_width=2).add(
+                                           InlineKeyboardButton('Да', callback_data='bad_condition_9_4_u'),
+                                           InlineKeyboardButton('Нет', callback_data='bad_condition_9_4_m')))
+
+            elif callback_query.data[-1] == 'm':
+                cur_helpsys.execute('UPDATE bad SET 4_thought = ? WHERE user_id = ?',
+                                    ('Нет', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id,
+                                       'Иногда бояться чего-то это норма! Чувствовать меньше напряжения вам помогут разгружающие практики!'
+                                       '\n\nИменно поэтому хотим представить вам нашу новую систему поддержки, взаимодействующую с вами каждый день, которая будет предоставлять вам советы и рекомендации по улучшению психологического состояния, а также подборки с новыми упражнениями и практиками!'
+                                       '\nНапример, вечерняя практика "Дневник мыслей" поможет проанализировать прошедший день, осознать свои эмоции и действия, а также улучшить самосознание и эмоциональное состояние!'
+                                       '\nХотите попробовать?',
+                                       reply_markup=InlineKeyboardMarkup(row_width=1).add(
+                                           InlineKeyboardButton('Да, можно попробовать',
+                                                                callback_data='agreement_mailing_help_p_b_y'),
+                                           InlineKeyboardButton('Нет, не хочу',
+                                                                callback_data='agreement_mailing_help_p_b_n')))
+
+        if callback_query.data[-5] == '9':
+            if callback_query.data[-1] == 'u':
+                cur_helpsys.execute('UPDATE bad SET 4_success = ? WHERE user_id = ?',
+                                    ('Да', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id,
+                                       'Вы на верном пути! Вам могут помочь наши дневник юлагодарностей, релаксация и терапия спокойствием!'
+                                       '\n\nИменно поэтому хотим представить вам нашу новую систему поддержки, взаимодействующую с вами каждый день, которая будет предоставлять вам советы и рекомендации по улучшению психологического состояния, а также подборки с новыми упражнениями и практиками!'
+                                       '\nНапример, вечерняя практика "Дневник мыслей" поможет проанализировать прошедший день, осознать свои эмоции и действия, а также улучшить самосознание и эмоциональное состояние!'
+                                       '\nХотите попробовать?',
+                                       reply_markup=InlineKeyboardMarkup(row_width=1).add(
+                                           InlineKeyboardButton('Да, можно попробовать',
+                                                                callback_data='agreement_mailing_help_p_b_y'),
+                                           InlineKeyboardButton('Нет, не хочу',
+                                                                callback_data='agreement_mailing_help_p_b_n')))
+
+            elif callback_query.data[-1] == 'm':
+                cur_helpsys.execute('UPDATE bad SET 4_success = ? WHERE user_id = ?',
+                                    ('Нет', callback_query.from_user.id))
+                await bot.send_message(callback_query.from_user.id,
+                                       'Похоже у вас не получается самостоятельно справится с этой катастрофической мыслью(( '
+                                       '\nРекомендуем обратиться к специалисту!')
+                await state.set_state(FSM_classes.MultiDialog.menu)
+
+        db_helpsys.commit()
 
 
 async def try_practice(callback_query: types.CallbackQuery, state: FSMContext):
@@ -361,6 +717,10 @@ async def agreement_mailing_help(callback_query: types.CallbackQuery, state: FSM
             cur_helpsys.execute('UPDATE agreement SET subject = ? WHERE user_id = ?', ('Марафон', callback_query.from_user.id))
     else:
         cur_helpsys.execute("UPDATE agreement SET state = ? WHERE user_id = ?", ('Плохо', callback_query.from_user.id))
+        if callback_query.data[-5] == 'm':
+            cur_helpsys.execute('UPDATE agreement SET subject = ? WHERE user_id = ?', ('Марафон', callback_query.from_user.id))
+        if callback_query.data[-5] == 'p':
+            cur_helpsys.execute('UPDATE agreement SET subject = ? WHERE user_id = ?', ('Практика на проработку', callback_query.from_user.id))
     db_helpsys.commit()
     if callback_query.data[-1] == 'y':
         cur_helpsys.execute("UPDATE agreement SET choice = ? WHERE user_id = ?", ('Да', callback_query.from_user.id))
