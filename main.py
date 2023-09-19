@@ -149,7 +149,7 @@ async def start_help_system(message: types.Message):
     users = cur_data.execute(
         'SELECT user_id FROM profile').fetchall()
     file = open('HelpSystem_mailing_report.txt', 'w')
-    start_helpsystem_text = 'Добрый вечер! \nКак вы себя чувствуете?'
+    start_helpsystem_text = 'Добрый день! \nКак вы себя чувствуете?'
     for user_mailing in range(len(users)):
         try:
             await bot.send_message(chat_id=(users[user_mailing][0]),
@@ -175,6 +175,11 @@ async def start_help_system(message: types.Message):
 @dp.message_handler(state=FSM_classes.HelpSystem.start)
 async def start_helpsystem_for_all_users(message: types.Message, state: FSMContext):
     await HelpSystem.choose_helpsystem(message, state)
+
+#
+# @dp.callback_query_handler(state=FSM_classes.HelpSystem.good_condition)
+# async def good_cond_system(callback_query: types.CallbackQuery, state: FSMContext):
+#     await HelpSystem.try_practice(callback_query, state)
 
 # @dp.callback_query_handler(lambda c: c.data and c.data.startswith('try_practice_'), state=FSM_classes.HelpSystem)
 # async def try_practice(callback_query: types.CallbackQuery, state: FSMContext):
@@ -239,8 +244,8 @@ async def mailing_agreement(message: types.Message):
                            text='Рассылка соглашения началась')
     text_agreement = ('Добрый день! Подскажите, вам бы было интересно получать сообщения с подборками психологических рекомендаций и аффирмаций. '
                       '\nВсего одно сообщение в день, рекомендуем попробовать')
-    answer_agreement = InlineKeyboardMarkup(row_width=1, resize_keyboard=True).add(InlineKeyboardButton(text='Да, можно попробовать', callback_data='agreement_y'),
-                                                                                   KeyboardButton(text='Нет', callback_data='agreement_n'))
+    answer_agreement = InlineKeyboardMarkup(row_width=1, resize_keyboard=True).add(InlineKeyboardButton(text='Да, можно попробовать', callback_data='mailing_agreement_y'),
+                                                                                   KeyboardButton(text='Нет', callback_data='mailing_agreement_n'))
     db_data = sqlite3.connect('Databases/Data_users.db')
     cur_data = db_data.cursor()
     users = cur_data.execute(
@@ -267,7 +272,7 @@ async def mailing_agreement(message: types.Message):
     os.remove('Agreement_report.txt')
 
 
-@dp.callback_query_handler(lambda c: c.data and c.data.startswith('agreement_'), state='*')
+@dp.callback_query_handler(lambda c: c.data and c.data.startswith('mailing_agreement_'), state='*')
 async def callback_agreement(callback_query: types.CallbackQuery):
     db_data = sqlite3.connect('Databases/Data_users.db')
     cur_data = db_data.cursor()

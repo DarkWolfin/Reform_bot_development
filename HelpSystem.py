@@ -22,11 +22,11 @@ from Database import help_system_good, help_system_norm, help_system_bad, help_s
 
 
 bad_condition_questions = ['Есть ли задачи, которые вызывают у вас беспокойство или стресс?',
-                           'Удается ли вам эффективно справляться со своей рабочей нагрузкой',
-                           'У вас достаточно времени на личную жизнь и отдых вне работы?',
-                           'Удается лм вам открыто и свободно общаться с вашими коллегами?',
+                           'Вам не удаётся эффективно справляться со своей рабочей нагрузкой',
+                           'У вас недостаточно времени на личную жизнь и отдых вне работы?',
+                           'Вам не удаётся открыто и свободно общаться с вашими коллегами?',
                            'Возникают ли у вас конфликты или напряженные ситуации?',
-                           'Удобное ли у вас рабочее место?',
+                           'У вас недобное рабочее место?',
                            'У вас есть личные проблемы или события, которые вас беспокоят или тревожат в настоящее время?',
                            'Существует ли что-то, что вызывает у вас беспокойство или тревожит в настоящее время?']
 
@@ -34,7 +34,7 @@ async def choose_helpsystem(message: types.Message, state: FSMContext):
     if message.text == 'Хорошо 😀':
         await help_system_good(user_id=message.from_user.id)
         await bot.send_message(message.from_user.id, 'Это замечательно!', reply_markup=ReplyKeyboardRemove())
-        await bot.send_message(message.from_user.id,'Желаете попробовать практику благодарности? Рассказать поподробнее?', InlineKeyboardMarkup(row_width=2). add(InlineKeyboardButton('Да', callback_data='try_practice_gy'), InlineKeyboardButton('Нет', callback_data='try_practice_gn')))
+        await bot.send_message(message.from_user.id,'Желаете попробовать практику благодарности? Рассказать поподробнее?', reply_markup=InlineKeyboardMarkup(row_width=2).add(InlineKeyboardButton('Да', callback_data='try_practice_gy'), InlineKeyboardButton('Нет', callback_data='try_practice_gn')))
         await state.set_state(FSM_classes.HelpSystem.good_condition)
     elif message.text == 'Нормально 🙂':
         await help_system_norm(user_id=message.from_user.id)
@@ -55,11 +55,14 @@ async def norm_condition(callback_query: types.CallbackQuery, state: FSMContext)
     db_helpsys = sqlite3.connect('Databases/Help_system.db')
     cur_helpsys = db_helpsys.cursor()
     if callback_query.data.startswith('norm_condition_0_'):
-        cur_helpsys.execute("UPDATE norm SET better = ? WHERE user_id = ?", (callback_query.data[-1], callback_query.from_user.id))
         if callback_query.data[-1] == 'y':
+            cur_helpsys.execute("UPDATE norm SET better = ? WHERE user_id = ?",
+                                ('Да', callback_query.from_user.id))
             await bot.send_message(callback_query.from_user.id, 'Регулярные физические упражнения, такие как занятия спортом, йога или даже ежедневные прогулки, могут улучшить физическое и эмоциональное состояние. '
                                                             '\nУдается ли вам их выполнять?', reply_markup=InlineKeyboardMarkup(row_width=1).add(InlineKeyboardButton('Нет, но хотелось бы это исправить', callback_data='norm_condition_1_i'), InlineKeyboardButton('Да', callback_data='norm_condition_1_y'), InlineKeyboardButton('Нет, меня всё устраивает', callback_data='norm_condition_1_n')))
         else:
+            cur_helpsys.execute("UPDATE norm SET better = ? WHERE user_id = ?",
+                                ('Нет', callback_query.from_user.id))
             await bot.send_message(callback_query.from_user.id, 'Очень жаль, что вам это неинтересно((')
             await state.set_state(FSM_classes.MultiDialog.menu)
         db_helpsys.commit()
@@ -72,7 +75,7 @@ async def norm_condition(callback_query: types.CallbackQuery, state: FSMContext)
                                                                 '\nУдается ли вам это?', reply_markup=InlineKeyboardMarkup(row_width=1).add(InlineKeyboardButton('Нет, но хотелось бы это исправить', callback_data='norm_condition_3_i'), InlineKeyboardButton('Да', callback_data='norm_condition_3_y'), InlineKeyboardButton('Нет, меня всё устраивает', callback_data='norm_condition_3_n')))
             cur_helpsys.execute("UPDATE norm SET sport = ? WHERE user_id = ?",
                                 ('Да', callback_query.from_user.id))
-        elif callback_query.data[-3] == 'n':
+        elif callback_query.data[-1] == 'n':
             await bot.send_message(callback_query.from_user.id, 'Принято, тогда идем дальше!')
             await bot.send_message(callback_query.from_user.id,
                                    'Уравновешенное питание с разнообразными продуктами может оказать положительное воздействие на ваше здоровье и настроение! '
@@ -103,7 +106,8 @@ async def norm_condition(callback_query: types.CallbackQuery, state: FSMContext)
                                                                 '\nВы бы хотели попробовать подобную практику?', reply_markup=InlineKeyboardMarkup(row_width=1).add(InlineKeyboardButton('Да', callback_data='agreement_mailing_help_s_n_y'), InlineKeyboardButton('Нет, меня всё устраивает', callback_data='agreement_mailing_help_s_n_n')))
             cur_helpsys.execute("UPDATE norm SET cause_sport = ? WHERE user_id = ?",
                                 ('Время', callback_query.from_user.id))
-        if callback_query.data[-1] == 'm':
+            await state.set_state(FSM_classes.HelpSystem.agreement)
+        elif callback_query.data[-1] == 'm':
             await bot.send_message(callback_query.from_user.id,
                                    'Для начала, мы можем начать с небольших утренних упражнений и разминки в течение рабочего дня, которые можно интегрировать в рабочий ритм. '
                                    '\nВы бы хотели попробовать подобную практику?',
@@ -113,7 +117,8 @@ async def norm_condition(callback_query: types.CallbackQuery, state: FSMContext)
                                                             callback_data='agreement_mailing_help_s_n_n')))
             cur_helpsys.execute("UPDATE norm SET cause_sport = ? WHERE user_id = ?",
                                 ('Мотивация', callback_query.from_user.id))
-        if callback_query.data[-1] == 'b':
+            await state.set_state(FSM_classes.HelpSystem.agreement)
+        elif callback_query.data[-1] == 'b':
             await bot.send_message(callback_query.from_user.id,
                                    'Даже если у вас ограничено время, есть несколько способов внедрить регулярные физические упражнения в вашу повседневную жизнь:'
                                    '\n\n1. - <b>Краткие интенсивные тренировки:</b> Вы можете проводить короткие, но интенсивные тренировки, которые занимают всего несколько минут, но способствуют улучшению физической формы и здоровья.'
@@ -133,6 +138,7 @@ async def norm_condition(callback_query: types.CallbackQuery, state: FSMContext)
                                                             callback_data='agreement_mailing_help_s_n_n')))
             cur_helpsys.execute("UPDATE norm SET cause_sport = ? WHERE user_id = ?",
                                 ('Оба', callback_query.from_user.id))
+            await state.set_state(FSM_classes.HelpSystem.agreement)
         db_helpsys.commit()
 
     elif callback_query.data[-3] == '3':
@@ -175,6 +181,7 @@ async def norm_condition(callback_query: types.CallbackQuery, state: FSMContext)
                                                             callback_data='agreement_mailing_help_f_n_n')))
             cur_helpsys.execute("UPDATE norm SET food = ? WHERE user_id = ?",
                                 ('Улучшить', callback_query.from_user.id))
+            await state.set_state(FSM_classes.HelpSystem.agreement)
         db_helpsys.commit()
 
     elif callback_query.data[-3] == '4':
@@ -210,6 +217,8 @@ async def norm_condition(callback_query: types.CallbackQuery, state: FSMContext)
                                                                 '\nХотите попробовать?', reply_markup=InlineKeyboardMarkup(row_width=1).add(
                     InlineKeyboardButton('Да, можно попробовать', callback_data='agreement_mailing_help_m_n_y'),
                     InlineKeyboardButton('Нет, не хочу', callback_data='agreement_mailing_help_m_n_n')))
+            await state.set_state(FSM_classes.HelpSystem.agreement)
+
         elif callback_query.data[-1] == 'n':
             cur_helpsys.execute('UPDATE norm SET marathon = ? WHERE user_id = ?', ('Не понравился', callback_query.from_user.id))
             await bot.send_message(callback_query.from_user.id, 'Очень жаль, что вам неинтересна тема заботы о своём психологическом здоровье(('
@@ -242,6 +251,7 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
                                        'Понимаю, что взаимодействие с коллегами может иногда вызывать трудности! '
                                        '\nВажно помнить, что это нормальная часть рабочей жизни, и с ней можно справиться! '
                                        '\nВот несколько советов, которые могут помочь вам улучшить отношения и справиться со сложностями с коллегами:')
+                await asyncio.sleep(2)
                 await bot.send_message(callback_query.from_user.id,'Попробуйте начать разговор с коллегой и выразить свои мысли и чувства открыто и конструктивно. '
                                                                    '\nОбмен мнениями может помочь разрешить конфликты!'
                                                                    '\n\nПостарайтесь внимательно выслушать точку зрения коллеги и понять его или ее сторону. '
@@ -255,6 +265,7 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
                                                                    '\nСовместное достижение целей может укрепить отношения!'
                                                                    '\n\nНаучитесь управлять стрессом и конфликтами. '
                                                                    '\nДыхательные упражнения и методы релаксации могут помочь справляться с эмоциональными вызовами!')
+                await asyncio.sleep(5)
                 await bot.send_message(callback_query.from_user.id,' Если сложности с коллегами продолжаются, также стоит обратиться за поддержкой к вашему руководству или специалистам по персоналу!'
                                                                    '\nМы сформировали запрос и с вами свяжуться для помощи с решением вопроса!')
                 await FSM_classes.MultiDialog.menu.set()
@@ -290,7 +301,7 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
                                        reply_markup=quick_help.quick_help_menu)
             else:
                 await bot.send_message(callback_query.from_user.id,
-                                   text=bad_condition_questions[int(callback_query.data[-5])+1],
+                                   text=bad_condition_questions[int(callback_query.data[-5])],
                                    reply_markup=InlineKeyboardMarkup(row_width=2).add(
                                        InlineKeyboardButton('Да', callback_data='bad_condition_'+str(int(callback_query.data[-5])+1)+'_0_y'),
                                        InlineKeyboardButton('Нет', callback_data='bad_condition_'+str(int(callback_query.data[-5])+1)+'_0_n')))
@@ -298,6 +309,8 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
     #Высокая нагрузка
     if callback_query.data[-3] == '1':
         if callback_query.data[-5] == '1':
+            await help_system_agreement(user_id=callback_query.from_user.id)
+
             cur_helpsys.execute("UPDATE agreement SET state = ? WHERE user_id = ?",('Плохо', callback_query.from_user.id))
             cur_helpsys.execute('UPDATE agreement SET subject = ? WHERE user_id = ?',
                                 ('Высокая нагрузка', callback_query.from_user.id))
@@ -321,6 +334,8 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
     #Рабочее место
     if callback_query.data[-3] == '3':
         if callback_query.data[-5] == '1':
+            await help_system_agreement(user_id=callback_query.from_user.id)
+
             cur_helpsys.execute("UPDATE agreement SET state = ? WHERE user_id = ?",('Плохо', callback_query.from_user.id))
             cur_helpsys.execute('UPDATE agreement SET subject = ? WHERE user_id = ?',
                                 ('Рабочее место', callback_query.from_user.id))
@@ -342,7 +357,7 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
                                        InlineKeyboardButton('Да', callback_data='bad_condition_2_3_y'),
                                        InlineKeyboardButton('Нет', callback_data='bad_condition_2_3_n')))
         elif callback_query.data[-5] == '2':
-            cur_helpsys.execute('UPDATE bad SET 3_workplace = ? WHERE user_id = ?',
+            cur_helpsys.execute('UPDATE bad SET p_workplace = ? WHERE user_id = ?',
                                 (callback_query.data[-1], callback_query.from_user.id))
             await bot.send_message(callback_query.from_user.id, 'Питайтесь сбалансировано и употребляйте достаточное количество воды! '
                                                                 '\nЗдоровое питание может помочь поддерживать уровень энергии на работе!'
@@ -351,7 +366,7 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
                                        InlineKeyboardButton('Да', callback_data='bad_condition_3_3_y'),
                                        InlineKeyboardButton('Нет', callback_data='bad_condition_3_3_n')))
         elif callback_query.data[-5] == '3':
-            cur_helpsys.execute('UPDATE bad SET 3_food = ? WHERE user_id = ?',
+            cur_helpsys.execute('UPDATE bad SET p_food = ? WHERE user_id = ?',
                                 (callback_query.data[-1], callback_query.from_user.id))
             await bot.send_message(callback_query.from_user.id, 'Попробуйте методы управления стрессом, такие как дыхательные упражнения, медитация или просто глубокий вдох и выдох в моменты напряжения. '
                                                                 '\nЭто поможет снизить уровень стресса и повысить психологический комфорт!'
@@ -370,7 +385,7 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
                                                             callback_data='bad_condition_4_3_n')))
         elif callback_query.data[-5] == '4':
             if callback_query.data[-1] == 'y':
-                cur_helpsys.execute('UPDATE bad SET 3_marathon = ? WHERE user_id = ?',
+                cur_helpsys.execute('UPDATE bad SET p_marathon = ? WHERE user_id = ?',
                                     ('Понравился', callback_query.from_user.id))
                 await bot.send_message(callback_query.from_user.id, 'Рады это слышать!'
                                                                     '\nИменно поэтому хотим представить вам нашу новую систему поддержки, взаимодействующую с вами каждый день, которая будет предоставлять вам советы и рекомендации по улучшению психологического состояния, а также подборки с новыми упражнениями и практиками!'
@@ -380,8 +395,9 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
                                                                 callback_data='agreement_mailing_help_m_b_y'),
                                            InlineKeyboardButton('Нет, не хочу',
                                                                 callback_data='agreement_mailing_help_m_b_n')))
+                await state.set_state(FSM_classes.HelpSystem.agreement)
             elif callback_query.data[-1] == 'n':
-                cur_helpsys.execute('UPDATE bad SET 3_marathon = ? WHERE user_id = ?',
+                cur_helpsys.execute('UPDATE bad SET p_marathon = ? WHERE user_id = ?',
                                     ('Не понравился', callback_query.from_user.id))
                 await bot.send_message(callback_query.from_user.id,
                                        'Очень жаль, что вам неинтересна тема заботы о своём психологическом здоровье(('
@@ -393,7 +409,7 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
     # Психологический дискомфорт
     if callback_query.data[-3] == '4':
         if callback_query.data[-5] == '1':
-            cur_helpsys.execute('UPDATE bad SET 4_elaboration = ? WHERE user_id = ?',
+            cur_helpsys.execute('UPDATE bad SET d_elaboration = ? WHERE user_id = ?',
                                 (callback_query.data[-1], callback_query.from_user.id))
             if callback_query.data[-1] == 'y':
                 await bot.send_message(callback_query.from_user.id, 'Данный раздел научит вас прорабатывать катастрофические мысли. '
@@ -411,7 +427,7 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
                                        reply_markup=quick_help.quick_help_menu)
         if callback_query.data[-5] == '2':
             if callback_query.data[-1] == 'y':
-                cur_helpsys.execute('UPDATE bad SET 4_elaboration = ? WHERE user_id = ?',
+                cur_helpsys.execute('UPDATE bad SET d_circumstance = ? WHERE user_id = ?',
                                 ('Да', callback_query.from_user.id))
                 await bot.send_message(callback_query.from_user.id,
                                        'Такой исход вероятен?',
@@ -420,7 +436,7 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
                                            InlineKeyboardButton('Нет', callback_data='bad_condition_3_4_n')))
 
             elif callback_query.data[-1] == 'n':
-                cur_helpsys.execute('UPDATE bad SET 4_elaboration = ? WHERE user_id = ?',
+                cur_helpsys.execute('UPDATE bad SET d_circumstance = ? WHERE user_id = ?',
                                     ('Нет', callback_query.from_user.id))
                 await bot.send_message(callback_query.from_user.id, 'Нет смысла бояться того, что не может произойти в действительности! '
                                                                     '\nСправиться вам смогут помочь психологические практики, которые вы сможете найти в разделе /practices')
@@ -428,7 +444,7 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
 
         if callback_query.data[-5] == '3':
             if callback_query.data[-1] == 'y':
-                cur_helpsys.execute('UPDATE bad SET 4_probability = ? WHERE user_id = ?',
+                cur_helpsys.execute('UPDATE bad SET d_probability = ? WHERE user_id = ?',
                                 ('Да', callback_query.from_user.id))
                 await bot.send_message(callback_query.from_user.id,
                                        'Возможно ли что-то сделать чтобы снизить последствия?',
@@ -437,7 +453,7 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
                                            InlineKeyboardButton('Нет', callback_data='bad_condition_4_4_n')))
 
             elif callback_query.data[-1] == 'n':
-                cur_helpsys.execute('UPDATE bad SET 4_probability = ? WHERE user_id = ?',
+                cur_helpsys.execute('UPDATE bad SET d_probability = ? WHERE user_id = ?',
                                     ('Нет', callback_query.from_user.id))
                 await bot.send_message(callback_query.from_user.id, 'Нет смысла бояться того, что не может произойти в действительности!'
                                                                     '\nСправиться вам может помочь "Терапия спокойствием", в достижении которой вы можете воспользоваться практиками /practices')
@@ -445,7 +461,7 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
 
         if callback_query.data[-5] == '4':
             if callback_query.data[-1] == 'y':
-                cur_helpsys.execute('UPDATE bad SET 4_actions = ? WHERE user_id = ?',
+                cur_helpsys.execute('UPDATE bad SET d_actions = ? WHERE user_id = ?',
                                 ('Да', callback_query.from_user.id))
                 await bot.send_message(callback_query.from_user.id,
                                        'Отравляет ли вашу жизнь этот страх?',
@@ -454,7 +470,7 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
                                            InlineKeyboardButton('Нет', callback_data='bad_condition_5_4_n')))
 
             elif callback_query.data[-1] == 'n':
-                cur_helpsys.execute('UPDATE bad SET 4_actions = ? WHERE user_id = ?',
+                cur_helpsys.execute('UPDATE bad SET d_actions = ? WHERE user_id = ?',
                                     ('Нет', callback_query.from_user.id))
                 await bot.send_message(callback_query.from_user.id,
                                        'Если это случится, это можно будет исправить?',
@@ -464,7 +480,7 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
 
         if callback_query.data[-5] == '5':
             if callback_query.data[-1] == 'y':
-                cur_helpsys.execute('UPDATE bad SET 4_ruin = ? WHERE user_id = ?',
+                cur_helpsys.execute('UPDATE bad SET d_ruin = ? WHERE user_id = ?',
                                 ('Да', callback_query.from_user.id))
                 await bot.send_message(callback_query.from_user.id,
                                        'Часто ли эта мысль приходит в вашу голову?',
@@ -473,14 +489,14 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
                                            InlineKeyboardButton('Нет', callback_data='bad_condition_6_4_n')))
 
             elif callback_query.data[-1] == 'n':
-                cur_helpsys.execute('UPDATE bad SET 4_ruin = ? WHERE user_id = ?',
+                cur_helpsys.execute('UPDATE bad SET d_ruin = ? WHERE user_id = ?',
                                     ('Нет', callback_query.from_user.id))
                 await bot.send_message(callback_query.from_user.id,
                                        'Иногда бояться чего-то это норма! '
                                        '\nЧувствовать меньше напряжения вам поможет релаксация, в помощь вам раздел с практиками /practices')
 
             elif callback_query.data[-1] == 'u':
-                cur_helpsys.execute('UPDATE bad SET 4_correct = ? WHERE user_id = ?',
+                cur_helpsys.execute('UPDATE bad SET d_correct = ? WHERE user_id = ?',
                                     ('Да', callback_query.from_user.id))
                 await bot.send_message(callback_query.from_user.id,
                                        'Значит это поправимо и вам по силам!'
@@ -492,9 +508,10 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
                                                                 callback_data='agreement_mailing_help_p_b_y'),
                                            InlineKeyboardButton('Нет, не хочу',
                                                                 callback_data='agreement_mailing_help_p_b_n')))
+                await state.set_state(FSM_classes.HelpSystem.agreement)
 
             elif callback_query.data[-1] == 'm':
-                cur_helpsys.execute('UPDATE bad SET 4_correct = ? WHERE user_id = ?',
+                cur_helpsys.execute('UPDATE bad SET d_correct = ? WHERE user_id = ?',
                                 ('Нет', callback_query.from_user.id))
                 await bot.send_message(callback_query.from_user.id,
                                        'Если этого же боялся бы ваш близкий человек, вы бы поддержали его страх?',
@@ -504,7 +521,7 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
 
         if callback_query.data[-5] == '6':
             if callback_query.data[-1] == 'y':
-                cur_helpsys.execute('UPDATE bad SET 4_thought = ? WHERE user_id = ?',
+                cur_helpsys.execute('UPDATE bad SET d_thought = ? WHERE user_id = ?',
                                     ('Да', callback_query.from_user.id))
                 await bot.send_message(callback_query.from_user.id,
                                        'Умеете ли вы с ней справляться?',
@@ -513,7 +530,7 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
                                            InlineKeyboardButton('Нет', callback_data='bad_condition_7_4_n')))
 
             elif callback_query.data[-1] == 'n':
-                cur_helpsys.execute('UPDATE bad SET 4_thought = ? WHERE user_id = ?',
+                cur_helpsys.execute('UPDATE bad SET d_thought = ? WHERE user_id = ?',
                                     ('Нет', callback_query.from_user.id))
                 await bot.send_message(callback_query.from_user.id,
                                        'Иногда бояться чего-то это норма! Чувствовать меньше напряжения вам помогут разгружающие практики!'
@@ -525,9 +542,10 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
                                                                 callback_data='agreement_mailing_help_p_b_y'),
                                            InlineKeyboardButton('Нет, не хочу',
                                                                 callback_data='agreement_mailing_help_p_b_n')))
+                await state.set_state(FSM_classes.HelpSystem.agreement)
 
             elif callback_query.data[-1] == 'u':
-                cur_helpsys.execute('UPDATE bad SET 4_close = ? WHERE user_id = ?',
+                cur_helpsys.execute('UPDATE bad SET d_close = ? WHERE user_id = ?',
                                     ('Да', callback_query.from_user.id))
                 await bot.send_message(callback_query.from_user.id,
                                        'Отравляет и ограничивает ли вашу жизнь этот страх?',
@@ -536,7 +554,7 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
                                            InlineKeyboardButton('Нет', callback_data='bad_condition_7_4_m')))
 
             elif callback_query.data[-1] == 'm':
-                cur_helpsys.execute('UPDATE bad SET 4_close = ? WHERE user_id = ?',
+                cur_helpsys.execute('UPDATE bad SET d_close = ? WHERE user_id = ?',
                                     ('Нет', callback_query.from_user.id))
                 await bot.send_message(callback_query.from_user.id, 'Если ваш близкий человек не должен переживать, то почему вы должны?'
                                                                     '\nРешение страхов и трудностей может потребовать различных методов и подходов в каждом конкретном случае. '
@@ -552,10 +570,11 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
                                                                 callback_data='agreement_mailing_help_p_b_y'),
                                            InlineKeyboardButton('Нет, не хочу',
                                                                 callback_data='agreement_mailing_help_p_b_n')))
+                await state.set_state(FSM_classes.HelpSystem.agreement)
 
         if callback_query.data[-5] == '7':
             if callback_query.data[-1] == 'y':
-                cur_helpsys.execute('UPDATE bad SET 4_success = ? WHERE user_id = ?',
+                cur_helpsys.execute('UPDATE bad SET d_success = ? WHERE user_id = ?',
                                     ('Да', callback_query.from_user.id))
                 await bot.send_message(callback_query.from_user.id,
                                        'Вы на верном пути! Вам могут помочь наши дневник юлагодарностей, релаксация и терапия спокойствием!'
@@ -567,9 +586,10 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
                                                                 callback_data='agreement_mailing_help_p_b_y'),
                                            InlineKeyboardButton('Нет, не хочу',
                                                                 callback_data='agreement_mailing_help_p_b_n')))
+                await state.set_state(FSM_classes.HelpSystem.agreement)
 
             elif callback_query.data[-1] == 'n':
-                cur_helpsys.execute('UPDATE bad SET 4_success = ? WHERE user_id = ?',
+                cur_helpsys.execute('UPDATE bad SET d_success = ? WHERE user_id = ?',
                                     ('Нет', callback_query.from_user.id))
                 await bot.send_message(callback_query.from_user.id,
                                        'Похоже у вас не получается самостоятельно справится с этой катастрофической мыслью(( '
@@ -577,7 +597,7 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
                 await state.set_state(FSM_classes.MultiDialog.menu)
 
             elif callback_query.data[-1] == 'u':
-                cur_helpsys.execute('UPDATE bad SET 4_barrier = ? WHERE user_id = ?',
+                cur_helpsys.execute('UPDATE bad SET d_barrier = ? WHERE user_id = ?',
                                     ('Да', callback_query.from_user.id))
                 await bot.send_message(callback_query.from_user.id,
                                        'Часто ли эта мысль приходит в вашу голову?',
@@ -586,7 +606,7 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
                                            InlineKeyboardButton('Нет', callback_data='bad_condition_8_4_m')))
 
             elif callback_query.data[-1] == 'm':
-                cur_helpsys.execute('UPDATE bad SET 4_barrier = ? WHERE user_id = ?',
+                cur_helpsys.execute('UPDATE bad SET d_barrier = ? WHERE user_id = ?',
                                     ('Нет', callback_query.from_user.id))
                 await bot.send_message(callback_query.from_user.id,
                                        'Иногда бояться чего-то это норма! Чувствовать меньше напряжения вам помогут разгружающие практики!'
@@ -598,10 +618,11 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
                                                                 callback_data='agreement_mailing_help_p_b_y'),
                                            InlineKeyboardButton('Нет, не хочу',
                                                                 callback_data='agreement_mailing_help_p_b_n')))
+                await state.set_state(FSM_classes.HelpSystem.agreement)
 
         if callback_query.data[-5] == '8':
             if callback_query.data[-1] == 'u':
-                cur_helpsys.execute('UPDATE bad SET 4_thought = ? WHERE user_id = ?',
+                cur_helpsys.execute('UPDATE bad SET d_thought = ? WHERE user_id = ?',
                                     ('Да', callback_query.from_user.id))
                 await bot.send_message(callback_query.from_user.id,
                                        'Умеете ли вы с ней справляться?',
@@ -610,7 +631,7 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
                                            InlineKeyboardButton('Нет', callback_data='bad_condition_9_4_m')))
 
             elif callback_query.data[-1] == 'm':
-                cur_helpsys.execute('UPDATE bad SET 4_thought = ? WHERE user_id = ?',
+                cur_helpsys.execute('UPDATE bad SET d_thought = ? WHERE user_id = ?',
                                     ('Нет', callback_query.from_user.id))
                 await bot.send_message(callback_query.from_user.id,
                                        'Иногда бояться чего-то это норма! Чувствовать меньше напряжения вам помогут разгружающие практики!'
@@ -622,10 +643,11 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
                                                                 callback_data='agreement_mailing_help_p_b_y'),
                                            InlineKeyboardButton('Нет, не хочу',
                                                                 callback_data='agreement_mailing_help_p_b_n')))
+                await state.set_state(FSM_classes.HelpSystem.agreement)
 
         if callback_query.data[-5] == '9':
             if callback_query.data[-1] == 'u':
-                cur_helpsys.execute('UPDATE bad SET 4_success = ? WHERE user_id = ?',
+                cur_helpsys.execute('UPDATE bad SET d_success = ? WHERE user_id = ?',
                                     ('Да', callback_query.from_user.id))
                 await bot.send_message(callback_query.from_user.id,
                                        'Вы на верном пути! Вам могут помочь наши дневник юлагодарностей, релаксация и терапия спокойствием!'
@@ -637,9 +659,10 @@ async def bad_condition(callback_query: types.CallbackQuery, state: FSMContext):
                                                                 callback_data='agreement_mailing_help_p_b_y'),
                                            InlineKeyboardButton('Нет, не хочу',
                                                                 callback_data='agreement_mailing_help_p_b_n')))
+                await state.set_state(FSM_classes.HelpSystem.agreement)
 
             elif callback_query.data[-1] == 'm':
-                cur_helpsys.execute('UPDATE bad SET 4_success = ? WHERE user_id = ?',
+                cur_helpsys.execute('UPDATE bad SET d_success = ? WHERE user_id = ?',
                                     ('Нет', callback_query.from_user.id))
                 await bot.send_message(callback_query.from_user.id,
                                        'Похоже у вас не получается самостоятельно справится с этой катастрофической мыслью(( '
@@ -676,6 +699,7 @@ async def try_practice(callback_query: types.CallbackQuery, state: FSMContext):
                                '\nХотите попробовать?', reply_markup=InlineKeyboardMarkup(row_width=1).add(
                 InlineKeyboardButton('Да, можно попробовать', callback_data='agreement_mailing_help_0_g_y'),
                 InlineKeyboardButton('Нет, не хочу', callback_data='agreement_mailing_help_0_g_n')))
+        await state.set_state(FSM_classes.HelpSystem.agreement)
     else:
         if callback_query.data[-2] == 'g':
             cur_helpsys.execute("UPDATE good SET try_practice = ? WHERE user_id = ?", ('Нет', callback_query.from_user.id))
@@ -698,6 +722,7 @@ async def try_practice(callback_query: types.CallbackQuery, state: FSMContext):
                                    '\nХотите попробовать?', reply_markup=InlineKeyboardMarkup(row_width=1).add(
                     InlineKeyboardButton('Да, можно попробовать', callback_data='agreement_mailing_help_0_b_y'),
                     InlineKeyboardButton('Нет, не хочу', callback_data='agreement_mailing_help_0_b_n')))
+        await state.set_state(FSM_classes.HelpSystem.agreement)
         db_helpsys.commit()
 
 
@@ -736,6 +761,7 @@ async def agreement_mailing_help(callback_query: types.CallbackQuery, state: FSM
 
 
 def register_handlers_helpsystem(dp: Dispatcher):
-    dp.register_callback_query_handler(try_practice, lambda c: c.data and c.data.startswith('try_practice_'))
-    dp.register_callback_query_handler(norm_condition, lambda c: c.data and c.data.startswith('norm_condition_'))
-    dp.register_callback_query_handler(agreement_mailing_help, lambda c: c.data and c.data.startswith('agreement_mailing_help_'))
+    dp.register_callback_query_handler(try_practice, state=FSM_classes.HelpSystem.good_condition)
+    dp.register_callback_query_handler(norm_condition, state=FSM_classes.HelpSystem.norm_condition)
+    dp.register_callback_query_handler(bad_condition, state=FSM_classes.HelpSystem.bad_condition)
+    dp.register_callback_query_handler(agreement_mailing_help, state=FSM_classes.HelpSystem.agreement)
