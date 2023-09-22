@@ -181,19 +181,6 @@ async def start_help_system(message: types.Message):
 async def start_helpsystem_for_all_users(message: types.Message, state: FSMContext):
     await HelpSystem.choose_helpsystem(message, state)
 
-#
-# @dp.callback_query_handler(state=FSM_classes.HelpSystem.good_condition)
-# async def good_cond_system(callback_query: types.CallbackQuery, state: FSMContext):
-#     await HelpSystem.try_practice(callback_query, state)
-
-# @dp.callback_query_handler(lambda c: c.data and c.data.startswith('try_practice_'), state=FSM_classes.HelpSystem)
-# async def try_practice(callback_query: types.CallbackQuery, state: FSMContext):
-#     await HelpSystem.try_practice(callback_query, state)
-
-# @dp.callback_query_handler(lambda c: c.data and c.data.startswith('agreement_mailing_help_'), state=FSM_classes.HelpSystem)
-# async def try_practice(callback_query: types.CallbackQuery, state: FSMContext):
-#     await HelpSystem.agreement_mailing_help(callback_query, state)
-
 
 @dp.message_handler(commands=['get_db'], state='*', chat_id=[417986886, chats_id.commands_chat_id])
 async def get_db(message: types.Message):
@@ -232,6 +219,7 @@ async def send_to_user_quiz_id(message: types.Message):
     await bot.send_message(chat_id=int(message.text), text='Нажмите "Начать", чтобы пройти короткий опрос', parse_mode='html',  reply_markup=ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(KeyboardButton('Начать'), KeyboardButton('Нет, не хочу его проходить')))
     state_user = dp.current_state(chat=int(message.text), user=int(message.text))
     await state_user.set_state(FSM_classes.Quiz.high_workload_pre)
+    print(dp.current_state(chat=int(message.text), user=int(message.text)))
     state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
     await state.set_state(FSM_classes.MultiDialog.menu)
     await bot.send_message(message.chat.id,
