@@ -18,6 +18,7 @@ from datetime import datetime, timedelta
 import admin_commands
 import quick_help
 import Specialists
+import HelpSystem
 
 from aiogram import Bot, types, Dispatcher
 from aiogram.dispatcher import FSMContext
@@ -53,6 +54,7 @@ Psy_selfefficacy.register_handlers_Psy_selfefficacy(dp)
 Psy_stress.register_handlers_Psy_stress(dp)
 Psy_Weariness.register_handlers_Psy_Weariness(dp)
 
+HelpSystem.register_handlers_helpsystem(dp)
 
 Token_Raiff = ['RCS1', 'RCS2', 'RCS3', 'RCS4', 'RCS5', 'RCS6', 'RCS7', 'RCS8', 'RCS9', 'RCS10', 'RCS11', 'RCS12', 'RCS13',
                'RCS14', 'RCS15', 'RCS16', 'RCS17', 'RCS18', 'RCS19', 'RCS20', 'RCS21', 'RCS22', 'RCS23', 'RCS24', 'RCS25', 'RCS26',
@@ -141,6 +143,54 @@ async def fix_tokens_users(message: types.Message):
         await bot.send_message(message.chat.id, text='Отправлено '+str(users_fix_tokens[i]))
 
 
+@dp.message_handler(commands=['help_system_for_all_users'], state='*', chat_id=[417986886, chats_id.commands_chat_id])
+async def start_help_system(message: types.Message):
+    db_data = sqlite3.connect('Databases/Data_users.db')
+    cur_data = db_data.cursor()
+    users = cur_data.execute(
+        'SELECT user_id FROM profile').fetchall()
+    file = open('HelpSystem_mailing_report.txt', 'w')
+    start_helpsystem_text = 'Добрый день! \nКак вы себя чувствуете?'
+    for user_mailing in range(len(users)):
+        try:
+            await bot.send_message(chat_id=(users[user_mailing][0]),
+                                   text=start_helpsystem_text, parse_mode='html', reply_markup=Markups.start_helpsystem)
+            file.write(f'\nОтправлено ' + str(users[user_mailing][0]))
+            state = dp.current_state(chat=users[user_mailing][0], user=users[user_mailing][0])
+            await state.set_state(FSM_classes.HelpSystem.start)
+            await asyncio.sleep(0.1)
+        except BotBlocked:
+            cur_data.execute('UPDATE profile SET user_id = 0 WHERE user_id = ?',
+                             (users[user_mailing][0],))
+            file.write(f'\nБот заблокирован ' + str(users[user_mailing][0]))
+            db_data.commit()
+    cur_data.execute('DELETE FROM profile WHERE user_id = ?', (int(0),))
+    db_data.commit()
+    file = open('HelpSystem_mailing_report.txt', 'rb')
+    await bot.send_message(chat_id=message.chat.id, text='Система опроса состояния успешно отправлена!')
+    await bot.send_document(message.chat.id, file)
+    file.close()
+    os.remove('HelpSystem_mailing_report.txt')
+
+
+@dp.message_handler(state=FSM_classes.HelpSystem.start)
+async def start_helpsystem_for_all_users(message: types.Message, state: FSMContext):
+    await HelpSystem.choose_helpsystem(message, state)
+
+#
+# @dp.callback_query_handler(state=FSM_classes.HelpSystem.good_condition)
+# async def good_cond_system(callback_query: types.CallbackQuery, state: FSMContext):
+#     await HelpSystem.try_practice(callback_query, state)
+
+# @dp.callback_query_handler(lambda c: c.data and c.data.startswith('try_practice_'), state=FSM_classes.HelpSystem)
+# async def try_practice(callback_query: types.CallbackQuery, state: FSMContext):
+#     await HelpSystem.try_practice(callback_query, state)
+
+# @dp.callback_query_handler(lambda c: c.data and c.data.startswith('agreement_mailing_help_'), state=FSM_classes.HelpSystem)
+# async def try_practice(callback_query: types.CallbackQuery, state: FSMContext):
+#     await HelpSystem.agreement_mailing_help(callback_query, state)
+
+
 @dp.message_handler(commands=['get_db'], state='*', chat_id=[417986886, chats_id.commands_chat_id])
 async def get_db(message: types.Message):
     await bot.send_document(message.chat.id, open('Databases/Data_users.db', 'rb'))
@@ -195,8 +245,8 @@ async def mailing_agreement(message: types.Message):
                            text='Рассылка соглашения началась')
     text_agreement = ('Добрый день! Подскажите, вам бы было интересно получать сообщения с подборками психологических рекомендаций и аффирмаций. '
                       '\nВсего одно сообщение в день, рекомендуем попробовать')
-    answer_agreement = InlineKeyboardMarkup(row_width=1, resize_keyboard=True).add(InlineKeyboardButton(text='Да, можно попробовать', callback_data='agreement_y'),
-                                                                                   KeyboardButton(text='Нет', callback_data='agreement_n'))
+    answer_agreement = InlineKeyboardMarkup(row_width=1, resize_keyboard=True).add(InlineKeyboardButton(text='Да, можно попробовать', callback_data='mailing_agreement_y'),
+                                                                                   KeyboardButton(text='Нет', callback_data='mailing_agreement_n'))
     db_data = sqlite3.connect('Databases/Data_users.db')
     cur_data = db_data.cursor()
     users = cur_data.execute(
@@ -223,7 +273,7 @@ async def mailing_agreement(message: types.Message):
     os.remove('Agreement_report.txt')
 
 
-@dp.callback_query_handler(lambda c: c.data and c.data.startswith('agreement_'), state='*')
+@dp.callback_query_handler(lambda c: c.data and c.data.startswith('mailing_agreement_'), state='*')
 async def callback_agreement(callback_query: types.CallbackQuery):
     db_data = sqlite3.connect('Databases/Data_users.db')
     cur_data = db_data.cursor()
@@ -555,7 +605,7 @@ async def get_user_report(message: types.Message):
 async def get_user_report(message: types.Message, state: FSMContext):
     if message.text == 'admin123':
         await bot.send_message(message.chat.id,
-                               text='Введите id нужных юзеров через пробел или напишите слово "все"')
+                               text='Введите id нужных юзеров через пробел или напишите слово " Все"')
         await FSM_classes.adminCommands.getUserReportId.set()
     else:
         await bot.send_message(message.chat.id, text='Ошибка доступа!'
@@ -584,7 +634,7 @@ async def get_user_report(message: types.Message, state: FSMContext):
     startDate = startDate.replace(':', '')
     endDate = endDate.replace(':', '')
     users = str(users['users']).split(' ')
-    if len(users) == 1 and users[0] == 'все':
+    if len(users) == 1 and users[0] == 'Все':
         users = await get_all_user_ids()
         users = [str(user[0]) for user in users]
 
@@ -607,7 +657,7 @@ async def get_user_report(message: types.Message, state: FSMContext):
         await FSM_classes.adminCommands.getUserActionId.set()
     else:
         await bot.send_message(message.chat.id, text='Ошибка доступа!'
-                                                          '\n/getuserreport - ввести другой пароль '
+                                                          '\n/getuseractions - ввести другой пароль '
                                                           '\n/main_menu - перейти в главное меню')
 
 
@@ -630,6 +680,36 @@ async def get_user_report(message: types.Message, state: FSMContext):
         await admin_commands.createExcelFileActionCommand(startDate, endDate, tokens)
 
     with open('getUserAction.xlsx', 'rb') as f:
+        await bot.send_document(chat_id=message.chat.id, document=InputFile(f))
+    await FSM_classes.MultiDialog.menu.set()
+    await main_menu(message, state)
+
+
+@dp.message_handler(commands=['getuseractions_short'], state='*')
+async def get_user_report(message: types.Message):
+    await bot.send_message(message.chat.id, text='Введите пароль:')
+    await FSM_classes.adminCommands.getUserActionShortPassword.set()
+
+
+@dp.message_handler(state=FSM_classes.adminCommands.getUserActionShortPassword)
+async def get_user_report(message: types.Message, state: FSMContext):
+    if message.text == 'admin123':
+        await bot.send_message(message.chat.id,
+                               text='Введите дату начала и конца наблюдений через пробел в формате ЧЧ:ММ:ГГГГ')
+        await FSM_classes.adminCommands.getUserActionShortDate.set()
+    else:
+        await bot.send_message(message.chat.id, text='Ошибка доступа!'
+                                                          '\n/getuseractions_short - ввести другой пароль'
+                                                          '\n/main_menu - перейти в главное меню')
+
+
+@dp.message_handler(state=FSM_classes.adminCommands.getUserActionShortDate)
+async def get_user_report(message: types.Message, state: FSMContext):
+    startDate, endDate = message.text.split(' ')
+
+    await admin_commands.createExcelFileActionsShortForAllUsersWithTokens(startDate, endDate)
+
+    with open('getUserAction_short.xlsx', 'rb') as f:
         await bot.send_document(chat_id=message.chat.id, document=InputFile(f))
     await FSM_classes.MultiDialog.menu.set()
     await main_menu(message, state)

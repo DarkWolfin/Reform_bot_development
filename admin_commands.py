@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 import sqlite3
 from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
+from openpyxl.styles import Font
 import matplotlib.pyplot as plt
 
 async def createExcelFileReportCommand(startDate,endDate,users):
@@ -67,11 +68,12 @@ async def createExcelFileActionsForAllUsersWithTokens(startDate: str, endDate: s
     workbook = Workbook()
     print(startDate, endDate)
 
-    users = [[str(user[0]), str(user[1])] for user in cur_profiles.execute("SELECT user_id, token FROM profile").fetchall()]
+    users = [[str(user[0]), str(user[1])] for user in
+             cur_profiles.execute("SELECT user_id, token FROM profile").fetchall()]
 
     for user in users:
         df = pd.DataFrame(columns=['action', 'time'])
-        results = cur_user_interactions.execute("SELECT action, time FROM users WHERE user_id = ?", (user[0],))\
+        results = cur_user_interactions.execute("SELECT action, time FROM users WHERE user_id = ?", (user[0],)) \
             .fetchall()
 
         print(results)
@@ -82,11 +84,63 @@ async def createExcelFileActionsForAllUsersWithTokens(startDate: str, endDate: s
             if dateTimeStartDate <= resultDateTime <= dateTimeEndDate:
                 new_df = pd.DataFrame([(result[0], result[1])], columns=['action', 'time'])
                 df = pd.concat([df, new_df], ignore_index=True)
-        sheet = workbook.create_sheet(title=user[0]+' - '+user[1].replace('?', ''))
+        sheet = workbook.create_sheet(title=user[0] + ' - ' + user[1].replace('?', ''))
         for row in dataframe_to_rows(df, index=False, header=True):
             sheet.append(row)
     workbook.remove(workbook['Sheet'])
     workbook.save('getUserAction.xlsx')
+
+
+async def createExcelFileActionsShortForAllUsersWithTokens(startDate: str, endDate: str):
+    db_user_interactions = sqlite3.connect('Databases/user_interactions.db')
+    cur_user_interactions = db_user_interactions.cursor()
+
+    db_profiles = sqlite3.connect('Databases/Data_users.db')
+    cur_profiles = db_profiles.cursor()
+
+    workbook = Workbook()
+    print(startDate, endDate)
+
+    users = [[str(user[0]), str(user[1])] for user in
+             cur_profiles.execute("SELECT user_id, token FROM profile").fetchall()]
+
+    df = pd.DataFrame()
+    sheet = workbook.create_sheet(title='Report')
+
+    for user in users:
+        results = cur_user_interactions.execute("SELECT action, time FROM users WHERE user_id = ?", (user[0],)) \
+            .fetchall()
+        print(results)
+        new_df = pd.DataFrame([(user[0], user[1])], columns=[user[0], user[1]])
+        for result in results:
+            dateTimeStartDate = datetime.strptime(startDate, '%d:%m:%Y')
+            dateTimeEndDate = datetime.strptime(endDate, '%d:%m:%Y')
+            resultDateTime = datetime.strptime(result[1][0:10], '%Y-%m-%d')
+            if dateTimeStartDate <= resultDateTime <= dateTimeEndDate:
+                # if (user[0] and user[1]) not in df.columns:
+                #     df.insert(loc=0, column=user[0], value='')
+                #     df.insert(loc=0, column=user[1], value='')
+                add_df = pd.DataFrame([(result[1], result[0])], columns=[user[0], user[1]])
+                new_df = pd.concat([new_df, add_df], ignore_index=True, names=False, sort=False)
+        df = pd.concat([df, new_df], axis=1, names=False, ignore_index=True)
+    for row in dataframe_to_rows(df, index=False, header=False):
+        sheet.append(row)
+
+    # workbook.remove(workbook['Sheet'])
+    # workbook.save('getUserAction_short.xlsx')
+
+    with pd.ExcelWriter('getUserAction_short.xlsx', engine='xlsxwriter') as writer:
+        df.to_excel(writer, sheet_name='Report', index=False, header=False)
+        sheet = writer.sheets['Report']
+        for column in df:
+            column_width = max(df[column].astype(str).map(len).max(), len(str(column)))
+            col_idx = df.columns.get_loc(column)
+            writer.sheets['Report'].set_column(col_idx, col_idx, column_width)
+        cell_format = writer.book.add_format()
+        cell_format.set_bold()
+        sheet.set_row(0, 40, cell_format)
+    writer._save()
+
 
 
 async def createGraphReportCommand(dateStart,user_id):
