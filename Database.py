@@ -228,7 +228,7 @@ async def pre_quiz_workload(user_id):
         "SELECT 1 FROM workload WHERE user_id == '{key}'".format(key=user_id)).fetchone()
     if not user:
         timeNow = datetime.now()
-        timenow = str(timeNow)[:7]
+        timeNow = str(timeNow)[:7]
         cur_quiz.execute("INSERT INTO workload VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                          (user_id, str(cur_data.execute('SELECT username FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), str(cur_data.execute('SELECT token FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), timeNow, '', '', '', '', '', '', '', '', '', '', '', '', ''))
 
