@@ -73,6 +73,17 @@ class adminCommands(StatesGroup):
     getUserActionPassword = State()
     getUserActionId = State()
     getUserActionDate = State()
+    getUserActionShortPassword = State()
+    getUserActionShortId = State()
+    getUserActionShortDate = State()
     getUserReportGraphDate = State()
     receiving_feedback_password = State()
     FB_marathon_password = State()
+
+
+class HelpSystem(StatesGroup):
+    start = State()
+    good_condition = State()
+    norm_condition = State()
+    bad_condition = State()
+    agreement = State()
