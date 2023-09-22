@@ -448,6 +448,7 @@ async def feedback_answer_2(message: types.Message):
     await FSM_classes.Feedback.answer_6.set()
 
 
+
 @dp.message_handler(content_types=['text'], state=FSM_classes.Feedback.answer_6)
 async def feedback_answer_2(message: types.Message):
     db_f = sqlite3.connect('Databases/Data_users.db')
