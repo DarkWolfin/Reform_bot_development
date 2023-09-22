@@ -1,4 +1,6 @@
 import os
+
+import Quiz
 import chats_id
 from PsyTests import Psy_Weariness, Psy_selfefficacy
 from AllCourses import Anxiety
@@ -19,6 +21,7 @@ import admin_commands
 import quick_help
 import Specialists
 import HelpSystem
+import Quiz
 
 from aiogram import Bot, types, Dispatcher
 from aiogram.dispatcher import FSMContext
@@ -55,6 +58,7 @@ Psy_stress.register_handlers_Psy_stress(dp)
 Psy_Weariness.register_handlers_Psy_Weariness(dp)
 
 HelpSystem.register_handlers_helpsystem(dp)
+Quiz.register_handlers_quiz(dp)
 
 Token_Raiff = ['RCS1', 'RCS2', 'RCS3', 'RCS4', 'RCS5', 'RCS6', 'RCS7', 'RCS8', 'RCS9', 'RCS10', 'RCS11', 'RCS12', 'RCS13',
                'RCS14', 'RCS15', 'RCS16', 'RCS17', 'RCS18', 'RCS19', 'RCS20', 'RCS21', 'RCS22', 'RCS23', 'RCS24', 'RCS25', 'RCS26',
@@ -230,7 +234,6 @@ async def send_to_user_quiz_id(message: types.Message):
     await state.set_state(FSM_classes.MultiDialog.menu)
     await bot.send_message(message.chat.id,
                            'Опрос пользователю ' + str(message.text) + ' успешно отправлено')
-
 
 
 @dp.message_handler(commands=['send_to_user'], state='*', chat_id=[417986886, chats_id.commands_chat_id])
