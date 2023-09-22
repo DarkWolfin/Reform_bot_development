@@ -43,6 +43,7 @@ class Admin(StatesGroup):
     smart_mailing = State()
     send_to_user_id =State()
     send_to_user_message = State()
+    send_to_user_quiz_id = State()
 
 
 class Feedback(StatesGroup):

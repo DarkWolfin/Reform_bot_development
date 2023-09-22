@@ -25,7 +25,7 @@ async def high_workload_preview(message: types.Message, state: FSMContext):
     db_quiz_workload = sqlite3.connect('Databases/Quiz.db')
     cur_quiz_workload = db_quiz_workload.cursor()
     await pre_quiz_workload(user_id=message.from_user.id)
-    if message.text == 'Пройти тест':
+    if message.text == 'Начать':
         await bot.send_message(message.from_user.id, 'Отлично, тогда приступим!')
         await asyncio.sleep(1)
         cur_quiz_workload.execute("UPDATE workload SET agree = ? WHERE user_id = ?",
@@ -33,7 +33,7 @@ async def high_workload_preview(message: types.Message, state: FSMContext):
         await bot.send_message(message.from_user.id, '1) Есть ли какие-либо ситуации или задачи, которые вызывают у вас <b>тревогу или неприятные эмоции</b> на работе?', parse_mode='html',
                                reply_markup=ReplyKeyboardMarkup(resize_keyboard=True, row_width=2).add(KeyboardButton('Да'), KeyboardButton('Нет')))
         await state.set_state(FSM_classes.Quiz.high_workload_1)
-    elif message.text == 'Нет, не хочу':
+    elif message.text == 'Нет, не хочу его проходить':
         await bot.send_message(message.from_user.id, 'Очень жаль, что вы не хотите поделиться('
                                                      '\nЭто нужно для того, чтобы лучше понять ваше состояние и подготовить более персонализированные рекомендации')
         cur_quiz_workload.execute("UPDATE workload SET agree = ? WHERE user_id = ?",
