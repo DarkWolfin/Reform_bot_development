@@ -205,6 +205,8 @@ async def get_db(message: types.Message):
     await bot.send_document(message.chat.id, open('Databases/Data_users.db', 'rb'))
     await bot.send_document(message.chat.id, open('Databases/Current_habits.db', 'rb'))
     await bot.send_document(message.chat.id, open('Databases/user_interactions.db', 'rb'))
+    await bot.send_document(message.chat.id, open('Databases/Help_system.db', 'rb'))
+    await bot.send_document(message.chat.id, open('Databases/Quiz.db', 'rb'))
 
 
 @dp.message_handler(commands=['get_test_results_db'], state='*', chat_id=[417986886, chats_id.commands_chat_id])
