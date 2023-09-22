@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 async def db_start():
     global db_data, cur_data, db_test_weariness, cur_test_weariness, db_test_selfefficacy, cur_test_selfefficacy, cur_test_stress, db_test_control, cur_test_control, db_test_typeperson, cur_test_typeperson, \
-        db_habit_sleep, cur_habit_sleep, db_course_anxiety, cur_course_anxiety, db_user_interactions, db_test_stress, cur_user_interactions, db_test_holms, cur_test_holms, db_helpsystem, cur_helpsystem
+        db_habit_sleep, cur_habit_sleep, db_course_anxiety, cur_course_anxiety, db_user_interactions, db_test_stress, cur_user_interactions, db_test_holms, cur_test_holms, db_helpsystem, cur_helpsystem, db_quiz, cur_quiz
 
     db_data = sq.connect('Databases/Data_users.db')
     cur_data = db_data.cursor()
@@ -39,6 +39,13 @@ async def db_start():
     cur_helpsystem.execute(
         "CREATE TABLE IF NOT EXISTS agreement(user_id INT PRIMARY KEY, username TEXT, token TEXT, time TEXT, choice TEXT, state TEXT, subject TEXT)")
     db_helpsystem.commit()
+
+    #quiz
+    db_quiz = sq.connect('Databases/Quiz.db')
+    cur_quiz = db_quiz.cursor()
+    cur_quiz.execute(
+        "CREATE TABLE IF NOT EXISTS workload(user_id INT PRIMARY KEY, username TEXT, token TEXT, time TEXT, agree TEXT, cause TEXT, answer_1 TEXT, answer_1_details TEXT, answer_2 TEXT, answer_2_details TEXT, answer_3 TEXT, answer_4 TEXT, answer_5 TEXT, answer_6 TEXT, answer_7 TEXT, answer_8 TEXT, answer_9 TEXT)")
+    db_quiz.commit()
 
 
     db_test_weariness = sq.connect('Databases/Result_Tests/PSY_Weariness.db')
@@ -216,7 +223,14 @@ async def help_system_agreement(user_id):
         db_helpsystem.commit()
 
 
-
+async def pre_quiz_workload(user_id):
+    user = cur_helpsystem.execute(
+        "SELECT 1 FROM workload WHERE user_id == '{key}'".format(key=user_id)).fetchone()
+    if not user:
+        timeNow = datetime.now()
+        timenow = str(timeNow)[:7]
+        cur_quiz.execute("INSERT INTO workload VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                         (user_id, str(cur_data.execute('SELECT username FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), str(cur_data.execute('SELECT token FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), timeNow, '', '', '', '', '', '', '', '', '', '', '', '', ''))
 
 
 async def get_all_user_ids():
