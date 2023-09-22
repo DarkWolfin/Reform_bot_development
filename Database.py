@@ -224,7 +224,7 @@ async def help_system_agreement(user_id):
 
 
 async def pre_quiz_workload(user_id):
-    user = cur_helpsystem.execute(
+    user = cur_quiz.execute(
         "SELECT 1 FROM workload WHERE user_id == '{key}'".format(key=user_id)).fetchone()
     if not user:
         timeNow = datetime.now()
