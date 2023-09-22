@@ -43,6 +43,7 @@ class Admin(StatesGroup):
     smart_mailing = State()
     send_to_user_id =State()
     send_to_user_message = State()
+    send_to_user_quiz_id = State()
 
 
 class Feedback(StatesGroup):
@@ -87,3 +88,19 @@ class HelpSystem(StatesGroup):
     norm_condition = State()
     bad_condition = State()
     agreement = State()
+
+
+class Quiz(StatesGroup):
+    high_workload_pre = State()
+    high_workload_cause_not = State()
+    high_workload_1 = State()
+    high_workload_1_details = State()
+    high_workload_2 = State()
+    high_workload_2_details = State()
+    high_workload_3 = State()
+    high_workload_4 = State()
+    high_workload_5 = State()
+    high_workload_6 = State()
+    high_workload_7 = State()
+    high_workload_8 = State()
+    high_workload_9 = State()

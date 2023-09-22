@@ -8,8 +8,10 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, \
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
 from Token import Token
+from Storage import storage
+
 bot = Bot(Token)
-dp = Dispatcher(bot, storage=MemoryStorage())
+dp = Dispatcher(bot, storage=storage)
 
 from Database import pre_points_test_typeperson, points_test_typeperson, save_user_action
 

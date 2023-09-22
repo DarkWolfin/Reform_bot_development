@@ -9,9 +9,10 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from datetime import datetime, timedelta
 
 from Token import Token
+from Storage import storage
 
 bot = Bot(Token)
-dp = Dispatcher(bot, storage=MemoryStorage())
+dp = Dispatcher(bot, storage=storage)
 
 from Database import pre_points_test_control, points_test_control, pre_points_test_selfefficacy, \
     points_test_selfefficacy, save_user_action

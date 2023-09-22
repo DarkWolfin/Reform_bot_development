@@ -22,8 +22,10 @@ from aiogram.types import Message
 questions = load(open("PopTests/questions_motivation.json", "r", encoding="utf-8"))
 
 from Token import Token
+from Storage import storage
+
 bot = Bot(Token)
-dp = Dispatcher(bot, storage=MemoryStorage())
+dp = Dispatcher(bot, storage=storage)
 db = sqlite3.connect('Databases/Result_Tests/POP_Motivation.db')
 
 

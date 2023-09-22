@@ -28,9 +28,11 @@ from aiogram.utils import executor
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 import aioschedule as schedule
 
+
 from aiogram.utils.exceptions import BotBlocked, BotKicked
 
 from Token import Token
+from Storage import storage
 from Database import db_start, data_profile, affirmation, data_feedback, pre_points_test_weariness, \
     points_test_weariness, \
     pre_answers_test_weariness, set_user_token, get_all_user_ids, save_user_action, data_FB_marathon, NEW_affirmation
@@ -39,9 +41,8 @@ from Database import db_start, data_profile, affirmation, data_feedback, pre_poi
 async def on_startup(_):
     await db_start()
 
-
 bot = Bot(Token)
-dp = Dispatcher(bot, storage=MemoryStorage())
+dp = Dispatcher(bot, storage=storage)
 
 
 Specialists.register_handlers_specialist(dp)
@@ -212,6 +213,26 @@ async def get_db(message: types.Message):
     await bot.send_document(message.chat.id, open('Databases/Result_Tests/POP_Typeperson.db', 'rb'))
 
 
+@dp.message_handler(commands=['send_to_user_quiz'], state='*', chat_id=[417986886, chats_id.commands_chat_id])
+async def send_to_user_quiz(message: types.Message):
+    state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
+    await state.set_state(FSM_classes.Admin.send_to_user_quiz_id)
+    await bot.send_message(message.chat.id, text='Добрый день, босс! Сейчас настроена отправка опроса по рабочей нагрузке, если хотите продолжить, то пришлите ID пользователя',
+                           parse_mode='html')
+
+
+@dp.message_handler(state=FSM_classes.Admin.send_to_user_quiz_id, chat_id=[417986886,chats_id.commands_chat_id])
+async def send_to_user_quiz_id(message: types.Message):
+    await bot.send_message(chat_id=int(message.text), text='Нажмите "Начать", чтобы пройти короткий опрос', parse_mode='html',  reply_markup=ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(KeyboardButton('Начать'), KeyboardButton('Нет, не хочу его проходить')))
+    state_user = dp.current_state(chat=int(message.text), user=int(message.text))
+    await state_user.set_state(FSM_classes.Quiz.high_workload_pre)
+    state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
+    await state.set_state(FSM_classes.MultiDialog.menu)
+    await bot.send_message(message.chat.id,
+                           'Опрос пользователю ' + str(message.text) + ' успешно отправлено')
+
+
+
 @dp.message_handler(commands=['send_to_user'], state='*', chat_id=[417986886, chats_id.commands_chat_id])
 async def send_to_user(message: types.Message):
     state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
@@ -224,18 +245,50 @@ async def send_to_user(message: types.Message):
 async def send_to_user_id(message: types.Message):
     global send_to_user_id_remember
     send_to_user_id_remember = int(message.text)
-    await bot.send_message(message.chat.id, text='Теперь напишите, что ему передать',
+    await bot.send_message(message.chat.id, text='Теперь напишите или пришлите то, что ему передать',
                            parse_mode='html')
     state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
     await state.set_state(FSM_classes.Admin.send_to_user_message)
 
 
-@dp.message_handler(state=FSM_classes.Admin.send_to_user_message, chat_id=[417986886,chats_id.commands_chat_id])
+@dp.message_handler(content_types=['text'], state=FSM_classes.Admin.send_to_user_message, chat_id=[417986886,chats_id.commands_chat_id])
 async def send_to_user_message(message: types.Message):
     await bot.send_message(chat_id=send_to_user_id_remember, text=message.text, parse_mode='html')
     state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
     await state.set_state(FSM_classes.MultiDialog.menu)
     await bot.send_message(message.chat.id, 'Сообщение пользователю '+str(send_to_user_id_remember)+' успешно отправлено')
+
+
+@dp.message_handler(content_types=['audio'], state=FSM_classes.Admin.send_to_user_message, chat_id=[417986886,chats_id.commands_chat_id])
+async def send_to_user_message(message: types.Message):
+    await message.audio.download(destination_file=str(message.audio.file_name))
+    try:
+        audio_mailing = open(str(message.audio.file_name), 'rb')
+        await bot.send_audio(chat_id=send_to_user_id_remember, audio=audio_mailing, parse_mode='html')
+        await bot.send_message(message.chat.id,
+                               'Аудио пользователю ' + str(send_to_user_id_remember) + ' успешно отправлено')
+    except BotBlocked:
+        await bot.send_message(chat_id=message.chat.id, text='Бот заблокирован ' + str(send_to_user_id_remember),
+                               parse_mode='html')
+    state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
+    await state.set_state(FSM_classes.MultiDialog.menu)
+    os.remove(message.audio.file_name)
+
+
+@dp.message_handler(content_types=['photo'], state=FSM_classes.Admin.send_to_user_message, chat_id=[417986886,chats_id.commands_chat_id])
+async def send_to_user_message(message: types.Message):
+    await message.photo[-1].download(destination_file='mailing_to_user.jpg')
+    try:
+        photo_mailing = open('mailing_to_user.jpg', 'rb')
+        await bot.send_photo(chat_id=send_to_user_id_remember, photo=photo_mailing, parse_mode='html')
+        await bot.send_message(message.chat.id,
+                               'Фото пользователю ' + str(send_to_user_id_remember) + ' успешно отправлено')
+    except BotBlocked:
+        await bot.send_message(chat_id=message.chat.id, text='Бот заблокирован ' + str(send_to_user_id_remember),
+                               parse_mode='html')
+    state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
+    await state.set_state(FSM_classes.MultiDialog.menu)
+    os.remove('mailing_to_user.jpg')
 
 
 @dp.message_handler(commands=['agreement_mailing'], state='*', chat_id=[417986886, chats_id.commands_chat_id])
@@ -413,6 +466,7 @@ async def feedback_answer_2(message: types.Message):
     await bot.send_message(message.from_user.id,
                            text='6) Что бы вы предложили улучшить или изменить в марафоне, чтобы он стал более полезным и интересным для вас?', parse_mode='html')
     await FSM_classes.Feedback.answer_6.set()
+
 
 
 @dp.message_handler(content_types=['text'], state=FSM_classes.Feedback.answer_6)

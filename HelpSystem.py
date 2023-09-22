@@ -10,11 +10,13 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, \
     InlineKeyboardMarkup, InlineKeyboardButton, InputFile, ReplyKeyboardRemove
 from aiogram.utils import executor
 from aiogram.utils.exceptions import BotBlocked
+from Storage import storage
+
 
 import quick_help
 from Token import Token
 bot = Bot(Token)
-dp = Dispatcher(bot, storage=MemoryStorage())
+dp = Dispatcher(bot, storage=storage)
 
 import Markups
 import FSM_classes
