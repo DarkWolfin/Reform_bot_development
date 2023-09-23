@@ -41,12 +41,12 @@ async def db_start():
     db_helpsystem.commit()
 
     #quiz
-    db_quiz_workload = sq.connect('Databases/Quiz.db')
-    cur_quiz_workload = db_quiz_workload.cursor()
-    cur_quiz_workload.execute(
+    db_quiz = sq.connect('Databases/Quiz.db')
+    cur_quiz = db_quiz.cursor()
+    cur_quiz.execute(
         "CREATE TABLE IF NOT EXISTS workload(user_id INT PRIMARY KEY, username TEXT, token TEXT, time TEXT, agree TEXT, cause TEXT, answer_1 TEXT, answer_1_details TEXT, answer_2 TEXT, answer_2_details TEXT, answer_3 TEXT, answer_4 TEXT, answer_5 TEXT, answer_6 TEXT, answer_7 TEXT, answer_8 TEXT, answer_9 TEXT)")
-    db_quiz_workload.commit()
-    db_quiz_workload.execute("PRAGMA journal_mode=WAL")
+    db_quiz.commit()
+    # db_quiz.execute("PRAGMA journal_mode=WAL")
 
 
     db_test_weariness = sq.connect('Databases/Result_Tests/PSY_Weariness.db')
@@ -225,14 +225,14 @@ async def help_system_agreement(user_id):
 
 
 async def pre_quiz_workload(user_id):
-    user = cur_quiz_workload.execute(
+    user = cur_quiz.execute(
         "SELECT 1 FROM workload WHERE user_id == '{key}'".format(key=user_id)).fetchone()
     if not user:
-        # timeNow = datetime.now()
-        # timeNow = str(timeNow)[:7]
-        cur_quiz_workload.execute("INSERT INTO workload VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                         (user_id, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''))
-        db_quiz_workload.commit()
+        timeNow = datetime.now()
+        timeNow = str(timeNow)[:7]
+        cur_quiz.execute("INSERT INTO workload VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                         (user_id, str(cur_data.execute('SELECT username FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), str(cur_data.execute('SELECT token FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), timeNow, '', '', '', '', '', '', '', '', '', '', '', '', ''))
+        db_quiz.commit()
 
 
 async def get_all_user_ids():
