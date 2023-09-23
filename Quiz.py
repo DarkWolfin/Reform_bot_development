@@ -190,6 +190,7 @@ async def high_workload_9(message:types.Message, state:FSMContext):
 
 def register_handlers_quiz(dp: Dispatcher):
     dp.register_message_handler(high_workload_preview, state=FSM_classes.Quiz.high_workload_pre)
+    dp.register_message_handler(high_workload_cause_not, state=FSM_classes.Quiz.high_workload_cause_not)
     dp.register_message_handler(high_workload_1, state=FSM_classes.Quiz.high_workload_1)
     dp.register_message_handler(high_workload_1_details, state=FSM_classes.Quiz.high_workload_1_details)
     dp.register_message_handler(high_workload_2, state=FSM_classes.Quiz.high_workload_2)
