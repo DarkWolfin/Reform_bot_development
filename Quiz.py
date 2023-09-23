@@ -38,7 +38,7 @@ async def high_workload_preview(message: types.Message, state: FSMContext):
                                                      '\nЭто нужно для того, чтобы лучше понять ваше состояние и подготовить более персонализированные рекомендации')
         cur_quiz_workload.execute("UPDATE workload SET agree = ? WHERE user_id = ?",
                                   ('Нет', message.from_user.id))
-        await bot.send_message(message.from_user.id, 'Пожалуйста, напишите, с чем связано ваше решение, это поможет нам стать лучше!')
+        await bot.send_message(message.from_user.id, 'Пожалуйста, напишите, с чем связано ваше решение, это поможет нам стать лучше!', reply_markup=ReplyKeyboardRemove())
         await state.set_state(FSM_classes.Quiz.high_workload_cause_not)
     db_quiz_workload.commit()
 
