@@ -38,7 +38,7 @@ from Token import Token
 from Storage import storage
 from Database import db_start, data_profile, affirmation, data_feedback, pre_points_test_weariness, \
     points_test_weariness, \
-    pre_answers_test_weariness, set_user_token, get_all_user_ids, save_user_action, data_FB_marathon, NEW_affirmation, pre_quiz_workload
+    pre_answers_test_weariness, set_user_token, get_all_user_ids, save_user_action, data_FB_marathon, NEW_affirmation
 
 
 async def on_startup(_):
@@ -220,7 +220,6 @@ async def send_to_user_quiz_id(message: types.Message):
     await state_user.set_state(FSM_classes.Quiz.high_workload_pre)
     state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
     await state.set_state(FSM_classes.MultiDialog.menu)
-    await pre_quiz_workload(user_id=message.text)
     await bot.send_message(chat_id=message.text, text='Нажмите "Начать", чтобы пройти короткий опрос', parse_mode='html',  reply_markup=ReplyKeyboardMarkup(resize_keyboard=True, row_width=1).add(KeyboardButton('Начать'), KeyboardButton('Нет, не хочу его проходить')))
     await bot.send_message(message.chat.id,
                            'Опрос пользователю ' + str(message.text) + ' успешно отправлено')

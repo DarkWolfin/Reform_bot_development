@@ -18,9 +18,11 @@ bot = Bot(Token)
 dp = Dispatcher(bot, storage=storage)
 
 import FSM_classes
+from Database import pre_quiz_workload
 
 
 async def high_workload_preview(message: types.Message, state: FSMContext):
+    await pre_quiz_workload(user_id=message.from_user.id)
     db_quiz_workload = sqlite3.connect('Databases/Quiz.db')
     cur_quiz_workload = db_quiz_workload.cursor()
     if message.text == 'Начать':
