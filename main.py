@@ -222,7 +222,7 @@ async def send_to_user_quiz_id(message: types.Message):
     print(dp.current_state(chat=int(message.text), user=int(message.text)))
     state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
     await state.set_state(FSM_classes.MultiDialog.menu)
-    await pre_quiz_workload(user_id=message.text)
+    await pre_quiz_workload(user_id=int(message.text))
     await bot.send_message(message.chat.id,
                            'Опрос пользователю ' + str(message.text) + ' успешно отправлено')
 
