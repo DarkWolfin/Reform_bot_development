@@ -231,7 +231,7 @@ async def pre_quiz_workload(user_id):
         # timeNow = datetime.now()
         # timeNow = str(timeNow)[:7]
         cur_quiz_workload.execute("INSERT INTO workload VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                         (str(user_id), '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''))
+                         (user_id, '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''))
         db_quiz_workload.commit()
 
 
