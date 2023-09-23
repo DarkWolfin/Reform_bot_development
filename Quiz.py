@@ -18,9 +18,11 @@ bot = Bot(Token)
 dp = Dispatcher(bot, storage=storage)
 
 import FSM_classes
+from Database import pre_quiz_workload
 
 
 async def high_workload_preview(message: types.Message, state: FSMContext):
+    await pre_quiz_workload(user_id=message.from_user.id)
     db_quiz_workload = sqlite3.connect('Databases/Quiz.db')
     cur_quiz_workload = db_quiz_workload.cursor()
     if message.text == 'Начать':
@@ -47,6 +49,7 @@ async def high_workload_cause_not(message: types.Message, state: FSMContext):
     cur_quiz_workload.execute("UPDATE workload SET cause = ? WHERE user_id = ?",
                               (message.text, message.from_user.id))
     await bot.send_message(message.from_user.id, 'Спасибо, что поделились! Я обязательно передам ваш ответ команде создателям Reform!')
+    db_quiz_workload.commit()
     await state.set_state(FSM_classes.MultiDialog.menu)
 
 
@@ -62,6 +65,7 @@ async def high_workload_1(message:types.Message, state:FSMContext):
         await bot.send_message(message.from_user.id, '2) Есть ли какие-либо проекты или задачи, с которыми у вас <b>возникли сложности</b>?', parse_mode='html',
                                reply_markup=ReplyKeyboardMarkup(resize_keyboard=True, row_width=2).add(KeyboardButton('Да'), KeyboardButton('Нет')))
         await state.set_state(FSM_classes.Quiz.high_workload_2)
+    db_quiz_workload.commit()
 
 
 async def high_workload_1_details(message:types.Message, state:FSMContext):
@@ -76,6 +80,7 @@ async def high_workload_1_details(message:types.Message, state:FSMContext):
                                                                                                    KeyboardButton(
                                                                                                        'Нет')))
     await state.set_state(FSM_classes.Quiz.high_workload_2)
+    db_quiz_workload.commit()
 
 
 async def high_workload_2(message:types.Message, state:FSMContext):
@@ -90,6 +95,7 @@ async def high_workload_2(message:types.Message, state:FSMContext):
         await bot.send_message(message.from_user.id, '3) Как часто вы испытываете физическую усталость или недомогание?', parse_mode='html',
                                reply_markup=ReplyKeyboardMarkup(resize_keyboard=True, row_width=3).add(KeyboardButton('Часто'), KeyboardButton('Иногда'), KeyboardButton('Редко')))
         await state.set_state(FSM_classes.Quiz.high_workload_3)
+    db_quiz_workload.commit()
 
 
 async def high_workload_2_details(message:types.Message, state:FSMContext):
@@ -101,6 +107,7 @@ async def high_workload_2_details(message:types.Message, state:FSMContext):
                            '3) Как часто вы испытываете физическую усталость или недомогание?', parse_mode='html',
                                reply_markup=ReplyKeyboardMarkup(resize_keyboard=True, row_width=3).add(KeyboardButton('Часто'), KeyboardButton('Иногда'), KeyboardButton('Редко')))
     await state.set_state(FSM_classes.Quiz.high_workload_3)
+    db_quiz_workload.commit()
 
 
 async def high_workload_3(message:types.Message, state:FSMContext):
@@ -111,6 +118,7 @@ async def high_workload_3(message:types.Message, state:FSMContext):
     await bot.send_message(message.from_user.id, '4) Уделяете ли вы внимание физической активности и здоровому питанию?', parse_mode='html',
                            reply_markup=ReplyKeyboardMarkup(resize_keyboard=True, row_width=3).add(KeyboardButton('Да'), KeyboardButton('Стараюсь'), KeyboardButton('Нет')))
     await state.set_state(FSM_classes.Quiz.high_workload_4)
+    db_quiz_workload.commit()
 
 
 async def high_workload_4(message:types.Message, state:FSMContext):
@@ -121,6 +129,7 @@ async def high_workload_4(message:types.Message, state:FSMContext):
     await bot.send_message(message.from_user.id, '5) Есть ли у вас внутренний диссонанс или несоответствие между вашими ценностями и текущей работой?', parse_mode='html',
                            reply_markup=ReplyKeyboardMarkup(resize_keyboard=True, row_width=2).add(KeyboardButton('Да'), KeyboardButton('Нет')))
     await state.set_state(FSM_classes.Quiz.high_workload_5)
+    db_quiz_workload.commit()
 
 
 async def high_workload_5(message:types.Message, state:FSMContext):
@@ -141,6 +150,7 @@ async def high_workload_6(message:types.Message, state:FSMContext):
     await bot.send_message(message.from_user.id, '7) Можете ли вы описать, что вызывает у вас негативные эмоции?', parse_mode='html',
                            reply_markup=ReplyKeyboardRemove())
     await state.set_state(FSM_classes.Quiz.high_workload_7)
+    db_quiz_workload.commit()
 
 
 async def high_workload_7(message:types.Message, state:FSMContext):
@@ -151,6 +161,7 @@ async def high_workload_7(message:types.Message, state:FSMContext):
     await bot.send_message(message.from_user.id, '8) Чувствуете ли вы воодушевление при взаимодействии с коллегами?', parse_mode='html',
                            reply_markup=ReplyKeyboardMarkup(resize_keyboard=True, row_width=2).add(KeyboardButton('Да'), KeyboardButton('Нет')))
     await state.set_state(FSM_classes.Quiz.high_workload_8)
+    db_quiz_workload.commit()
 
 
 async def high_workload_8(message:types.Message, state:FSMContext):
@@ -161,6 +172,7 @@ async def high_workload_8(message:types.Message, state:FSMContext):
     await bot.send_message(message.from_user.id, '9) Чувствуете ли вы, что ваш труд приносит пользу людям и/или положительно влияет на них?', parse_mode='html',
                            reply_markup=ReplyKeyboardMarkup(resize_keyboard=True, row_width=2).add(KeyboardButton('Да'), KeyboardButton('Нет')))
     await state.set_state(FSM_classes.Quiz.high_workload_9)
+    db_quiz_workload.commit()
 
 
 async def high_workload_9(message:types.Message, state:FSMContext):
@@ -173,6 +185,7 @@ async def high_workload_9(message:types.Message, state:FSMContext):
                                                  '\nСкоро к вам вернусь! До встречи!',
                            reply_markup=ReplyKeyboardRemove())
     await state.set_state(FSM_classes.MultiDialog.menu)
+    db_quiz_workload.commit()
 
 
 def register_handlers_quiz(dp: Dispatcher):
