@@ -46,6 +46,7 @@ async def db_start():
     cur_quiz.execute(
         "CREATE TABLE IF NOT EXISTS workload(user_id INT PRIMARY KEY, username TEXT, token TEXT, time TEXT, agree TEXT, cause TEXT, answer_1 TEXT, answer_1_details TEXT, answer_2 TEXT, answer_2_details TEXT, answer_3 TEXT, answer_4 TEXT, answer_5 TEXT, answer_6 TEXT, answer_7 TEXT, answer_8 TEXT, answer_9 TEXT)")
     db_quiz.commit()
+    db_quiz.execute("PRAGMA journal_mode=WAL")
 
 
     db_test_weariness = sq.connect('Databases/Result_Tests/PSY_Weariness.db')
