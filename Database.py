@@ -232,7 +232,7 @@ async def pre_quiz_workload(user_id):
         timeNow = str(timeNow)[:7]
         cur_quiz_workload.execute("INSERT INTO workload VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                          (str(user_id), str(cur_data.execute('SELECT username FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), str(cur_data.execute('SELECT token FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), timeNow, '', '', '', '', '', '', '', '', '', '', '', '', ''))
-    db_quiz_workload.close()
+        db_quiz_workload.commit()
 
 
 async def get_all_user_ids():
