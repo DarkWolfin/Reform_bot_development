@@ -23,6 +23,8 @@ async def db_start():
     cur_data.execute(
         "CREATE TABLE IF NOT EXISTS FB_marathon_3(user_id INT PRIMARY KEY, token TEXT, answer_1 TEXT, answer_2 TEXT, answer_3 TEXT, answer_4 TEXT, answer_5 TEXT, answer_6 TEXT, answer_7 TEXT)")
     db_data.commit()
+    db_data.execute("PRAGMA journal_mode=WAL")
+
 
     #help system
     db_helpsystem = sq.connect('Databases/Help_system.db')
@@ -39,6 +41,8 @@ async def db_start():
     cur_helpsystem.execute(
         "CREATE TABLE IF NOT EXISTS agreement(user_id INT PRIMARY KEY, username TEXT, token TEXT, time TEXT, choice TEXT, state TEXT, subject TEXT)")
     db_helpsystem.commit()
+    db_helpsystem.execute("PRAGMA journal_mode=WAL")
+
 
     #quiz
     db_quiz_workload = sq.connect('Databases/Quiz.db')
@@ -141,6 +145,7 @@ async def data_profile(user_id, first_name, username):
         cur_data.execute("INSERT INTO profile VALUES(?, ?, ?, ?, '')",
                          (user_id, first_name, username, 'Активен'))
         db_data.commit()
+    db_data.close()
 
 
 async def data_feedback(user_id):
@@ -150,6 +155,7 @@ async def data_feedback(user_id):
         cur_data.execute("INSERT INTO feedback_2 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)",
                          (user_id, '', '', '', '', '', '', '', ''))
         db_data.commit()
+    db_data.close()
 
 
 async def data_FB_marathon(user_id):
@@ -159,6 +165,7 @@ async def data_FB_marathon(user_id):
         cur_data.execute("INSERT INTO FB_marathon_3 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)",
                          (user_id, '', '', '', '', '', '', '', ''))
         db_data.commit()
+    db_data.close()
 
 
 async def set_user_token(user_id, token):
@@ -169,6 +176,7 @@ async def set_user_token(user_id, token):
         cur_data.execute("UPDATE profile SET token = '{token}' WHERE user_id == '{id}'".format(
             token=token, id=user_id))
         db_data.commit()
+    db_data.close()
 
 
 async def NEW_affirmation(user_id, username):
@@ -178,6 +186,7 @@ async def NEW_affirmation(user_id, username):
         cur_data.execute("INSERT INTO NEW_affirmation VALUES(?, ?, ?, ?)",
                          (user_id, username, '', ''))
         db_data.commit()
+    db_data.close()
 
 
 async def help_system_good(user_id):
@@ -189,6 +198,7 @@ async def help_system_good(user_id):
         cur_helpsystem.execute("INSERT INTO good VALUES(?, ?, ?, ?, ?)",
                          (user_id, str(cur_data.execute('SELECT username FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), str(cur_data.execute('SELECT token FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), timeNow, ''))
         db_helpsystem.commit()
+    db_helpsystem.close()
 
 
 async def help_system_norm(user_id):
@@ -200,6 +210,7 @@ async def help_system_norm(user_id):
         cur_helpsystem.execute("INSERT INTO norm VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                          (user_id, str(cur_data.execute('SELECT username FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), str(cur_data.execute('SELECT token FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), timeNow, '', '', '', '', '', ''))
         db_helpsystem.commit()
+    db_helpsystem.close()
 
 
 async def help_system_bad(user_id):
@@ -211,6 +222,7 @@ async def help_system_bad(user_id):
         cur_helpsystem.execute("INSERT INTO bad VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                          (user_id, str(cur_data.execute('SELECT username FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), str(cur_data.execute('SELECT token FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), timeNow, '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''))
         db_helpsystem.commit()
+    db_helpsystem.close()
 
 
 async def help_system_agreement(user_id):
@@ -222,6 +234,7 @@ async def help_system_agreement(user_id):
         cur_helpsystem.execute("INSERT INTO agreement VALUES(?, ?, ?, ?, ?, ?, ?)",
                          (user_id, str(cur_data.execute('SELECT username FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), str(cur_data.execute('SELECT token FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), timeNow, '', '', ''))
         db_helpsystem.commit()
+    db_helpsystem.close()
 
 
 async def pre_quiz_workload(user_id):
