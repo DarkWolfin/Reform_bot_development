@@ -38,7 +38,7 @@ async def high_workload_preview(message: types.Message, state: FSMContext):
                                                      '\nЭто нужно для того, чтобы лучше понять ваше состояние и подготовить более персонализированные рекомендации')
         cur_quiz_workload.execute("UPDATE workload SET agree = ? WHERE user_id = ?",
                                   ('Нет', message.from_user.id))
-        await bot.send_message(message.from_user.id, 'Пожалуйста, напишите, с чем связано ваше решение, это поможет нам стать лучше!')
+        await bot.send_message(message.from_user.id, 'Пожалуйста, напишите, с чем связано ваше решение, это поможет нам стать лучше!', reply_markup=ReplyKeyboardRemove())
         await state.set_state(FSM_classes.Quiz.high_workload_cause_not)
     db_quiz_workload.commit()
 
@@ -140,6 +140,7 @@ async def high_workload_5(message:types.Message, state:FSMContext):
     await bot.send_message(message.from_user.id, '6) Как бы вы оценили свое общее эмоциональное состояние на данный момент по шкале 1 до 10?', parse_mode='html',
                            reply_markup=ReplyKeyboardMarkup(resize_keyboard=True, row_width=5).add(KeyboardButton('1'), KeyboardButton('2'), KeyboardButton('3'), KeyboardButton('4'), KeyboardButton('5'), KeyboardButton('6'), KeyboardButton('7'), KeyboardButton('8'), KeyboardButton('9'), KeyboardButton('10')))
     await state.set_state(FSM_classes.Quiz.high_workload_6)
+    db_quiz_workload.commit()
 
 
 async def high_workload_6(message:types.Message, state:FSMContext):
@@ -190,6 +191,7 @@ async def high_workload_9(message:types.Message, state:FSMContext):
 
 def register_handlers_quiz(dp: Dispatcher):
     dp.register_message_handler(high_workload_preview, state=FSM_classes.Quiz.high_workload_pre)
+    dp.register_message_handler(high_workload_cause_not, state=FSM_classes.Quiz.high_workload_cause_not)
     dp.register_message_handler(high_workload_1, state=FSM_classes.Quiz.high_workload_1)
     dp.register_message_handler(high_workload_1_details, state=FSM_classes.Quiz.high_workload_1_details)
     dp.register_message_handler(high_workload_2, state=FSM_classes.Quiz.high_workload_2)
