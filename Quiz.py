@@ -38,6 +38,7 @@ async def high_workload_preview(message: types.Message, state: FSMContext):
                                   ('Нет', message.from_user.id))
         await bot.send_message(message.from_user.id, 'Пожалуйста, напишите, с чем связано ваше решение, это поможет нам стать лучше!')
         await state.set_state(FSM_classes.Quiz.high_workload_cause_not)
+    db_quiz_workload.commit()
 
 
 async def high_workload_cause_not(message: types.Message, state: FSMContext):
