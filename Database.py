@@ -226,6 +226,8 @@ async def help_system_agreement(user_id):
 
 
 async def pre_quiz_workload(user_id):
+    db_quiz = sq.connect('Databases/Quiz.db')
+    cur_quiz = db_quiz.cursor()
     user = cur_quiz.execute(
         "SELECT 1 FROM workload WHERE user_id == '{key}'".format(key=user_id)).fetchone()
     if not user:
@@ -234,6 +236,7 @@ async def pre_quiz_workload(user_id):
         cur_quiz.execute("INSERT INTO workload VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                          (user_id, str(cur_data.execute('SELECT username FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), str(cur_data.execute('SELECT token FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), timeNow, '', '', '', '', '', '', '', '', '', '', '', '', ''))
         db_quiz.commit()
+    db_quiz.close()
 
 
 async def get_all_user_ids():
