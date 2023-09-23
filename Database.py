@@ -46,6 +46,7 @@ async def db_start():
     cur_quiz_workload.execute(
         "CREATE TABLE IF NOT EXISTS workload(user_id INT PRIMARY KEY, username TEXT, token TEXT, time TEXT, agree TEXT, cause TEXT, answer_1 TEXT, answer_1_details TEXT, answer_2 TEXT, answer_2_details TEXT, answer_3 TEXT, answer_4 TEXT, answer_5 TEXT, answer_6 TEXT, answer_7 TEXT, answer_8 TEXT, answer_9 TEXT)")
     db_quiz_workload.commit()
+    db_quiz_workload.execute("PRAGMA journal_mode=WAL")
 
 
     db_test_weariness = sq.connect('Databases/Result_Tests/PSY_Weariness.db')
@@ -231,6 +232,7 @@ async def pre_quiz_workload(user_id):
         timeNow = str(timeNow)[:7]
         cur_quiz_workload.execute("INSERT INTO workload VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                          (user_id, str(cur_data.execute('SELECT username FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), str(cur_data.execute('SELECT token FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), timeNow, '', '', '', '', '', '', '', '', '', '', '', '', ''))
+    db_quiz_workload.close()
 
 
 async def get_all_user_ids():
