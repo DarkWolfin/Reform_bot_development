@@ -38,7 +38,7 @@ from Token import Token
 from Storage import storage
 from Database import db_start, data_profile, affirmation, data_feedback, pre_points_test_weariness, \
     points_test_weariness, \
-    pre_answers_test_weariness, set_user_token, get_all_user_ids, save_user_action, data_FB_marathon, NEW_affirmation
+    pre_answers_test_weariness, set_user_token, get_all_user_ids, save_user_action, data_FB_marathon, NEW_affirmation, pre_quiz_workload
 
 
 async def on_startup(_):
@@ -222,6 +222,7 @@ async def send_to_user_quiz_id(message: types.Message):
     print(dp.current_state(chat=int(message.text), user=int(message.text)))
     state = dp.current_state(chat=message.chat.id, user=message.from_user.id)
     await state.set_state(FSM_classes.MultiDialog.menu)
+    await pre_quiz_workload(user_id=message.text)
     await bot.send_message(message.chat.id,
                            'Опрос пользователю ' + str(message.text) + ' успешно отправлено')
 

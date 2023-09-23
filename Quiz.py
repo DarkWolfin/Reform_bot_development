@@ -18,13 +18,11 @@ bot = Bot(Token)
 dp = Dispatcher(bot, storage=storage)
 
 import FSM_classes
-from Database import pre_quiz_workload
 
 
 async def high_workload_preview(message: types.Message, state: FSMContext):
     db_quiz_workload = sqlite3.connect('Databases/Quiz.db')
     cur_quiz_workload = db_quiz_workload.cursor()
-    await pre_quiz_workload(user_id=message.from_user.id)
     if message.text == 'Начать':
         await bot.send_message(message.from_user.id, 'Отлично, тогда приступим!')
         await asyncio.sleep(1)
@@ -40,6 +38,7 @@ async def high_workload_preview(message: types.Message, state: FSMContext):
                                   ('Нет', message.from_user.id))
         await bot.send_message(message.from_user.id, 'Пожалуйста, напишите, с чем связано ваше решение, это поможет нам стать лучше!')
         await state.set_state(FSM_classes.Quiz.high_workload_cause_not)
+    db_quiz_workload.close()
 
 
 async def high_workload_cause_not(message: types.Message, state: FSMContext):
