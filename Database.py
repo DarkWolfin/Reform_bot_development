@@ -48,7 +48,6 @@ async def db_start():
     cur_quiz.execute(
         "CREATE TABLE IF NOT EXISTS workload(user_id INT PRIMARY KEY, username TEXT, token TEXT, time TEXT, agree TEXT, cause TEXT, answer_1 TEXT, answer_1_details TEXT, answer_2 TEXT, answer_2_details TEXT, answer_3 TEXT, answer_4 TEXT, answer_5 TEXT, answer_6 TEXT, answer_7 TEXT, answer_8 TEXT, answer_9 TEXT)")
     db_quiz.commit()
-    db_quiz.close()
 
 
     db_test_weariness = sq.connect('Databases/Result_Tests/PSY_Weariness.db')
@@ -143,7 +142,6 @@ async def data_profile(user_id, first_name, username):
         cur_data.execute("INSERT INTO profile VALUES(?, ?, ?, ?, ?)",
                          (user_id, first_name, username, 'Активен', ''))
         db_data.commit()
-    db_data.close()
 
 
 async def data_feedback(user_id):
@@ -153,7 +151,6 @@ async def data_feedback(user_id):
         cur_data.execute("INSERT INTO feedback_2 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)",
                          (user_id, '', '', '', '', '', '', '', ''))
         db_data.commit()
-    db_data.close()
 
 
 async def data_FB_marathon(user_id):
@@ -163,7 +160,6 @@ async def data_FB_marathon(user_id):
         cur_data.execute("INSERT INTO FB_marathon_3 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)",
                          (user_id, '', '', '', '', '', '', '', ''))
         db_data.commit()
-    db_data.close()
 
 
 async def set_user_token(user_id, token):
@@ -174,7 +170,6 @@ async def set_user_token(user_id, token):
         cur_data.execute("UPDATE profile SET token = '{token}' WHERE user_id == '{id}'".format(
             token=token, id=user_id))
         db_data.commit()
-    db_data.close()
 
 
 async def NEW_affirmation(user_id, username):
@@ -184,7 +179,6 @@ async def NEW_affirmation(user_id, username):
         cur_data.execute("INSERT INTO NEW_affirmation VALUES(?, ?, ?, ?)",
                          (user_id, username, '', ''))
         db_data.commit()
-    db_data.close()
 
 
 async def help_system_good(user_id):
@@ -242,7 +236,6 @@ async def pre_quiz_workload(user_id):
         cur_quiz.execute("INSERT INTO workload VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                          (user_id, str(cur_data.execute('SELECT username FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), str(cur_data.execute('SELECT token FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), timeNow, '', '', '', '', '', '', '', '', '', '', '', '', ''))
         db_quiz.commit()
-    db_quiz.close()
 
 
 async def get_all_user_ids():
@@ -259,8 +252,6 @@ async def affirmation(user_id, first_name, username):
 
 
 # PSY tests
-
-
 async def pre_points_test_weariness(user_id, username):
     user = cur_test_weariness.execute(
         "SELECT 1 FROM points WHERE user_id == '{key}'".format(key=user_id)).fetchone()
