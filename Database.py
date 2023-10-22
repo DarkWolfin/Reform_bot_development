@@ -196,7 +196,6 @@ async def help_system_good(user_id):
         cur_helpsystem.execute("INSERT INTO good VALUES(?, ?, ?, ?, ?)",
                          (user_id, str(cur_data.execute('SELECT username FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), str(cur_data.execute('SELECT token FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), timeNow, ''))
         db_helpsystem.commit()
-    db_helpsystem.close()
 
 
 async def help_system_norm(user_id):
@@ -208,7 +207,6 @@ async def help_system_norm(user_id):
         cur_helpsystem.execute("INSERT INTO norm VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                          (user_id, str(cur_data.execute('SELECT username FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), str(cur_data.execute('SELECT token FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), timeNow, '', '', '', '', '', ''))
         db_helpsystem.commit()
-    db_helpsystem.close()
 
 
 async def help_system_bad(user_id):
@@ -220,7 +218,6 @@ async def help_system_bad(user_id):
         cur_helpsystem.execute("INSERT INTO bad VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                          (user_id, str(cur_data.execute('SELECT username FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), str(cur_data.execute('SELECT token FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), timeNow, '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''))
         db_helpsystem.commit()
-    db_helpsystem.close()
 
 
 async def help_system_agreement(user_id):
@@ -232,7 +229,6 @@ async def help_system_agreement(user_id):
         cur_helpsystem.execute("INSERT INTO agreement VALUES(?, ?, ?, ?, ?, ?, ?)",
                          (user_id, str(cur_data.execute('SELECT username FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), str(cur_data.execute('SELECT token FROM profile WHERE user_id = ?', (user_id,)).fetchone()[0]), timeNow, '', '', ''))
         db_helpsystem.commit()
-    db_helpsystem.close()
 
 
 async def pre_quiz_workload(user_id):
