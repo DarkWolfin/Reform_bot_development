@@ -1,6 +1,7 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
 
 # Main_menu
+HelpAnalize_btn = KeyboardButton('🌳 Самоанализ')
 Practise_btn = KeyboardButton('🧘‍♀️ Практики')
 Tests_btn = KeyboardButton('📝 Тесты')
 Habits_btn = KeyboardButton('💪 Привычки')
@@ -9,8 +10,8 @@ Specialist_btn = KeyboardButton('💬 Обсудить проблему')
 Contacts_btn = KeyboardButton('📥 Контакты')
 TechSupport_btn = KeyboardButton('⚙️ Техподдержка')
 main_kb = ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
-main_kb.add(Help_btn, Practise_btn, Specialist_btn,
-            Tests_btn, Habits_btn, Contacts_btn, TechSupport_btn)
+main_kb.add(HelpAnalize_btn, Help_btn, Practise_btn,
+            Tests_btn, Specialist_btn, Habits_btn, Contacts_btn, TechSupport_btn)
 
 
 # Practices
