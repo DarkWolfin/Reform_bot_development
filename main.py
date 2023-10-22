@@ -115,8 +115,8 @@ async def set_token(message: types.Message):
         except Exception:
             await bot.send_message(message.from_user.id, "Произошла ошибка, попробуйте ещё раз", parse_mode='html')
     else:
-        await bot.send_message(message.from_user.id, "Вы ввели некорректный токен, пожалуйста введите токен, который вы получили на работе, "
-                                                     "он состоит из заглавных букв английского алфавита и числа, записанных слитно (например, SME16, RCS28 и др.)", parse_mode='html')
+        await bot.send_message(message.from_user.id, "Вы ввели некорректный токен!"
+                                                     "Токен состоит из заглавных букв английского алфавита и числа, записанных слитно (например, FTM16, ION28 и др.)", parse_mode='html')
     await log_users(message)
 
 
