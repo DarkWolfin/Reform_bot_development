@@ -143,8 +143,8 @@ async def data_profile(user_id, first_name, username):
     user = cur_data.execute(
         "SELECT 1 FROM profile WHERE user_id == '{key}'".format(key=user_id)).fetchone()
     if not user:
-        cur_data.execute("INSERT INTO profile VALUES(?, ?, ?, ?, '')",
-                         (user_id, first_name, username, 'Активен'))
+        cur_data.execute("INSERT INTO profile VALUES(?, ?, ?, ?, ?)",
+                         (user_id, first_name, username, 'Активен', ''))
         db_data.commit()
     db_data.close()
 
