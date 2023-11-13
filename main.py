@@ -65,6 +65,7 @@ Token_Raiff = ['RCS1', 'RCS2', 'RCS3', 'RCS4', 'RCS5', 'RCS6', 'RCS7', 'RCS8', '
                'SME1', 'SME2', 'SME3', 'SME4', 'SME5', 'SME6', 'SME7', 'SME8', 'SME9', 'SME10', 'SME11', 'SME12', 'SME13', 'SME14', 'SME15',
                'PREM1', 'PREM2', 'PREM3', 'PREM4', 'PREM5', 'PREM6', 'PREM7', 'PREM8', 'PREM9',
                'TEST1', 'TEST2', 'TEST3', 'TEST4', 'TEST5', 'TEST00', 'TEST000',
+               'POLYTECHTEST1', 'POLYTECHTEST2', 'POLYTECHTEST3'
                'admin']
 
 
